@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document Parsing POC</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --fg:#1d2330; --muted:#667085; --line:#e4e7ec; --accent:#2f5bea; --ok:#12805c; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12151c; --card:#1b202b; --fg:#e8ebf2; --muted:#98a2b3; --line:#2b3242; --accent:#6c8cff; --ok:#3ccf9a; --bad:#ff7b72; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:16px 24px; border-bottom:1px solid var(--line); background:var(--card); }
+  header h1 { margin:0; font-size:18px; }
+  header p { margin:2px 0 0; color:var(--muted); }
+  main { display:grid; grid-template-columns: 380px 1fr; gap:16px; padding:16px 24px; max-width:1400px; margin:auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .card h2 { margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  label { display:block; margin:10px 0 4px; font-weight:600; }
+  input[type=text], select, input[type=file], textarea { width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); font:inherit; }
+  textarea { min-height:70px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .check { display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:400; }
+  button { padding:8px 12px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; font:inherit; }
+  button.secondary { background:transparent; color:var(--accent); }
+  button:disabled { opacity:.5; cursor:wait; }
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:12px; flex-wrap:wrap; }
+  .tab { padding:6px 12px; cursor:pointer; border-bottom:2px solid transparent; color:var(--muted); }
+  .tab.active { color:var(--fg); border-color:var(--accent); }
+  pre { margin:0; padding:12px; background:var(--bg); border:1px solid var(--line); border-radius:6px; overflow:auto; max-height:560px; white-space:pre-wrap; word-break:break-word; font:12px/1.5 ui-monospace, monospace; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; }
+  th { color:var(--muted); font-weight:600; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; border:1px solid var(--line); color:var(--muted); }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .muted { color:var(--muted); }
+  .hidden { display:none; }
+  .kv { display:grid; grid-template-columns: 140px 1fr; gap:2px 10px; margin-bottom:10px; }
+  .kv div:nth-child(odd) { color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Document Parsing POC</h1>
+  <p>Upload a file, let the router pick a parser (or force one), and compare engines side by side.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Input</h2>
+    <div class="tabs">
+      <div class="tab active" data-src="upload">Upload file</div>
+      <div class="tab" data-src="url">Blob URL / path</div>
+    </div>
+
+    <div id="src-upload">
+      <label>File</label>
+      <input type="file" id="file">
+    </div>
+    <div id="src-url" class="hidden">
+      <label>file_path (blob URL with SAS, azure://container/blob, or local path)</label>
+      <input type="text" id="file_path" placeholder="https://acct.blob.core.windows.net/docs/x.pdf?sv=...">
+      <label>file_name</label>
+      <input type="text" id="file_name" placeholder="x.pdf">
+    </div>
+
+    <label>tenant_id</label>
+    <input type="text" id="tenant_id" value="tenant-demo">
+    <label>file_id</label>
+    <input type="text" id="file_id" placeholder="(auto)">
+
+    <label>Parser</label>
+    <select id="parser"><option value="auto">auto (router decides)</option></select>
+
+    <div class="check"><input type="checkbox" id="extract_images"><span>Extract embedded images (bytes)</span></div>
+    <div class="check"><input type="checkbox" id="prefer_quality"><span>Prefer quality (vision LLM first)</span></div>
+    <div class="check"><input type="checkbox" id="include_images"><span>Include image bytes in response</span></div>
+
+    <label>Max pages (blank = all)</label>
+    <input type="text" id="max_pages" placeholder="e.g. 3">
+
+    <label>Reference text for scoring (optional, compare only)</label>
+    <textarea id="reference" placeholder="Paste the known-correct text to get F1 / similarity scores"></textarea>
+
+    <div class="row">
+      <button id="btn-parse">Parse</button>
+      <button id="btn-compare" class="secondary">Compare all parsers</button>
+      <button id="btn-job" class="secondary">Queue as job</button>
+    </div>
+    <p class="muted" id="status"></p>
+
+    <h2 style="margin-top:20px">Parsers</h2>
+    <div id="providers" class="muted">loading…</div>
+  </section>
+
+  <section class="card">
+    <h2>Result</h2>
+    <div id="summary"></div>
+    <div class="tabs" id="result-tabs">
+      <div class="tab active" data-view="markdown">Markdown</div>
+      <div class="tab" data-view="json">JSON</div>
+      <div class="tab" data-view="compare">Comparison</div>
+    </div>
+    <div id="view-markdown"><pre id="out-md">Nothing yet.</pre></div>
+    <div id="view-json" class="hidden"><pre id="out-json"></pre></div>
+    <div id="view-compare" class="hidden"><div id="out-compare" class="muted">Run "Compare all parsers".</div></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let srcMode = "upload";
+
+// ---- tabs ----
+document.querySelectorAll("[data-src]").forEach(t => t.onclick = () => {
+  srcMode = t.dataset.src;
+  document.querySelectorAll("[data-src]").forEach(x => x.classList.toggle("active", x === t));
+  $("src-upload").classList.toggle("hidden", srcMode !== "upload");
+  $("src-url").classList.toggle("hidden", srcMode !== "url");
+});
+function showView(v) {
+  document.querySelectorAll("[data-view]").forEach(x => x.classList.toggle("active", x.dataset.view === v));
+  ["markdown", "json", "compare"].forEach(n => $("view-" + n).classList.toggle("hidden", n !== v));
+}
+document.querySelectorAll("[data-view]").forEach(t => t.onclick = () => showView(t.dataset.view));
+
+// ---- providers ----
+fetch("/api/providers").then(r => r.json()).then(list => {
+  $("providers").innerHTML = "<table><tr><th>name</th><th>types</th><th>cost</th><th></th></tr>" + list.map(p =>
+    `<tr><td>${p.name}</td><td>${p.supported_types.join(", ")}</td><td>${p.cost}</td>
+     <td class="${p.available ? "ok" : "bad"}" title="${p.unavailable_reason}">${p.available ? "ready" : "unavailable"}</td></tr>`).join("") + "</table>";
+  list.filter(p => p.available).forEach(p => {
+    const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; $("parser").appendChild(o);
+  });
+});
+
+// ---- helpers ----
+function options() {
+  const o = { extract_images: $("extract_images").checked, prefer_quality: $("prefer_quality").checked };
+  const mp = parseInt($("max_pages").value); if (mp > 0) o.max_pages = mp;
+  return o;
+}
+function busy(b, msg) { document.querySelectorAll("button").forEach(x => x.disabled = b); $("status").textContent = msg || ""; }
+function esc(s) { return String(s ?? "").replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+async function call(kind) {
+  // kind: parse | compare | job
+  const base = { upload: { parse: "/api/parse/upload", compare: "/api/compare/upload", job: "/api/jobs/upload" },
+                 url:    { parse: "/api/parse",        compare: "/api/compare",        job: "/api/jobs" } }[srcMode][kind];
+  let init;
+  if (srcMode === "upload") {
+    const f = $("file").files[0]; if (!f) throw new Error("Choose a file first");
+    const fd = new FormData();
+    fd.append("file", f); fd.append("options", JSON.stringify(options()));
+    if (kind !== "compare") { fd.append("tenant_id", $("tenant_id").value); fd.append("file_id", $("file_id").value); fd.append("parser", $("parser").value); }
+    if (kind === "parse") fd.append("include_images", $("include_images").checked);
+    if (kind === "compare") fd.append("reference_text", $("reference").value);
+    init = { method: "POST", body: fd };
+  } else {
+    if (!$("file_path").value || !$("file_name").value) throw new Error("file_path and file_name are required");
+    const body = { file_id: $("file_id").value || $("file_name").value, file_name: $("file_name").value, file_path: $("file_path").value,
+                   tenant_id: $("tenant_id").value, parser: $("parser").value, options: options(), include_images: $("include_images").checked };
+    if (kind === "compare") body.reference_text = $("reference").value || null;
+    init = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  }
+  const r = await fetch(base, init);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.detail || r.statusText);
+  return j;
+}
+
+function renderParse(j) {
+  const m = j.metadata, r = j.routing, s = j.stats;
+  $("summary").innerHTML = `<div class="kv">
+    <div>engine</div><div><b>${esc(m.engine)}</b> ${r.overridden ? '<span class="pill">forced</span>' : ""}</div>
+    <div>why</div><div>${esc(r.reason)}</div>
+    <div>document type</div><div>${esc(m.file_type)} / ${esc(r.profile.classification)} · ${m.page_count} page(s)</div>
+    <div>stats</div><div>${s.words} words · ${s.tables} tables · ${s.images} images · ${s.headings} headings</div>
+    <div>time</div><div>${j.timings_ms.total} ms</div>
+    <div>attempts</div><div>${r.attempts.map(a => `${a.parser}: <span class="${a.status === "ok" ? "ok" : "bad"}">${a.status}</span>`).join(" → ")}</div>
+    ${j.warnings.length ? `<div>warnings</div><div>${j.warnings.map(esc).join("<br>")}</div>` : ""}
+  </div>`;
+  $("out-md").textContent = j.content || "(empty)";
+  $("out-json").textContent = JSON.stringify(j, null, 2);
+  showView("markdown");
+}
+function renderCompare(c) {
+  $("summary").innerHTML = `<div class="kv"><div>router would pick</div><div><b>${esc(c.router_would_pick)}</b></div>
+    <div>ranked by</div><div>${esc(c.ranked_by)}</div><div>ranking</div><div>${esc(c.ranking.join(" > ") || "n/a")}</div></div>`;
+  const cols = ["parser", "status", "elapsed_ms", "pages", "words", "headings", "tables", "images", "coverage", "agreement", "heuristic", "f1", "similarity"];
+  $("out-compare").innerHTML = "<table><tr>" + cols.map(x => `<th>${x}</th>`).join("") + "</tr>" +
+    c.results.map(r => "<tr>" + cols.map(x => `<td class="${x === "status" ? (r.status === "ok" ? "ok" : "bad") : ""}">${esc(r[x] ?? "")}</td>`).join("") + "</tr>" +
+      (r.error ? `<tr><td colspan="${cols.length}" class="bad">${esc(r.error)}</td></tr>` : "") +
+      (r.preview ? `<tr><td colspan="${cols.length}"><details><summary class="muted">preview</summary><pre>${esc(r.preview)}</pre></details></td></tr>` : "")).join("") + "</table>";
+  $("out-json").textContent = JSON.stringify(c, null, 2);
+  $("out-md").textContent = c.report_markdown;
+  showView("compare");
+}
+async function pollJob(id) {
+  for (let i = 0; i < 600; i++) {
+    const j = await (await fetch("/api/jobs/" + id)).json();
+    $("status").textContent = `job ${id.slice(0, 8)}… ${j.status}`;
+    if (j.status === "COMPLETED") { const res = await (await fetch(`/api/jobs/${id}/result`)).json(); renderParse(res); return; }
+    if (j.status === "FAILED") throw new Error(j.error);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+}
+
+$("btn-parse").onclick = async () => { busy(true, "parsing…"); try { renderParse(await call("parse")); $("status").textContent = ""; } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
+$("btn-compare").onclick = async () => { busy(true, "running every parser…"); try { renderCompare(await call("compare")); $("status").textContent = ""; } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
+$("btn-job").onclick = async () => { busy(true, "queueing…"); try { const j = await call("job"); await pollJob(j.job_id); } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
+</script>
+</body>
+</html>

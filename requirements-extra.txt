@@ -1,0 +1,6 @@
+# Optional engines - install only what you want to evaluate:  pip install -r requirements-extra.txt
+docling>=2.0                                  # free, layout/table-aware (pulls PyTorch)
+unstructured[pdf,docx,pptx,xlsx]>=0.15        # free, element-level partitioning (large)
+easyocr>=1.7                                  # free deep-learning OCR (PyTorch)
+llama-parse>=0.5                              # LlamaParse CLOUD api (needs LLAMA_CLOUD_API_KEY; data leaves your network)
+azure-ai-documentintelligence>=1.0.0          # Azure Document Intelligence (PAID; needs endpoint + key)
