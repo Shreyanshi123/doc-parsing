@@ -34,12 +34,16 @@ _cache = {"t": 0.0, "ok": False, "reason": ""}
 @register
 class VlmParser(BaseParser):
     name = "vlm"
-    description = "Vision LLM via local Ollama (default qwen2.5vl:7b). Best for complex/scanned/handwritten layouts; slowest."
+    description = "Vision LLM: Azure OpenAI (GPT-4.1) if AZURE_OPENAI_* is set, else local Ollama (qwen2.5vl:7b). Best for complex/scanned/handwritten layouts and charts; slowest. Azure use costs money per page."
     supported_types = {"pdf", "image"}
-    cost = "free-local-gpu"
+    cost = "paid"   # may call Azure OpenAI (billed per page); also keeps it out of "Compare all" unless paid parsers are ticked
 
     @classmethod
     def is_available(cls):
+        from app.vision import azure_ready
+
+        if azure_ready():
+            return True, ""
         if time.time() - _cache["t"] < 15:  # don't hit the network on every call
             return _cache["ok"], _cache["reason"]
         try:
@@ -56,7 +60,9 @@ class VlmParser(BaseParser):
         return _cache["ok"], _cache["reason"]
 
     def parse(self, data, file_name, file_type, options):
-        model = options.vlm_model or settings.vlm_model
+        from app.vision import azure_ready
+
+        model = settings.azure_openai_deployment if azure_ready() else (options.vlm_model or settings.vlm_model)
         out = ParsedDocument(file_name, file_type, f"{self.name}:{model}")
         if file_type == "image":
             out.pages.append(Page(1, [Element(TEXT, self._ask(model, data))]))
@@ -75,6 +81,10 @@ class VlmParser(BaseParser):
         return out
 
     def _ask(self, model: str, image_bytes: bytes) -> str:
+        from app.vision import ask_azure, azure_ready
+
+        if azure_ready():
+            return ask_azure(image_bytes, PROMPT)
         payload = {
             "model": model,
             "prompt": PROMPT,

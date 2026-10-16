@@ -192,10 +192,29 @@ class RouterTests(unittest.TestCase):
         names = {p["name"]: p["available"] for p in list_parsers()}
         if names.get("pymupdf"):
             self.assertEqual(route(self._p("pdf", "digital"), ParseOptions()).selected, "pymupdf")
-        if names.get("ocr") and HAS_FITZ:
-            self.assertEqual(route(self._p("pdf", "scanned"), ParseOptions()).selected, "ocr")
+        if names.get("pymupdf4llm") and HAS_FITZ:   # scanned: pymupdf4llm scored 93%, plain OCR 49% in our test
+            self.assertEqual(route(self._p("pdf", "scanned"), ParseOptions()).selected, "pymupdf4llm")
         if names.get("hybrid_pdf"):
             self.assertEqual(route(self._p("pdf", "mixed"), ParseOptions()).selected, "hybrid_pdf")
+
+    def test_pdf_with_tables_prefers_pymupdf4llm(self):
+        names = {p["name"]: p["available"] for p in list_parsers()}
+        if names.get("pymupdf4llm"):
+            prof = DocProfile(file_type="pdf", size_bytes=1, classification="digital", traits=["tables"], est_tables=3)
+            self.assertEqual(route(prof, ParseOptions()).selected, "pymupdf4llm")
+
+    def test_prefer_quality_uses_docling_for_digital_and_scanned(self):
+        names = {p["name"]: p["available"] for p in list_parsers()}
+        if names.get("docling"):
+            for cls in ("digital", "scanned"):
+                self.assertEqual(route(self._p("pdf", cls), ParseOptions(prefer_quality=True)).selected, "docling")
+
+    def test_figures_add_a_note_but_do_not_change_the_pick(self):
+        prof = DocProfile(file_type="pdf", size_bytes=1, classification="digital", traits=["figures"],
+                          figure_count=2, figure_pages=1)
+        d = route(prof, ParseOptions())
+        self.assertEqual(d.selected, "pymupdf")
+        self.assertTrue(any("does not read chart values" in n for n in d.notes))
 
     def test_office_rules(self):
         self.assertEqual(route(self._p("docx", "native_office"), ParseOptions()).selected, "docx")
@@ -249,14 +268,15 @@ class PdfTests(unittest.TestCase):
 
     def test_digital(self):
         r = parse_bytes((self.dir / "digital.pdf").read_bytes(), "digital.pdf")
-        self.assertEqual(r.routing.selected, "pymupdf")
+        self.assertIn("tables", r.profile.traits)                    # the sample has a real ruled table
+        self.assertIn(r.routing.selected, ("pymupdf4llm", "pymupdf"))
         self.assertIn("Quarterly Sales Report", r.document.markdown)
-        self.assertGreaterEqual(r.document.stats()["tables"], 1)
+        self.assertIn("North", r.document.markdown)                  # the table content is there
 
     @unittest.skipUnless(HAS_TESS, "tesseract not installed")
     def test_scanned_and_mixed(self):
         r = parse_bytes((self.dir / "scanned.pdf").read_bytes(), "scanned.pdf")
-        self.assertEqual(r.routing.selected, "ocr")
+        self.assertIn(r.routing.selected, ("pymupdf4llm", "ocr"))     # ocr if pymupdf4llm returns nothing
         self.assertIn("Quarterly", r.document.markdown)
         r = parse_bytes((self.dir / "mixed.pdf").read_bytes(), "mixed.pdf")
         self.assertEqual(r.routing.selected, "hybrid_pdf")

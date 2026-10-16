@@ -42,6 +42,16 @@ class Settings:
     vlm_max_pages: int = int(os.getenv("VLM_MAX_PAGES", "10"))
     vlm_timeout: int = int(os.getenv("VLM_TIMEOUT_SEC", "300"))
 
+    # Figure reader (charts / diagrams -> text). Used by the smart_pdf parser.
+    #   VISION_BACKEND = auto | azure_openai | ollama | off
+    #   auto = Azure OpenAI if its three settings below are filled, else local Ollama if reachable, else off
+    vision_backend: str = os.getenv("VISION_BACKEND", "auto")
+    azure_openai_endpoint: str = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+    azure_openai_key: str = os.getenv("AZURE_OPENAI_KEY", "")
+    azure_openai_deployment: str = os.getenv("AZURE_OPENAI_DEPLOYMENT", "")
+    azure_openai_api_version: str = os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21")
+    max_figures: int = int(os.getenv("MAX_FIGURES", "8"))   # per document - caps vision calls (cost)
+
     # Paid engines (optional)
     azure_di_endpoint: str = os.getenv("AZURE_DI_ENDPOINT", "")
     azure_di_key: str = os.getenv("AZURE_DI_KEY", "")

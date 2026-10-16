@@ -7,3 +7,5 @@ data/outputs/*
 data/jobs.db
 !data/uploads/.gitkeep
 !data/outputs/.gitkeep
+.pytest_cache/
+

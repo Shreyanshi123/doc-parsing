@@ -16,6 +16,7 @@ def extract_page_elements(doc, page, options: ParseOptions) -> list[Element]:
 
     # ---- tables ----
     table_bboxes = []
+    fills: dict = {}
     try:
         for t in page.find_tables().tables:
             md = ""
@@ -25,6 +26,11 @@ def extract_page_elements(doc, page, options: ParseOptions) -> list[Element]:
                 md = rows_to_markdown(t.extract())
             if md.strip():
                 table_bboxes.append((fitz_rect(t.bbox), md))
+                try:   # share of cells that hold text; a "table" that is mostly empty is usually a chart's grid lines
+                    cells = [c for row in t.extract() for c in row]
+                    fills[fitz_rect(t.bbox)] = sum(1 for c in cells if c and str(c).strip()) / len(cells) if cells else 1.0
+                except Exception:
+                    fills[fitz_rect(t.bbox)] = 1.0
     except Exception:
         pass  # older PyMuPDF without find_tables
 
@@ -65,10 +71,10 @@ def extract_page_elements(doc, page, options: ParseOptions) -> list[Element]:
                 text = "## " + text
             elif ratio >= 1.1 and bold:
                 text = "### " + text
-        items.append((y0, Element(TEXT, text)))
+        items.append((y0, Element(TEXT, text, metadata={"y": round(y0, 1), "bbox": [round(v, 1) for v in (x0, y0, x1, y1)]})))
 
     for rect, md in table_bboxes:
-        items.append((rect[1], Element(TABLE, md)))
+        items.append((rect[1], Element(TABLE, md, metadata={"y": round(rect[1], 1), "bbox": [round(v, 1) for v in rect], "fill": round(fills.get(rect, 1.0), 2)})))
     items.sort(key=lambda t: t[0])
     elements.extend(e for _, e in items)
 

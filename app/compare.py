@@ -45,6 +45,47 @@ def similarity(a: str, b: str, limit: int = 20000) -> float:
     return difflib.SequenceMatcher(None, " ".join(_tokens(a))[:limit], " ".join(_tokens(b))[:limit], autojunk=False).ratio()
 
 
+def _norm(s: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"[*_`]", "", s)).strip().lower()
+
+
+def _headings(md: str) -> list[str]:
+    return [_norm(l.lstrip("#")) for l in md.splitlines() if l.lstrip().startswith("#")]
+
+
+def _table_cells(md: str) -> list[str]:
+    cells = []
+    for line in md.splitlines():
+        line = line.strip()
+        if not line.startswith("|") or re.fullmatch(r"[|\-:\s]+", line):
+            continue
+        cells += [_norm(c) for c in line.strip("|").split("|") if _norm(c)]
+    return cells
+
+
+def _list_f1(truth: list[str], got: list[str]) -> float:
+    a, b = Counter(truth), Counter(got)
+    overlap = sum((a & b).values())
+    if not overlap:
+        return 0.0
+    p, r = overlap / sum(b.values()), overlap / sum(a.values())
+    return 2 * p * r / (p + r)
+
+
+def score_against_truth(truth: str, out: str) -> dict:
+    """text = word F1, headings = F1 of heading lines, tables = F1 of table cells (the last two only
+    when the truth has any). score = average of the parts that apply (0..1)."""
+    s = {"text": word_f1(truth, out)}
+    th = _headings(truth)
+    if th:
+        s["headings"] = _list_f1(th, _headings(out))
+    tc = _table_cells(truth)
+    if tc:
+        s["tables"] = _list_f1(tc, _table_cells(out))
+    s["score"] = sum(s.values()) / len(s)
+    return {k: round(v, 3) for k, v in s.items()}
+
+
 def compare_parsers(
     data: bytes,
     file_name: str,
@@ -76,7 +117,9 @@ def compare_parsers(
             row.update(doc.stats())
             row["status"] = "ok"
             outputs[cls.name] = doc.markdown
-            row["preview"] = doc.markdown[:500]
+            # Keep the complete extraction so the comparison view can show what
+            # each parser actually returned, not just a short sample.
+            row["output"] = doc.markdown
         except Exception as e:  # noqa: BLE001
             row.update(status="error", error=f"{type(e).__name__}: {e}",
                        elapsed_ms=int((time.perf_counter() - t) * 1000))
@@ -102,8 +145,12 @@ def compare_parsers(
         if reference_text:
             row["f1"] = round(word_f1(reference_text, mine), 3)
             row["similarity"] = round(similarity(reference_text, mine), 3)
+            sc = score_against_truth(reference_text, mine)  # separate keys: 'headings'/'tables' already hold parser counts
+            row.update(score=sc["score"], text_score=sc["text"], headings_score=sc.get("headings"), tables_score=sc.get("tables"))
+        elif row.get("heuristic") is not None:
+            row["score"] = row["heuristic"]
 
-    key = "f1" if reference_text else "heuristic"
+    key = "score"
     ranked = sorted([r for r in rows if r.get("status") == "ok" and r.get(key) is not None],
                     key=lambda r: (-r[key], r["elapsed_ms"]))
     return {
@@ -111,7 +158,8 @@ def compare_parsers(
         "file_type": file_type,
         "profile": profile.to_dict(),
         "router_would_pick": auto_pick,
-        "ranked_by": "f1 (vs your reference text)" if reference_text else "heuristic = coverage x agreement (NO ground truth - provide reference_text for a real ranking)",
+        "has_reference": bool(reference_text),
+        "ranked_by": "score vs your reference text (words + headings + tables)" if reference_text else "heuristic = coverage x agreement (NO ground truth - provide reference_text for a real ranking)",
         "ranking": [r["parser"] for r in ranked],
         "results": rows,
     }
@@ -125,13 +173,13 @@ def report_markdown(cmp: dict) -> str:
         f"- ranked by: {cmp['ranked_by']}",
         f"- ranking: {' > '.join(cmp['ranking']) or 'n/a'}",
         "",
-        "| parser | status | ms | pages | words | headings | tables | images | coverage | agreement | f1 |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| parser | status | ms | pages | words | headings | tables | images | coverage | agreement | f1 | score |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in cmp["results"]:
         lines.append(
             f"| {r['parser']} | {r['status']} | {r.get('elapsed_ms','')} | {r.get('pages','')} | {r.get('words','')} | "
-            f"{r.get('headings','')} | {r.get('tables','')} | {r.get('images','')} | {r.get('coverage','')} | {r.get('agreement','')} | {r.get('f1','')} |"
+            f"{r.get('headings','')} | {r.get('tables','')} | {r.get('images','')} | {r.get('coverage','')} | {r.get('agreement','')} | {r.get('f1','')} | {r.get('score','')} |"
         )
         if r["status"] == "error":
             lines.append(f"|  | ↳ {r['error']} | | | | | | | | | |")

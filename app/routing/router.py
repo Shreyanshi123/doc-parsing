@@ -20,6 +20,7 @@ class RoutingDecision:
     reason: str
     overridden: bool = False
     skipped: dict[str, str] = field(default_factory=dict)  # parser -> why not usable
+    notes: list[str] = field(default_factory=list)         # things worth knowing, e.g. "charts found, values not read"
 
     def to_dict(self):
         return {
@@ -28,6 +29,7 @@ class RoutingDecision:
             "reason": self.reason,
             "overridden": self.overridden,
             "skipped": self.skipped,
+            "notes": self.notes,
         }
 
 
@@ -40,19 +42,27 @@ def _rules(profile: DocProfile, options: ParseOptions) -> list[tuple[str, str]]:
     q = options.prefer_quality
 
     if ft == "pdf":
+        tables = "tables" in profile.traits
         if cls == "digital":
-            r = [("pymupdf", "PDF has a real text layer -> fastest, most accurate extraction"),
-                 ("pdfminer", "fallback text engine")]
+            if tables:
+                r = [("pymupdf4llm", "digital PDF with tables -> pymupdf4llm (kept 80% of table cells in our research-paper test, pymupdf only 12%)"),
+                     ("pymupdf", "text layer only (fast, weak on tables)"),
+                     ("pdfminer", "fallback text engine")]
+            else:
+                r = [("pymupdf", "simple digital PDF (text, no tables) -> pymupdf (99-100% in our Wikipedia tests, 1-2 s)"),
+                     ("pymupdf4llm", "same text, richer Markdown"),
+                     ("pdfminer", "fallback text engine")]
             if q:
-                r.insert(0, ("vlm", "prefer_quality=true -> vision LLM first"))
+                r.insert(0, ("docling", "prefer_quality=true -> docling (most accurate in our tests, but 50-250x slower)"))
             return r + [("hybrid_pdf", "fallback"), ("ocr", "last resort")]
         if cls == "scanned":
-            r = [("ocr", "pages are images (no text layer) -> OCR"),
+            r = [("pymupdf4llm", "scanned PDF -> pymupdf4llm (93% in our scan test; ocr gave the words but no headings: 49%)"),
+                 ("ocr", "plain-text OCR (fast, no headings or tables)"),
                  ("vlm", "vision LLM alternative for scans")]
             if q:
-                r.reverse()
+                r.insert(0, ("docling", "prefer_quality=true -> docling (98% in our scan test, slower)"))
             return r
-        # mixed / unknown
+        # mixed / unknown  (not tested yet, rule unchanged)
         r = [("hybrid_pdf", "some pages have text, some are scans -> decide per page"),
              ("ocr", "OCR everything"), ("pymupdf", "text layer only")]
         if q:
@@ -94,9 +104,15 @@ def route(profile: DocProfile, options: ParseOptions, override: str | None = Non
             skipped[name] = reason
     if not chosen:
         raise NoParserAvailable(f"No available parser for {profile.file_type}/{profile.classification}. Skipped: {skipped}")
-    return RoutingDecision(
+    decision = RoutingDecision(
         selected=chosen[0][0],
         candidates=[c for c, _ in chosen],
         reason=chosen[0][1],
         skipped=skipped,
     )
+    if profile.figure_count and decision.selected not in ("smart_pdf", "vlm"):
+        decision.notes.append(
+            f"{profile.figure_count} figure(s) (charts / diagrams / pictures) on {profile.figure_pages} page(s): "
+            f"{decision.selected} does not read chart values. Use smart_pdf or vlm (paid, needs a vision model) if you need them."
+        )
+    return decision

@@ -25,7 +25,11 @@ class DocProfile:
     text_pages: int = 0
     scanned_pages: int = 0
     avg_chars_per_page: float = 0.0
-    est_tables: int = 0
+    est_tables: int = 0            # real tables (a chart's grid lines are not counted)
+    table_pages: int = 0
+    figure_count: int = 0          # charts / diagrams / pictures on the text pages
+    figure_pages: int = 0
+    traits: list[str] = field(default_factory=list)   # what is IN the document: "tables", "figures"
     notes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -65,13 +69,32 @@ def _analyze_pdf(data: bytes, p: DocProfile, options: ParseOptions) -> None:
         total_chars += chars
         if chars >= options.min_chars_per_page:
             p.text_pages += 1
+            _look_for_tables_and_figures(page, p)
         else:
             p.scanned_pages += 1
-        try:
-            p.est_tables += len(page.find_tables().tables)
-        except Exception:
-            pass
     _finish_pdf(p, total_chars, n)
+
+
+def _look_for_tables_and_figures(page, p: DocProfile) -> None:
+    """Only for pages that have a text layer. Cheap checks with PyMuPDF; any failure just means 'nothing found'."""
+    from app.figures import find_figures, table_fill, MIN_TABLE_FILL
+
+    table_rects = []
+    try:
+        real = [t for t in page.find_tables().tables if table_fill(t) >= MIN_TABLE_FILL]
+        if real:
+            p.table_pages += 1
+            p.est_tables += len(real)
+            table_rects = [tuple(t.bbox) for t in real]
+    except Exception:
+        pass
+    try:
+        figs = find_figures(page, table_rects)
+        if figs:
+            p.figure_pages += 1
+            p.figure_count += len(figs)
+    except Exception:
+        pass
 
 
 def _analyze_pdf_pdfminer(data: bytes, p: DocProfile, options: ParseOptions) -> None:
@@ -96,6 +119,10 @@ def _analyze_pdf_pdfminer(data: bytes, p: DocProfile, options: ParseOptions) -> 
 
 def _finish_pdf(p: DocProfile, total_chars: int, n: int) -> None:
     p.avg_chars_per_page = total_chars / n if n else 0.0
+    if p.est_tables:
+        p.traits.append("tables")
+    if p.figure_count:
+        p.traits.append("figures")
     if n == 0:
         p.classification = "unknown"
     elif p.scanned_pages == 0:

@@ -1,0 +1,15 @@
+Type: bar chart
+
+Chart:
+Title: Revenue (USD m)
+Axis labels: 
+- X-axis: Year
+- Y-axis: Revenue (USD m)
+
+| Year | Revenue (USD m) |
+|------|-----------------|
+| 2021 | 120             |
+| 2022 | 150             |
+| 2023 | 200             |
+| 2024 | 310             |
+| 2025 | 400             |

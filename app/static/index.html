@@ -39,6 +39,9 @@
   .hidden { display:none; }
   .kv { display:grid; grid-template-columns: 140px 1fr; gap:2px 10px; margin-bottom:10px; }
   .kv div:nth-child(odd) { color:var(--muted); }
+  .parser-result { border:1px solid var(--line); border-radius:8px; margin:10px 0; padding:10px 12px; }
+  .parser-result summary { cursor:pointer; font-weight:600; }
+  .parser-result pre { margin-top:10px; max-height:480px; }
 </style>
 </head>
 <body>
@@ -77,6 +80,7 @@
     <div class="check"><input type="checkbox" id="extract_images"><span>Extract embedded images (bytes)</span></div>
     <div class="check"><input type="checkbox" id="prefer_quality"><span>Prefer quality (vision LLM first)</span></div>
     <div class="check"><input type="checkbox" id="include_images"><span>Include image bytes in response</span></div>
+    <div class="check"><input type="checkbox" id="include_paid"><span>Include paid parsers in Compare (Azure; costs per page)</span></div>
 
     <label>Max pages (blank = all)</label>
     <input type="text" id="max_pages" placeholder="e.g. 3">
@@ -157,12 +161,14 @@ async function call(kind) {
     if (kind !== "compare") { fd.append("tenant_id", $("tenant_id").value); fd.append("file_id", $("file_id").value); fd.append("parser", $("parser").value); }
     if (kind === "parse") fd.append("include_images", $("include_images").checked);
     if (kind === "compare") fd.append("reference_text", $("reference").value);
+    if (kind === "compare") fd.append("include_paid", $("include_paid").checked);
     init = { method: "POST", body: fd };
   } else {
     if (!$("file_path").value || !$("file_name").value) throw new Error("file_path and file_name are required");
     const body = { file_id: $("file_id").value || $("file_name").value, file_name: $("file_name").value, file_path: $("file_path").value,
                    tenant_id: $("tenant_id").value, parser: $("parser").value, options: options(), include_images: $("include_images").checked };
     if (kind === "compare") body.reference_text = $("reference").value || null;
+    if (kind === "compare") body.include_paid = $("include_paid").checked;
     init = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
   }
   const r = await fetch(base, init);
@@ -186,14 +192,44 @@ function renderParse(j) {
   $("out-json").textContent = JSON.stringify(j, null, 2);
   showView("markdown");
 }
+function leaderboard(c) {
+  const byName = Object.fromEntries(c.results.map(r => [r.parser, r]));
+  const order = [...c.ranking, ...c.results.filter(r => !c.ranking.includes(r.parser)).map(r => r.parser)];
+  const pct = v => v == null ? "–" : Math.round(v * 100) + "%";
+  const bar = v => v == null ? "" : `<div style="background:var(--line);border-radius:4px;height:8px;width:120px"><div style="background:${v >= .9 ? "var(--ok)" : v >= .5 ? "var(--accent)" : "var(--bad)"};height:8px;border-radius:4px;width:${Math.round(v * 100)}%"></div></div>`;
+  const rows = order.map((n, i) => {
+    const r = byName[n];
+    if (r.status !== "ok") return `<tr><td>–</td><td>${esc(n)}</td><td colspan="5" class="bad">failed: ${esc(r.error || "")}</td></tr>`;
+    return `<tr><td>${i + 1}</td><td><b>${esc(n)}</b></td><td>${bar(r.score)}${pct(r.score)}</td>
+      <td>${c.has_reference ? pct(r.text_score) : "–"}</td><td>${c.has_reference ? pct(r.headings_score) : "–"}</td><td>${c.has_reference ? pct(r.tables_score) : "–"}</td>
+      <td>${(Number(r.elapsed_ms || 0) / 1000).toFixed(1)}s</td></tr>`;
+  }).join("");
+  return `<table><tr><th>#</th><th>parser</th><th>score</th><th>text</th><th>headings</th><th>tables</th><th>time</th></tr>${rows}</table>
+    <p class="muted">"–" under headings/tables means the reference text has none of those (not counted).</p>`;
+}
 function renderCompare(c) {
-  $("summary").innerHTML = `<div class="kv"><div>router would pick</div><div><b>${esc(c.router_would_pick)}</b></div>
-    <div>ranked by</div><div>${esc(c.ranked_by)}</div><div>ranking</div><div>${esc(c.ranking.join(" > ") || "n/a")}</div></div>`;
+  const best = c.ranking[0];
+  $("summary").innerHTML = `<div class="kv">
+    <div>Document</div><div>${esc(c.file_name)} · ${esc(c.file_type)} / ${esc(c.profile.classification)} · ${c.profile.page_count} page(s)</div>
+    <div>Best parser</div><div><b>${esc(best || "n/a")}</b> ${c.has_reference ? "" : '<span class="pill">not verified</span>'}</div>
+    <div>Router's current pick</div><div>${esc(c.router_would_pick || "not available")}</div></div>
+    ${c.has_reference
+      ? '<p class="ok">Scored against your reference text: text = right words, headings = headings detected, tables = table cells correct.</p>'
+      : '<p class="bad">No reference text given, so this ranking only compares parsers with each other (more words + agreement). It does NOT prove correctness. Paste the correct text in "Reference text" and run again for a real score.</p>'}
+    ${leaderboard(c)}`;
   const cols = ["parser", "status", "elapsed_ms", "pages", "words", "headings", "tables", "images", "coverage", "agreement", "heuristic", "f1", "similarity"];
-  $("out-compare").innerHTML = "<table><tr>" + cols.map(x => `<th>${x}</th>`).join("") + "</tr>" +
-    c.results.map(r => "<tr>" + cols.map(x => `<td class="${x === "status" ? (r.status === "ok" ? "ok" : "bad") : ""}">${esc(r[x] ?? "")}</td>`).join("") + "</tr>" +
-      (r.error ? `<tr><td colspan="${cols.length}" class="bad">${esc(r.error)}</td></tr>` : "") +
-      (r.preview ? `<tr><td colspan="${cols.length}"><details><summary class="muted">preview</summary><pre>${esc(r.preview)}</pre></details></td></tr>` : "")).join("") + "</table>";
+  const outputs = c.results.map(r => {
+    const shortStats = r.status === "ok"
+      ? `${esc(r.pages ?? "?")} pages · ${esc(r.words ?? 0)} words · ${(Number(r.elapsed_ms || 0) / 1000).toFixed(1)} seconds`
+      : `<span class="bad">Could not read this file: ${esc(r.error || "unknown error")}</span>`;
+    const content = r.status === "ok"
+      ? `<pre>${esc(r.output || "(This parser returned no text.)")}</pre>`
+      : "";
+    return `<details class="parser-result"><summary><span class="${r.status === "ok" ? "ok" : "bad"}">${esc(r.parser)}</span> — ${shortStats}</summary>${content}</details>`;
+  }).join("");
+  const technical = "<details><summary>Show technical measurements</summary><div style=\"overflow:auto;margin-top:8px\"><table><tr>" + cols.map(x => `<th>${esc(x)}</th>`).join("") + "</tr>" +
+    c.results.map(r => "<tr>" + cols.map(x => `<td class="${x === "status" ? (r.status === "ok" ? "ok" : "bad") : ""}">${esc(r[x] ?? "")}</td>`).join("") + "</tr>").join("") + "</table></div></details>";
+  $("out-compare").innerHTML = `<h3>What each parser read</h3>${outputs}${technical}`;
   $("out-json").textContent = JSON.stringify(c, null, 2);
   $("out-md").textContent = c.report_markdown;
   showView("compare");

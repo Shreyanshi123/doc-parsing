@@ -1,0 +1,12 @@
+Type: flowchart
+
+Entities:
+- Collect data
+- Clean data
+- Publish report
+- Quality check
+
+Connections:
+- Collect data -> Clean data
+- Clean data -> Publish report
+- Clean data -> Quality check

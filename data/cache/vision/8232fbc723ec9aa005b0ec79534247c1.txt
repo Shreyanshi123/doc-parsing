@@ -1,0 +1,15 @@
+Type: line chart
+
+Chart:
+Title: Profit (USD m)
+Axis labels: 
+- X-axis: Year
+- Y-axis: Profit (USD m)
+
+| Year | Profit (USD m) |
+|------|---------------|
+| 2021 | 11            |
+| 2022 | 18            |
+| 2023 | 30            |
+| 2024 | 52            |
+| 2025 | 80            |

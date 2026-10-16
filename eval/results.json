@@ -1,0 +1,780 @@
+{
+  "summary": {
+    "csv": [
+      {
+        "parser": "spreadsheet",
+        "avg_score": 1.0,
+        "avg_ms": 1
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 1.0,
+        "avg_ms": 40
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 1.0,
+        "avg_ms": 96
+      }
+    ],
+    "docx": [
+      {
+        "parser": "docx",
+        "avg_score": 1.0,
+        "avg_ms": 21
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 1.0,
+        "avg_ms": 90
+      },
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 647
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.889,
+        "avg_ms": 380
+      }
+    ],
+    "image/image": [
+      {
+        "parser": "unstructured",
+        "avg_score": 1.0,
+        "avg_ms": 3725
+      },
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 22241
+      },
+      {
+        "parser": "ocr",
+        "avg_score": 0.5,
+        "avg_ms": 861
+      },
+      {
+        "parser": "easyocr",
+        "avg_score": 0.5,
+        "avg_ms": 14353
+      }
+    ],
+    "pdf/digital": [
+      {
+        "parser": "hybrid_pdf",
+        "avg_score": 1.0,
+        "avg_ms": 588
+      },
+      {
+        "parser": "pymupdf",
+        "avg_score": 1.0,
+        "avg_ms": 1435
+      },
+      {
+        "parser": "pymupdf4llm",
+        "avg_score": 1.0,
+        "avg_ms": 3151
+      },
+      {
+        "parser": "opendataloader",
+        "avg_score": 1.0,
+        "avg_ms": 7336
+      },
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 37426
+      },
+      {
+        "parser": "pdfplumber",
+        "avg_score": 0.667,
+        "avg_ms": 20
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.667,
+        "avg_ms": 237
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 0.407,
+        "avg_ms": 12931
+      },
+      {
+        "parser": "pdfminer",
+        "avg_score": 0.333,
+        "avg_ms": 16
+      },
+      {
+        "parser": "easyocr",
+        "avg_score": 0.333,
+        "avg_ms": 35632
+      },
+      {
+        "parser": "ocr",
+        "avg_score": 0.325,
+        "avg_ms": 1502
+      }
+    ],
+    "pdf/mixed": [
+      {
+        "parser": "pymupdf4llm",
+        "avg_score": 1.0,
+        "avg_ms": 5500
+      },
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 23279
+      },
+      {
+        "parser": "hybrid_pdf",
+        "avg_score": 0.889,
+        "avg_ms": 1710
+      },
+      {
+        "parser": "pymupdf",
+        "avg_score": 0.81,
+        "avg_ms": 775
+      },
+      {
+        "parser": "opendataloader",
+        "avg_score": 0.81,
+        "avg_ms": 1530
+      },
+      {
+        "parser": "pdfplumber",
+        "avg_score": 0.588,
+        "avg_ms": 39
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.588,
+        "avg_ms": 93
+      },
+      {
+        "parser": "easyocr",
+        "avg_score": 0.333,
+        "avg_ms": 61194
+      },
+      {
+        "parser": "ocr",
+        "avg_score": 0.328,
+        "avg_ms": 1878
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 0.321,
+        "avg_ms": 69
+      },
+      {
+        "parser": "pdfminer",
+        "avg_score": 0.255,
+        "avg_ms": 24
+      }
+    ],
+    "pdf/scanned": [
+      {
+        "parser": "pymupdf4llm",
+        "avg_score": 1.0,
+        "avg_ms": 2706
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 1.0,
+        "avg_ms": 3413
+      },
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 10530
+      },
+      {
+        "parser": "ocr",
+        "avg_score": 0.5,
+        "avg_ms": 974
+      },
+      {
+        "parser": "hybrid_pdf",
+        "avg_score": 0.5,
+        "avg_ms": 1102
+      },
+      {
+        "parser": "easyocr",
+        "avg_score": 0.5,
+        "avg_ms": 29991
+      },
+      {
+        "parser": "pdfminer",
+        "avg_score": 0.0,
+        "avg_ms": 1
+      },
+      {
+        "parser": "pdfplumber",
+        "avg_score": 0.0,
+        "avg_ms": 2
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.0,
+        "avg_ms": 64
+      },
+      {
+        "parser": "pymupdf",
+        "avg_score": 0.0,
+        "avg_ms": 212
+      },
+      {
+        "parser": "opendataloader",
+        "avg_score": 0.0,
+        "avg_ms": 1110
+      }
+    ],
+    "pptx": [
+      {
+        "parser": "pptx",
+        "avg_score": 0.964,
+        "avg_ms": 19
+      },
+      {
+        "parser": "docling",
+        "avg_score": 0.909,
+        "avg_ms": 39623
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.767,
+        "avg_ms": 174
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 0.742,
+        "avg_ms": 6053
+      }
+    ],
+    "xlsx": [
+      {
+        "parser": "docling",
+        "avg_score": 1.0,
+        "avg_ms": 397
+      },
+      {
+        "parser": "unstructured",
+        "avg_score": 1.0,
+        "avg_ms": 1738
+      },
+      {
+        "parser": "spreadsheet",
+        "avg_score": 0.976,
+        "avg_ms": 13
+      },
+      {
+        "parser": "markitdown",
+        "avg_score": 0.976,
+        "avg_ms": 122
+      }
+    ]
+  },
+  "detail": [
+    {
+      "file": "deck.pptx",
+      "group": "pptx",
+      "router_would_pick": "pptx",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 39623,
+          "text": 0.818,
+          "headings": 1.0,
+          "score": 0.909
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 174,
+          "text": 0.867,
+          "headings": 0.667,
+          "score": 0.767
+        },
+        {
+          "parser": "pptx",
+          "status": "ok",
+          "ms": 19,
+          "text": 0.929,
+          "headings": 1.0,
+          "score": 0.964
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 6053,
+          "text": 0.818,
+          "headings": 0.667,
+          "score": 0.742
+        }
+      ]
+    },
+    {
+      "file": "digital.pdf",
+      "group": "pdf/digital",
+      "router_would_pick": "pymupdf",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 37426,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "ocr",
+          "status": "ok",
+          "ms": 1502,
+          "text": 0.976,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.325
+        },
+        {
+          "parser": "easyocr",
+          "status": "ok",
+          "ms": 35632,
+          "text": 1.0,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.333
+        },
+        {
+          "parser": "pymupdf",
+          "status": "ok",
+          "ms": 1435,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "hybrid_pdf",
+          "status": "ok",
+          "ms": 588,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 237,
+          "text": 1.0,
+          "headings": 0.0,
+          "tables": 1.0,
+          "score": 0.667
+        },
+        {
+          "parser": "opendataloader",
+          "status": "ok",
+          "ms": 7336,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "pdfminer",
+          "status": "ok",
+          "ms": 16,
+          "text": 1.0,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.333
+        },
+        {
+          "parser": "pdfplumber",
+          "status": "ok",
+          "ms": 20,
+          "text": 1.0,
+          "headings": 0.0,
+          "tables": 1.0,
+          "score": 0.667
+        },
+        {
+          "parser": "pymupdf4llm",
+          "status": "ok",
+          "ms": 3151,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 12931,
+          "text": 1.0,
+          "headings": 0.222,
+          "tables": 0.0,
+          "score": 0.407
+        }
+      ]
+    },
+    {
+      "file": "mixed.pdf",
+      "group": "pdf/mixed",
+      "router_would_pick": "hybrid_pdf",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 23279,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "ocr",
+          "status": "ok",
+          "ms": 1878,
+          "text": 0.985,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.328
+        },
+        {
+          "parser": "easyocr",
+          "status": "ok",
+          "ms": 61194,
+          "text": 1.0,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.333
+        },
+        {
+          "parser": "pymupdf",
+          "status": "ok",
+          "ms": 775,
+          "text": 0.764,
+          "headings": 0.667,
+          "tables": 1.0,
+          "score": 0.81
+        },
+        {
+          "parser": "hybrid_pdf",
+          "status": "ok",
+          "ms": 1710,
+          "text": 1.0,
+          "headings": 0.667,
+          "tables": 1.0,
+          "score": 0.889
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 93,
+          "text": 0.764,
+          "headings": 0.0,
+          "tables": 1.0,
+          "score": 0.588
+        },
+        {
+          "parser": "opendataloader",
+          "status": "ok",
+          "ms": 1530,
+          "text": 0.764,
+          "headings": 0.667,
+          "tables": 1.0,
+          "score": 0.81
+        },
+        {
+          "parser": "pdfminer",
+          "status": "ok",
+          "ms": 24,
+          "text": 0.764,
+          "headings": 0.0,
+          "tables": 0.0,
+          "score": 0.255
+        },
+        {
+          "parser": "pdfplumber",
+          "status": "ok",
+          "ms": 39,
+          "text": 0.764,
+          "headings": 0.0,
+          "tables": 1.0,
+          "score": 0.588
+        },
+        {
+          "parser": "pymupdf4llm",
+          "status": "ok",
+          "ms": 5500,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 69,
+          "text": 0.764,
+          "headings": 0.2,
+          "tables": 0.0,
+          "score": 0.321
+        }
+      ]
+    },
+    {
+      "file": "report.docx",
+      "group": "docx",
+      "router_would_pick": "docx",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 647,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "docx",
+          "status": "ok",
+          "ms": 21,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 380,
+          "text": 1.0,
+          "headings": 0.667,
+          "tables": 1.0,
+          "score": 0.889
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 90,
+          "text": 1.0,
+          "headings": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "file": "sales.csv",
+      "group": "csv",
+      "router_would_pick": "spreadsheet",
+      "results": [
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 96,
+          "text": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "spreadsheet",
+          "status": "ok",
+          "ms": 1,
+          "text": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 40,
+          "text": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "file": "sales.xlsx",
+      "group": "xlsx",
+      "router_would_pick": "spreadsheet",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 397,
+          "text": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 122,
+          "text": 0.952,
+          "tables": 1.0,
+          "score": 0.976
+        },
+        {
+          "parser": "spreadsheet",
+          "status": "ok",
+          "ms": 13,
+          "text": 0.952,
+          "tables": 1.0,
+          "score": 0.976
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 1738,
+          "text": 1.0,
+          "tables": 1.0,
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "file": "scan.png",
+      "group": "image/image",
+      "router_would_pick": "ocr",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 22241,
+          "text": 1.0,
+          "headings": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "ocr",
+          "status": "ok",
+          "ms": 861,
+          "text": 1.0,
+          "headings": 0.0,
+          "score": 0.5
+        },
+        {
+          "parser": "easyocr",
+          "status": "ok",
+          "ms": 14353,
+          "text": 1.0,
+          "headings": 0.0,
+          "score": 0.5
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 3725,
+          "text": 1.0,
+          "headings": 1.0,
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "file": "scanned.pdf",
+      "group": "pdf/scanned",
+      "router_would_pick": "ocr",
+      "results": [
+        {
+          "parser": "docling",
+          "status": "ok",
+          "ms": 10530,
+          "text": 1.0,
+          "headings": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "ocr",
+          "status": "ok",
+          "ms": 974,
+          "text": 1.0,
+          "headings": 0.0,
+          "score": 0.5
+        },
+        {
+          "parser": "easyocr",
+          "status": "ok",
+          "ms": 29991,
+          "text": 1.0,
+          "headings": 0.0,
+          "score": 0.5
+        },
+        {
+          "parser": "pymupdf",
+          "status": "ok",
+          "ms": 212,
+          "text": 0.0,
+          "headings": 0.0,
+          "score": 0.0
+        },
+        {
+          "parser": "hybrid_pdf",
+          "status": "ok",
+          "ms": 1102,
+          "text": 1.0,
+          "headings": 0.0,
+          "score": 0.5
+        },
+        {
+          "parser": "markitdown",
+          "status": "ok",
+          "ms": 64,
+          "text": 0.0,
+          "headings": 0.0,
+          "score": 0.0
+        },
+        {
+          "parser": "opendataloader",
+          "status": "ok",
+          "ms": 1110,
+          "text": 0.0,
+          "headings": 0.0,
+          "score": 0.0
+        },
+        {
+          "parser": "pdfminer",
+          "status": "ok",
+          "ms": 1,
+          "text": 0.0,
+          "headings": 0.0,
+          "score": 0.0
+        },
+        {
+          "parser": "pdfplumber",
+          "status": "ok",
+          "ms": 2,
+          "text": 0.0,
+          "headings": 0.0,
+          "score": 0.0
+        },
+        {
+          "parser": "pymupdf4llm",
+          "status": "ok",
+          "ms": 2706,
+          "text": 1.0,
+          "headings": 1.0,
+          "score": 1.0
+        },
+        {
+          "parser": "unstructured",
+          "status": "ok",
+          "ms": 3413,
+          "text": 1.0,
+          "headings": 1.0,
+          "score": 1.0
+        }
+      ]
+    }
+  ]
+}
