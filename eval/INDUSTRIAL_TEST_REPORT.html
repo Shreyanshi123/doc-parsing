@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Smart Extract on industrial-style documents</title><style>
+:root { --bg:#f6f8fc; --card:#fff; --fg:#1d2330; --muted:#5a6578; --line:#d9dfec; --accent:#14307a; --head:#e8edfb; --code:#eef1f7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0e1118; --card:#161b26; --fg:#e6eaf3; --muted:#9aa5ba; --line:#2a3245; --accent:#8fb0ff; --head:#1f2a44; --code:#1c2333; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 Inter, "Segoe UI", system-ui, sans-serif; }
+main { max-width:1040px; margin:0 auto; padding:28px 16px 64px; }
+h1 { font-size:2rem; color:var(--accent); margin:0 0 .4em; letter-spacing:-.02em; }
+h2 { font-size:1.3rem; color:var(--accent); margin:1.8em 0 .4em; padding-top:.4em; border-top:1px solid var(--line); }
+p, li { margin:.35em 0; }
+ul, ol { padding-left:1.4em; }
+.tablewrap { overflow-x:auto; margin:.8em 0; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+table { border-collapse:collapse; width:100%; font-size:.88rem; }
+th, td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { background:var(--head); font-weight:650; white-space:nowrap; }
+tr:last-child td { border-bottom:0; }
+code { font-family:"JetBrains Mono", Consolas, monospace; font-size:.85em; background:var(--code); padding:1px 5px; border-radius:5px; }
+@media (max-width:600px) { body { font-size:14px; } h1 { font-size:1.55rem; } }
+</style></head><body><main><h1>Smart Extract on industrial-style documents</h1>
+<p>Date: 2026-10-22. 41 documents, 64 runs. Raw results: <code>eval/industrial/results.jsonl</code>. Documents and answer files: <code>eval/industrial/</code>. Generator: <code>scripts/make_industrial_corpus.py</code>. Runner: <code>scripts/run_industrial_suite.py</code>.</p>
+<h2>Short answer</h2>
+<ul>
+<li><b>Clean business documents work well.</b> Invoices, purchase orders, bank statements, balance sheets, contracts, lab reports, datasheets, forms, two-column papers, resumes, Hindi and Chinese text, rotated pages and a 130-row table over several pages all scored 4.75 to 5.0 out of 5.</li>
+<li><b>Photos and normal scans work.</b> A clean scanned invoice, a skewed and noisy scan, a receipt photo, an ID card, a screenshot and a handwriting-style note scored 4.3 to 5.0.</li>
+<li><b>Three things clearly fail or mislead:</b> a low-quality scan (score 0.86 and 0.02), files that return nothing without saying so, and error handling for protected, corrupted and blank PDFs.</li>
+<li><b>Vision on charts helps in one case and hurts in another:</b> chart report 3.18 without vision against 3.97 with it; slides 4.06 without vision against 3.52 with it.</li>
+<li><b>Word and Excel lose formatting detail:</b> numbered lists, merged cells, heading levels, dates.</li>
+<li><b>Unsupported formats are refused cleanly</b> with HTTP 415 and a clear message (json, xml, html, eml, old .doc and .xls).</li>
+</ul>
+<h2>How it was tested</h2>
+<ul>
+<li>41 synthetic documents with a hand-written correct answer for each. Synthetic means the answer is exact, but the files are cleaner than real client files. Scans are simulated (skew, noise, blur, low resolution), and the "handwriting" is a handwriting-style font.</li>
+<li>Each PDF ran in By document mode with paid parsers allowed (A) and in By part mode (B). Two chart files also ran By document with free parsers only (C). Non-PDF files ran once.</li>
+<li>Azure Document Intelligence was blocked, so no per-page cost. The Azure OpenAI vision model was on, capped at 8 figures per document.</li>
+<li>Scores are the usual 8-parameter scorecard, averaged over the parameters each document can test, 0 to 5.</li>
+<li>Files the app should refuse were sent to the web API, so the real status codes are recorded.</li>
+</ul>
+<h2>Results (score 0 to 5)</h2>
+<h2>Digital business documents</h2>
+<div class="tablewrap"><table><tr><th>Document</th><th>A: By document</th><th>B: By part</th><th>Parser used (A)</th></tr>
+<tr><td>Invoice</td><td>4.86</td><td>4.75</td><td>pymupdf4llm</td></tr>
+<tr><td>Purchase order</td><td>5.0</td><td>5.0</td><td>pymupdf4llm</td></tr>
+<tr><td>Bank statement (70 rows)</td><td>5.0</td><td>5.0</td><td>pymupdf4llm</td></tr>
+<tr><td>Balance sheet (negatives in brackets)</td><td>5.0</td><td>5.0</td><td>pymupdf4llm</td></tr>
+<tr><td>Contract (numbered clauses)</td><td>4.82</td><td>4.82</td><td>pymupdf</td></tr>
+<tr><td>Lab report</td><td>4.88</td><td>4.88</td><td>pymupdf4llm</td></tr>
+<tr><td>Datasheet (units, symbols)</td><td>5.0</td><td>4.81</td><td>pymupdf4llm</td></tr>
+<tr><td>Form with fields</td><td>5.0</td><td>5.0</td><td>pymupdf</td></tr>
+<tr><td>Two-column paper</td><td>4.99</td><td>4.71</td><td>pymupdf4llm</td></tr>
+<tr><td>Resume with sidebar</td><td>4.82</td><td>4.82</td><td>pymupdf</td></tr>
+<tr><td>English, Hindi, Chinese text</td><td>5.0</td><td>5.0</td><td>pymupdf</td></tr>
+<tr><td>Rotated pages (0, 90, 180)</td><td>5.0</td><td>5.0</td><td>pymupdf</td></tr>
+<tr><td>130-row table over several pages</td><td>5.0</td><td>5.0</td><td>pymupdf4llm</td></tr>
+<tr><td>Long report (18 pages, 12,924 words)</td><td>not scored</td><td>not scored</td><td>pymupdf</td></tr>
+</table></div>
+<p>The long report ran fine, but its answer file only lists the headings, so a score would mean nothing.</p>
+<h2>Charts and slides</h2>
+<div class="tablewrap"><table><tr><th>Document</th><th>A: with vision</th><th>B: By part</th><th>C: free only</th></tr>
+<tr><td>Chart report (bar, pie, line charts)</td><td>3.97 (smart_pdf)</td><td>3.95</td><td>3.18 (pymupdf4llm)</td></tr>
+<tr><td>Slides exported to PDF</td><td>3.52 (smart_pdf)</td><td>3.52</td><td>4.06 (pymupdf4llm)</td></tr>
+</table></div>
+<p>On the chart report, chart understanding went from 3.2 to 5.0 and tables from 2.1 to 4.6 with vision. On the slides, vision lowered the score because it added descriptive text that is not in the answer key (no-invent 2.4 against 3.3).</p>
+<h2>Scans, photos and images</h2>
+<div class="tablewrap"><table><tr><th>Document</th><th>Score</th><th>Parser</th></tr>
+<tr><td>Scanned invoice, clean</td><td>4.86</td><td>pymupdf4llm</td></tr>
+<tr><td>Scanned invoice, skewed and noisy</td><td>4.51</td><td>pymupdf4llm</td></tr>
+<tr><td><b>Scanned invoice, low quality</b></td><td><b>0.86 (A), 0.02 (B)</b></td><td>docling returned 1 word; easyocr returned 6</td></tr>
+<tr><td>Mixed (digital contract page + scanned invoice page)</td><td>4.83 (A), 4.72 (B)</td><td>pymupdf4llm</td></tr>
+<tr><td>Receipt photo</td><td>4.3</td><td>easyocr</td></tr>
+<tr><td>ID card image</td><td>5.0</td><td>easyocr</td></tr>
+<tr><td>Handwriting-style note</td><td>4.69</td><td>easyocr</td></tr>
+<tr><td>Application screenshot</td><td>4.7</td><td>easyocr</td></tr>
+<tr><td>Picture with no text</td><td>empty (expected)</td><td>none</td></tr>
+</table></div>
+<p>The mixed document first scored 3.44 because I wrote its answer file wrongly (it listed only the title and intro of the contract page). With the correct answer it scores 4.83.</p>
+<h2>Word, PowerPoint, Excel, data and text</h2>
+<div class="tablewrap"><table><tr><th>Document</th><th>Score</th><th>Note</th></tr>
+<tr><td>Word procedure</td><td>4.51</td><td>see "Formatting loss" below</td></tr>
+<tr><td>PowerPoint (4 slides, with notes)</td><td>4.93</td><td></td></tr>
+<tr><td>Excel (3 sheets, merged cell, formulas, dates)</td><td>3.85</td><td>see "Formatting loss" below</td></tr>
+<tr><td>CSV (300 rows, quoted commas, BOM)</td><td>5.0</td><td></td></tr>
+<tr><td>TSV</td><td>5.0</td><td></td></tr>
+<tr><td>.txt, .md, .log</td><td>5.0</td><td></td></tr>
+</table></div>
+<h2>Files the app should refuse or handle carefully (web API)</h2>
+<div class="tablewrap"><table><tr><th>File</th><th>Result</th><th>Verdict</th></tr>
+<tr><td>.json, .xml, .html, .eml</td><td>HTTP 415, "Unsupported file type"</td><td>Clean</td></tr>
+<tr><td>Old .doc and .xls</td><td>HTTP 415, tells you to convert to docx or xlsx</td><td>Clean</td></tr>
+<tr><td>Password-protected PDF</td><td><b>HTTP 500</b>, "ValueError: document closed or encrypted"</td><td>Not clean: should be a 4xx saying the PDF needs a password</td></tr>
+<tr><td>Corrupted PDF (truncated)</td><td><b>HTTP 200</b>, empty result, 100 seconds</td><td>Should fail fast with an error</td></tr>
+<tr><td>Blank PDF</td><td><b>HTTP 200</b>, 2 words, read by the vlm parser</td><td>A blank page was sent to a vision model; it should return empty</td></tr>
+</table></div>
+<h2>What went wrong, in order of importance</h2>
+<ol>
+<li><b>Near-empty results count as success.</b> On the low-quality scan, pymupdf4llm returned nothing, docling returned 1 word, and that was accepted, so the OCR parser was never tried. In By part mode, easyocr returned 6 words. Neither mode warned the user. The same silence applies to the picture with no text.</li>
+<li><b>Error handling:</b> protected PDFs give HTTP 500, corrupted PDFs take 100 seconds and return an empty success, and a blank PDF reaches a vision model.</li>
+<li><b>Vision is not always an improvement.</b> It helped on the chart report and hurt on the slides. The "figures found, so use smart_pdf" rule cannot tell the two cases apart.</li>
+<li><b>Word files:</b> numbered lists all come out as "1.", a merged cell repeats in every column it spans, and the Title and Heading 1 both become "#".</li>
+<li><b>Excel files:</b> dates come out as <code>2026-01-05 00:00:00</code> instead of the displayed format, numbers as <code>1038.0</code>, and the merged title row is treated as the table header. Formula results are correct.</li>
+</ol>
+<h2>Suggested fixes (none made yet)</h2>
+<ol>
+<li>Treat a result with very few words as a failure and continue down the chain. Show a warning when the final result is empty or near-empty.</li>
+<li>Return a clear 4xx for protected PDFs, fail fast on corrupted PDFs, and do not send blank pages to a vision model.</li>
+<li>Use smart_pdf only for charts and diagrams, not for every picture.</li>
+<li>Fix the Word numbering, merged cells and heading levels, and keep Excel date formats.</li>
+<li>Try preprocessing (deskew, denoise, upscale) before OCR on low-quality scans, and test whether it helps.</li>
+</ol>
+<h2>Limits of this test</h2>
+<ul>
+<li>All documents are synthetic and cleaner than most real client files. Handwriting is simulated with a font and real handwriting was not tested.</li>
+<li>One run per file and mode. Differences under about 0.1 are noise.</li>
+<li>The answer files were written by hand by me. Two were wrong at first (the mixed document and the long report) and are handled as described above.</li>
+<li><b>Timings are not usable.</b> Each run started a fresh process that loaded the models, and the disk was 99% full (4 GB free of 476 GB), which caused one run to fail with "No space left on device" (it passed when re-run).</li>
+<li>Not tested: Azure Document Intelligence, the "Prefer quality" path (docling first), documents of 100 pages or more, real client files, and the web page in a browser.</li>
+</ul></main></body></html>

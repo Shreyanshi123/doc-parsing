@@ -1,0 +1,18 @@
+Type: bar chart
+
+Chart title: [Not explicitly given, inferred from figure caption: "Helpfulness human evaluation results for LLAMA 2-CHAT compared to other open-source and closed-source models"]
+
+Axis labels:
+- X-axis: % Win Rate
+- Y-axis: Model comparison
+
+Markdown table:
+
+| Model Comparison                                      | Win  | Tie  | Loss  |
+|-------------------------------------------------------|------|------|-------|
+| Llama-2-70b-chat vs. ChatGPT-0301                     | 35.9 | 31.5 | 32.5  |
+| Llama-2-70b-chat vs. PaLM-Bison                       | 53.0 | 24.6 | 22.4  |
+| Llama-2-34b-chat vs. Falcon-40b-instruct              | 76.3 | 14.6 | 9.1   |
+| Llama-2-34b-chat vs. Vicuna-33b-v1.3                  | 37.2 | 31.6 | 31.2  |
+| Llama-2-13b-chat vs. Vicuna-13b-v1.1                  | 45.4 | 29.8 | 24.9  |
+| Llama-2-7b-chat vs. MPT-7b-chat                       | 61.1 | 20.9 | 18.0  |

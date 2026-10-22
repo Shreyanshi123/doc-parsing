@@ -1,0 +1,12 @@
+Type: architecture diagram
+
+Entities:
+- ReplicaSet (replicas: 2)
+- Pod 1
+- Pod 2
+- Pod 3
+
+Connections:
+- ReplicaSet -> Pod 1
+- ReplicaSet -> Pod 2
+- ReplicaSet -> Pod 3

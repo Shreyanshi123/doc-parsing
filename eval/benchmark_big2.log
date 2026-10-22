@@ -1,0 +1,96 @@
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+[digital + charts/images] llama2_paper.pdf (77 pages)
+   azure_di             58.5s  (reference)
+rapidocr_api using backend: rapidocr
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=2/3.
+OCR on page.number=3/4.
+OCR on page.number=4/5.
+OCR on page.number=15/16.
+OCR on page.number=18/19.
+OCR on page.number=20/21.
+OCR on page.number=27/28.
+OCR on page.number=29/30.
+OCR on page.number=30/31.
+OCR on page.number=32/33.
+OCR on page.number=33/34.
+OCR on page.number=47/48.
+OCR on page.number=54/55.
+OCR on page.number=56/57.
+OCR on page.number=57/58.
+   pymupdf4llm         303.3s  0.82 avg  
+   hybrid_pdf          119.0s  0.71 avg  
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  23%|██▎       | 174/770 [00:00<00:00, 1737.83it/s]Loading weights:  45%|████▌     | 348/770 [00:00<00:00, 925.09it/s] Loading weights:  60%|█████▉    | 461/770 [00:00<00:00, 875.01it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 1380.86it/s]
+   docling            29887.0s  0.79 avg  
+   opendataloader       21.9s  0.67 avg  
+   smart_pdf           250.0s  0.70 avg  
+   pymupdf             191.8s  0.71 avg  
+   markitdown           85.3s  0.44 avg  
+   pdfplumber           86.0s  0.37 avg  
+[digital + charts/images] un_sdg_report_2024.pdf (51 pages)
+   azure_di             27.5s  (reference)
+The text detection result is empty
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=4/5.
+OCR on page.number=11/12.
+OCR on page.number=19/20.
+OCR on page.number=25/26.
+OCR on page.number=29/30.
+OCR on page.number=50/51.
+R on page.number=29/30.
+OCR on page.number=30/31.
+OCR on page.number=32/33.
+OCR on page.number=33/34.
+OCR on page.number=47/48.
+OCR on page.number=54/55.
+OCR on page.number=56/57.
+OCR on page.number=57/58.
+   pymupdf4llm          66.1s  0.70 avg  
+   hybrid_pdf           23.5s  0.69 avg  
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  31%|███       | 235/770 [00:00<00:00, 2243.04it/s]Loading weights:  60%|█████▉    | 460/770 [00:00<00:00, 1771.08it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2940.46it/s]
+The text detection result is empty
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+The text detection result is empty
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+RapidOCR returned empty result!
+   docling             329.1s  0.64 avg  
+Error running opendataloader-pdf CLI.
+Return code: 1
+Stderr: Exception in thread "main" java.lang.OutOfMemoryError: Java heap space: failed reallocation of scalar replaced objects
+	at org.verapdf.gf.model.factory.chunks.ChunkParser.processLineArts(ChunkParser.java:1166)
+	at org.verapdf.gf.model.factory.chunks.ChunkParser.parseChunk(ChunkParser.java:261)
+	at org.verapdf.gf.model.factory.chunks.ChunkFactory.chunksFromTokens(ChunkFactory.java:48)
+	at org.verapdf.gf.model.impl.sa.GFSAContentStream.parseChunks(GFSAContentStream.java:89)
+	at org.verapdf.gf.model.impl.sa.GFSAPDFDocument.parseChunks(GFSAPDFDocument.java:187)
+	at org.opendataloader.pdf.processors.DocumentProcessor.preprocessing(DocumentProcessor.java:674)
+	at org.opendataloader.pdf.processors.DocumentProcessor.extractContents(DocumentProcessor.java:181)
+	at org.opendataloader.pdf.processors.DocumentProcessor.processFileWithResult(DocumentProcessor.java:150)
+	at org.opendataloader.pdf.processors.DocumentProcessor.processFile(DocumentProcessor.java:135)
+	at org.opendataloader.pdf.api.OpenDataLoaderPDF.processFile(OpenDataLoaderPDF.java:40)
+	at org.opendataloader.pdf.cli.CLIMain.processFile(CLIMain.java:245)
+	at org.opendataloader.pdf.cli.CLIMain.processPath(CLIMain.java:174)
+	at org.opendataloader.pdf.cli.CLIMain.run(CLIMain.java:124)
+	at org.opendataloader.pdf.cli.CLIMain.main(CLIMain.java:73)
+
+Error during conversion: Command '['java', '-Djava.awt.headless=true', '-Dapple.awt.UIElement=true', '-jar', 'C:\\Users\\Shreyanshi.Mishra1\\Desktop\\doc_parsing_poc 2\\doc_parsing_poc\\.venv\\Lib\\site-packages\\opendataloader_pdf\\jar\\opendataloader-pdf-cli.jar', 'C:\\Users\\SHREYA~1.MIS\\AppData\\Local\\Temp\\tmpju9kelpx.pdf', '--output-dir', 'C:\\Users\\SHREYA~1.MIS\\AppData\\Local\\Temp\\tmpbl770idu', '--format', 'markdown', '--quiet', '--markdown-page-separator', '\n<<<ODL_PAGE_BREAK_%page-number%>>>\n', '--text-page-separator', '\n<<<ODL_PAGE_BREAK_%page-number%>>>\n', '--html-page-separator', '\n<<<ODL_PAGE_BREAK_%page-number%>>>\n', '--image-output', 'off']' returned non-zero exit status 1.
+   opendataloader       41.4s  0.00 avg  
+   smart_pdf           102.6s  0.68 avg  
+   pymupdf              31.7s  0.69 avg  
+   markitdown           50.9s  0.61 avg  
+   pdfplumber           57.8s  0.58 avg  
+
+wrote eval/benchmark_big2.md
+exit=0

@@ -1,0 +1,9 @@
+Type: table image
+
+Chart:
+Title: Currently Runing Executions
+Axis labels: None
+
+| ID   | CONFERENCE NAME | SESSION NAME | URL | EXECUTED BY         | STATUS           | STARTED     |
+|------|-----------------|--------------|-----|---------------------|------------------|-------------|
+| 4784 | 1               | 1            | 🔗  | Pushgandha Tiwari   | Transcribing (2/3)| 3 secon     |

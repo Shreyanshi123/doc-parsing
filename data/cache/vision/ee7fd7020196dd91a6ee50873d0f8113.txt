@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: Two chat interfaces are shown side by side, illustrating issues with multi-turn memory (left) and improvements with GAtt (right), where responses are given using emojis.

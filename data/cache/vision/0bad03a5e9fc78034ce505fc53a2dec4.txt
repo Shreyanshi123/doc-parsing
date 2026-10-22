@@ -1,0 +1,10 @@
+Type: architecture diagram
+
+Boxes/entities:
+- Service
+- Pod (10.244.0.2)
+- Node
+
+Connections:
+- 30008 (NodePort) -> Service
+- Service (Port 80) -> Pod (Port 80, 10.244.0.2)

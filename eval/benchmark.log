@@ -1,0 +1,1372 @@
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+[mixed] AI_agent_mixed.pdf
+2026-10-20 23:17:04,733 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '539748'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '4319ce1e-ccae-11f1-8d9e-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:17:12,201 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 17:47:07 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:17:12,202 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/eddf379b-a74f-4504-aced-33a9e62479d0?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '4319ce1e-ccae-11f1-8d9e-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:17:12,464 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:47:07 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '5'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:17:17,465 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/eddf379b-a74f-4504-aced-33a9e62479d0?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '4319ce1e-ccae-11f1-8d9e-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:17:18,710 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '218870'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:47:12 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             14.3s  0.99 avg  
+2026-10-20 23:17:44,050 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:17:44,774 - INFO - Going to convert document batch...
+2026-10-20 23:17:44,774 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:17:44,845 - INFO - Loading plugin 'docling_defaults'
+2026-10-20 23:17:44,855 - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+2026-10-20 23:17:44,927 - INFO - Loading plugin 'docling_defaults'
+2026-10-20 23:17:44,959 - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+2026-10-20 23:17:45,671 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:17:45,691 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:17:45,730 - INFO - Loading plugin 'docling_defaults'
+2026-10-20 23:17:45,740 - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+2026-10-20 23:17:46,950 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:17:46,950 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:17:46,950 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:17:47,688 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:17:47,699 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:17:47,699 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  26%|██▋       | 204/770 [00:00<00:00, 2039.76it/s]Loading weights:  53%|█████▎    | 408/770 [00:00<00:00, 1923.84it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2844.17it/s]
+2026-10-20 23:17:49,563 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:17:49,646 - INFO - Loading plugin 'docling_defaults'
+2026-10-20 23:17:49,660 - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+2026-10-20 23:17:49,660 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:17:49,903 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:17:49,918 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:17:49,982 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:17:50,595 - INFO - Processing document tmp6admz6by.pdf
+[32m[INFO] 2026-10-20 23:17:53,550 [RapidOCR] base.py:23: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-10-20 23:17:53,577 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\PP-OCRv6_det_small.onnx[0m
+[32m[INFO] 2026-10-20 23:17:53,578 [RapidOCR] main.py:63: Using C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\PP-OCRv6_det_small.onnx[0m
+[32m[INFO] 2026-10-20 23:17:57,395 [RapidOCR] base.py:23: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-10-20 23:17:57,400 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-10-20 23:17:57,400 [RapidOCR] main.py:63: Using C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\ch_ppocr_mobile_v2.0_cls_mobile.onnx[0m
+[32m[INFO] 2026-10-20 23:17:57,702 [RapidOCR] base.py:23: Using engine_name: onnxruntime[0m
+[32m[INFO] 2026-10-20 23:17:57,755 [RapidOCR] download_file.py:60: File exists and is valid: C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\PP-OCRv6_rec_small.onnx[0m
+[32m[INFO] 2026-10-20 23:17:57,755 [RapidOCR] main.py:63: Using C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\rapidocr\models\PP-OCRv6_rec_small.onnx[0m
+2026-10-20 23:18:16,146 - INFO - Finished converting document tmp6admz6by.pdf in 32.10 sec.
+   docling              56.5s  0.99 avg  
+   opendataloader        1.6s  0.81 avg  
+rapidocr_api using backend: rapidocr
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=1/2.
+   pymupdf4llm           9.4s  0.96 avg  
+   hybrid_pdf            3.5s  0.95 avg  
+   smart_pdf             3.4s  0.95 avg  
+   markitdown            0.6s  0.75 avg  
+   pdfplumber            0.6s  0.75 avg  
+   pdfminer              0.2s  0.75 avg  
+   pymupdf               0.7s  0.82 avg  
+   ocr                   7.5s  0.83 avg  
+2026-10-20 23:18:54,953 - WARNING - Using CPU. Note: This module is much faster with a GPU.
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\ao\nn\quantized\dynamic\modules\rnn.py:162: UserWarning: torch.quantize_per_tensor, torch.quantize_per_channel and other quantized tensor creation functions that produce tensors with dtype torch.quint8, torch.qint8, and torch.qint32 are deprecated and will be removed in a future PyTorch release. Please see https://github.com/pytorch/pytorch/issues/184982 for more information. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\aten\src\ATen\quantized\Quantizer.cpp:116.)
+  w_ih = torch.quantize_per_tensor(
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             193.7s  0.87 avg  
+   langchain_loader      0.4s  0.75 avg  
+   llamaindex_reader     0.4s  0.75 avg  
+   haystack_converter    0.3s  0.75 avg  
+[digital] AI_agent_p1-3.pdf
+2026-10-20 23:22:21,911 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '128331'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '00274dca-ccaf-11f1-abee-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:22:25,027 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 17:52:19 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:22:25,030 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/a1f25422-33fa-4074-bcdb-1cc72615af1d?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '00274dca-ccaf-11f1-abee-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:22:25,457 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:52:20 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '5'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:22:30,459 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/a1f25422-33fa-4074-bcdb-1cc72615af1d?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '00274dca-ccaf-11f1-abee-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:22:32,095 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '218394'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:52:25 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             10.4s  0.99 avg  
+2026-10-20 23:22:35,899 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:22:36,586 - INFO - Going to convert document batch...
+2026-10-20 23:22:36,587 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:22:36,588 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:22:36,629 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:22:36,630 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:22:36,630 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:22:36,630 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:22:36,931 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:22:36,943 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:22:36,944 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 212/770 [00:00<00:00, 2051.94it/s]Loading weights:  54%|█████▍    | 418/770 [00:00<00:00, 1004.92it/s]Loading weights:  85%|████████▍ | 654/770 [00:00<00:00, 1395.35it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 1563.33it/s]
+2026-10-20 23:22:38,066 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:22:38,066 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:22:38,304 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:22:38,326 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:22:38,326 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:22:39,182 - INFO - Processing document tmpsdr9adfl.pdf
+2026-10-20 23:23:02,720 - INFO - Finished converting document tmpsdr9adfl.pdf in 26.83 sec.
+   docling              27.6s  1.00 avg  
+   opendataloader        2.2s  0.99 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=1/2.
+   pymupdf4llm           2.2s  0.97 avg  
+   hybrid_pdf            1.4s  1.00 avg  
+   smart_pdf             1.5s  1.00 avg  
+   markitdown            2.1s  0.90 avg  
+   pdfplumber            1.3s  0.90 avg  
+   pdfminer              0.8s  0.90 avg  
+   pymupdf               1.5s  1.00 avg  
+   ocr                   8.4s  0.83 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             201.2s  0.86 avg  
+   langchain_loader      0.3s  0.90 avg  
+   llamaindex_reader     0.2s  0.90 avg  
+   haystack_converter    0.2s  0.90 avg  
+[scanned] AI_agent_scanned_clean.pdf
+2026-10-20 23:27:24,335 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '1199950'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'b4698924-ccaf-11f1-abd4-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:27:34,965 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 17:57:30 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:27:34,967 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/69c174b3-01f9-4079-a956-390cd4f0c99b?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'b4698924-ccaf-11f1-abd4-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:27:35,256 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:57:30 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '5'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:27:40,257 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/69c174b3-01f9-4079-a956-390cd4f0c99b?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'b4698924-ccaf-11f1-abd4-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:27:41,674 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '219806'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 17:57:35 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             17.4s  0.99 avg  
+2026-10-20 23:27:43,620 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:27:44,425 - INFO - Going to convert document batch...
+2026-10-20 23:27:44,425 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:27:44,426 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:27:44,442 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:27:44,442 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:27:44,442 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:27:44,442 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:27:44,741 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:27:44,750 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:27:44,751 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  31%|███       | 235/770 [00:00<00:00, 2136.52it/s]Loading weights:  58%|█████▊    | 449/770 [00:00<00:00, 1852.90it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2850.89it/s]
+2026-10-20 23:27:45,243 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:27:45,243 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:27:45,479 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:27:45,497 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:27:45,498 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:27:46,383 - INFO - Processing document tmpg3lhp_kz.pdf
+2026-10-20 23:28:29,987 - INFO - Finished converting document tmpg3lhp_kz.pdf in 46.37 sec.
+   docling              47.4s  0.97 avg  
+   opendataloader        1.3s  0.00 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+   pymupdf4llm          28.2s  0.95 avg  
+   hybrid_pdf           12.4s  0.82 avg  
+   smart_pdf            13.3s  0.82 avg  
+   markitdown            0.1s  0.00 avg  
+   pdfplumber            0.0s  0.00 avg  
+   pdfminer              0.0s  0.00 avg  
+   pymupdf               0.6s  0.00 avg  
+   ocr                   8.8s  0.82 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             141.1s  0.87 avg  
+   langchain_loader      0.0s  0.00 avg  
+   llamaindex_reader     0.0s  0.00 avg  
+2026-10-20 23:32:11,449 - WARNING - PyPDFToDocument could not extract text from the file C:\Users\SHREYA~1.MIS\AppData\Local\Temp\tmpnzh4xc7g.pdf. Returning an empty document.
+   haystack_converter    0.0s  0.00 avg  
+[scanned] AI_agent_scanned_noisy.pdf
+2026-10-20 23:32:11,463 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '877804'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '5f8dacda-ccb0-11f1-91c2-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:32:14,435 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:02:08 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:32:14,437 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/0e6ef231-7755-4b6d-b545-be34452c14fa?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '5f8dacda-ccb0-11f1-91c2-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:32:14,756 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:02:09 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '5'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:32:19,757 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/0e6ef231-7755-4b6d-b545-be34452c14fa?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '5f8dacda-ccb0-11f1-91c2-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:32:21,002 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '218737'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:02:15 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di              9.7s  0.99 avg  
+2026-10-20 23:32:22,976 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:32:23,438 - INFO - Going to convert document batch...
+2026-10-20 23:32:23,439 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:32:23,440 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:32:23,464 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:32:23,464 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:32:23,464 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:32:23,465 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:32:23,773 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:32:23,792 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:32:23,792 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 214/770 [00:00<00:00, 2136.66it/s]Loading weights:  56%|█████▌    | 428/770 [00:00<00:00, 1432.31it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2412.68it/s]
+2026-10-20 23:32:24,471 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:32:24,471 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:32:24,721 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:32:24,739 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:32:24,739 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:32:25,287 - INFO - Processing document tmpt_d77wet.pdf
+2026-10-20 23:33:08,123 - INFO - Finished converting document tmpt_d77wet.pdf in 45.15 sec.
+   docling              45.7s  0.98 avg  
+   opendataloader        7.8s  0.00 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+   pymupdf4llm          23.8s  0.96 avg  
+   hybrid_pdf           10.3s  0.82 avg  
+   smart_pdf             9.0s  0.82 avg  
+   markitdown            0.1s  0.00 avg  
+   pdfplumber            0.0s  0.00 avg  
+   pdfminer              0.0s  0.00 avg  
+   pymupdf               0.5s  0.00 avg  
+   ocr                   8.4s  0.82 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             137.3s  0.77 avg  
+   langchain_loader      0.0s  0.00 avg  
+   llamaindex_reader     0.0s  0.00 avg  
+2026-10-20 23:36:43,971 - WARNING - PyPDFToDocument could not extract text from the file C:\Users\SHREYA~1.MIS\AppData\Local\Temp\tmpx37t8_qa.pdf. Returning an empty document.
+   haystack_converter    0.0s  0.00 avg  
+[digital + charts/images] chart_sample.pdf
+2026-10-20 23:36:44,583 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '542778'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '02588be4-ccb1-11f1-a028-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:36:47,882 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:06:42 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:36:47,886 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/7039cc2c-ad9d-438a-a5c0-49d52e13c7f8?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '02588be4-ccb1-11f1-a028-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:36:48,143 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:06:43 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '4'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:36:52,145 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/7039cc2c-ad9d-438a-a5c0-49d52e13c7f8?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '02588be4-ccb1-11f1-a028-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:36:52,628 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '29357'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:06:47 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di              8.1s  0.49 avg  
+2026-10-20 23:36:53,143 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:36:53,806 - INFO - Going to convert document batch...
+2026-10-20 23:36:53,807 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:36:53,808 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:36:53,839 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:36:53,839 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:36:53,840 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:36:53,840 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:36:54,152 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:36:54,169 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:36:54,169 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  27%|██▋       | 207/770 [00:00<00:00, 2055.49it/s]Loading weights:  54%|█████▎    | 413/770 [00:00<00:00, 1591.44it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2307.73it/s]
+2026-10-20 23:36:54,875 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:36:54,876 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:36:55,125 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:36:55,139 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:36:55,139 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:36:55,708 - INFO - Processing document tmp3quhi6cp.pdf
+2026-10-20 23:37:05,068 - INFO - Finished converting document tmp3quhi6cp.pdf in 11.93 sec.
+   docling              12.5s  0.31 avg  
+   opendataloader        1.6s  0.49 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+   pymupdf4llm           4.0s  0.50 avg  
+   hybrid_pdf            0.6s  0.49 avg  
+   smart_pdf             0.7s  0.70 avg  
+   markitdown            0.2s  0.50 avg  
+   pdfplumber            0.1s  0.50 avg  
+   pdfminer              0.1s  0.43 avg  
+   pymupdf               0.5s  0.49 avg  
+   ocr                   1.0s  0.41 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr              33.1s  0.44 avg  
+   langchain_loader      0.0s  0.43 avg  
+   llamaindex_reader     0.0s  0.43 avg  
+   haystack_converter    0.0s  0.43 avg  
+[digital + tables] digital.pdf
+2026-10-20 23:37:47,482 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '5135'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '27d62352-ccb1-11f1-98f0-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:37:49,236 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:07:44 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:37:49,238 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/acc859bb-abee-4066-9524-47d9cf407115?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '27d62352-ccb1-11f1-98f0-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:37:49,499 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:07:44 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '4'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:37:53,501 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/acc859bb-abee-4066-9524-47d9cf407115?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '27d62352-ccb1-11f1-98f0-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:37:53,775 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '16044'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:07:48 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di              6.3s  0.84 avg  
+2026-10-20 23:37:54,133 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:37:54,806 - INFO - Going to convert document batch...
+2026-10-20 23:37:54,807 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:37:54,808 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:37:54,831 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:37:54,832 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:37:54,832 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:37:54,832 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:37:55,148 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:37:55,162 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:37:55,162 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 212/770 [00:00<00:00, 2109.93it/s]Loading weights:  55%|█████▍    | 423/770 [00:00<00:00, 1508.85it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2387.40it/s]
+2026-10-20 23:37:55,963 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:37:55,963 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:37:56,193 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:37:56,206 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:37:56,206 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:37:56,750 - INFO - Processing document tmp1imz1ddl.pdf
+2026-10-20 23:38:04,085 - INFO - Finished converting document tmp1imz1ddl.pdf in 9.95 sec.
+   docling              10.4s  1.00 avg  
+   opendataloader        1.7s  1.00 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+   pymupdf4llm           1.1s  1.00 avg  
+   hybrid_pdf            0.5s  1.00 avg  
+   smart_pdf             0.5s  1.00 avg  
+   markitdown            0.2s  0.92 avg  
+   pdfplumber            0.0s  0.92 avg  
+   pdfminer              0.0s  0.74 avg  
+   pymupdf               0.4s  1.00 avg  
+   ocr                   1.0s  0.73 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr              29.6s  0.75 avg  
+   langchain_loader      0.0s  0.75 avg  
+   llamaindex_reader     0.0s  0.75 avg  
+   haystack_converter    0.0s  0.75 avg  
+[digital + charts/images] Generative_AI_p1-6.pdf
+2026-10-20 23:38:41,932 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '596977'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '484aa7c8-ccb1-11f1-8eb1-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:38:44,975 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:08:39 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:38:44,977 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/598e622a-7b02-4da7-83b1-31001de0784e?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '484aa7c8-ccb1-11f1-8eb1-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:38:45,237 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:08:40 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '6'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:38:51,239 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/598e622a-7b02-4da7-83b1-31001de0784e?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '484aa7c8-ccb1-11f1-8eb1-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:38:52,696 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '445021'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:08:46 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             11.1s  0.95 avg  
+2026-10-20 23:39:00,197 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:39:00,805 - INFO - Going to convert document batch...
+2026-10-20 23:39:00,805 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:39:00,806 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:39:00,840 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:39:00,840 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:39:00,840 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:39:00,840 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:39:01,142 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+2026-10-20 23:39:01,151 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:39:01,151 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  31%|███       | 235/770 [00:00<00:00, 2169.56it/s]Loading weights:  59%|█████▊    | 452/770 [00:00<00:00, 1743.07it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2359.62it/s]
+2026-10-20 23:39:01,889 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:39:01,890 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:39:02,143 - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+2026-10-20 23:39:02,161 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:39:02,161 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:39:02,803 - INFO - Processing document tmpycx79k3e.pdf
+2026-10-20 23:39:28,983 - INFO - Finished converting document tmpycx79k3e.pdf in 28.79 sec.
+   docling              29.3s  0.99 avg  
+   opendataloader        1.7s  0.98 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+OCR on page.number=4/5.
+OCR on page.number=5/6.
+   pymupdf4llm          13.9s  0.92 avg  
+   hybrid_pdf            1.6s  0.99 avg  
+   smart_pdf            38.7s  0.93 avg  
+   markitdown            1.6s  0.90 avg  
+   pdfplumber            1.2s  0.89 avg  
+   pdfminer              0.8s  0.90 avg  
+   pymupdf               1.6s  0.99 avg  
+   ocr                  10.2s  0.80 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             264.8s  0.85 avg  
+   langchain_loader      0.5s  0.89 avg  
+   llamaindex_reader     0.6s  0.89 avg  
+   haystack_converter    0.7s  0.89 avg  
+[mixed] mixed.pdf
+2026-10-20 23:47:17,245 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '6533247'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '7b710fac-ccb2-11f1-a314-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:47:33,235 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:17:28 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:47:33,250 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/b68ed521-a89d-46de-bf6f-9ec79b5343f2?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '7b710fac-ccb2-11f1-a314-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:47:33,555 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:17:29 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '4'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:47:37,557 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/b68ed521-a89d-46de-bf6f-9ec79b5343f2?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '7b710fac-ccb2-11f1-a314-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:47:38,155 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '21388'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:17:32 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             21.0s  0.88 avg  
+2026-10-20 23:47:39,306 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:47:41,178 - INFO - Going to convert document batch...
+2026-10-20 23:47:41,179 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:47:41,180 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:47:41,235 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:47:41,235 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:47:41,236 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:47:41,236 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:47:42,140 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:47:42,140 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  23%|██▎       | 177/770 [00:00<00:00, 1769.41it/s]Loading weights:  46%|████▌     | 354/770 [00:00<00:00, 956.74it/s] Loading weights:  61%|██████    | 470/770 [00:00<00:00, 883.13it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 1325.72it/s]
+2026-10-20 23:47:43,815 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:47:43,816 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:47:44,393 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:47:44,393 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:47:45,623 - INFO - Processing document tmpcg91jaeb.pdf
+2026-10-20 23:48:02,195 - INFO - Finished converting document tmpcg91jaeb.pdf in 22.92 sec.
+   docling              24.1s  1.00 avg  
+   opendataloader        1.6s  0.85 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+OCR on page.number=4/5.
+OCR on page.number=5/6.
+   pymupdf4llm           4.1s  1.00 avg  
+   hybrid_pdf            1.9s  0.97 avg  
+   smart_pdf             1.7s  0.97 avg  
+   markitdown            0.1s  0.79 avg  
+   pdfplumber            0.0s  0.79 avg  
+   pdfminer              0.0s  0.62 avg  
+   pymupdf               0.8s  0.85 avg  
+   ocr                   1.8s  0.74 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr              67.6s  0.75 avg  
+   langchain_loader      0.1s  0.62 avg  
+   llamaindex_reader     0.1s  0.62 avg  
+   haystack_converter    0.1s  0.62 avg  
+[digital + charts/images] Overview of Amazon Web Services - Overview of Amazon Web Services.pdf
+2026-10-20 23:49:24,107 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '148127'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'c70ea7f6-ccb2-11f1-b079-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:49:27,147 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:19:22 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:49:27,149 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/d8a49dd4-198e-484a-8492-7680a34c1c36?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'c70ea7f6-ccb2-11f1-b079-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:49:27,443 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:19:22 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '5'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:49:32,445 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/d8a49dd4-198e-484a-8492-7680a34c1c36?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'c70ea7f6-ccb2-11f1-b079-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:49:33,585 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '132528'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:19:27 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di              9.6s  0.56 avg  
+2026-10-20 23:49:34,310 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:49:34,987 - INFO - Going to convert document batch...
+2026-10-20 23:49:34,987 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:49:34,988 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:49:35,017 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:49:35,017 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:49:35,018 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:49:35,018 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:49:36,076 - INFO - Downloaded model docling-project/docling-layout-heron to C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8 in 1.06 sec.
+2026-10-20 23:49:36,076 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 212/770 [00:00<00:00, 2054.53it/s]Loading weights:  54%|█████▍    | 418/770 [00:00<00:00, 1266.07it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 1913.82it/s]
+2026-10-20 23:49:37,499 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:49:37,500 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:49:37,966 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:49:37,967 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:49:39,037 - INFO - Processing document tmp7ouzqbr6.pdf
+2026-10-20 23:50:14,130 - WARNING - 1 of 39 pdf cells matched neither a row nor a column band of the 5x5 grid and were dropped from the table
+2026-10-20 23:50:14,251 - INFO - Finished converting document tmp7ouzqbr6.pdf in 39.95 sec.
+   docling              40.5s  0.45 avg  
+   opendataloader        4.0s  0.53 avg  
+The text detection result is empty
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=2/3.
+   pymupdf4llm           6.2s  0.55 avg  
+   hybrid_pdf            1.9s  0.54 avg  
+   smart_pdf            12.2s  0.55 avg  
+   markitdown            1.2s  0.50 avg  
+   pdfplumber            0.5s  0.51 avg  
+   pdfminer              0.4s  0.50 avg  
+   pymupdf               1.7s  0.54 avg  
+   ocr                   8.9s  0.55 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             145.3s  0.51 avg  
+   langchain_loader      0.5s  0.50 avg  
+   llamaindex_reader     0.4s  0.50 avg  
+   haystack_converter    0.3s  0.50 avg  
+[digital + charts/images] PIB_home_p1-6.pdf
+2026-10-20 23:53:24,549 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '2090775'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '565f48af-ccb3-11f1-972a-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-20 23:53:28,140 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:23:25 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:53:28,142 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/dc76bde0-9665-41f6-94f7-8a439e15d1db?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '565f48af-ccb3-11f1-972a-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:53:28,384 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:23:25 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '6'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:53:34,300 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/dc76bde0-9665-41f6-94f7-8a439e15d1db?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '565f48af-ccb3-11f1-972a-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:53:34,550 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:23:31 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '1'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:53:35,536 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/dc76bde0-9665-41f6-94f7-8a439e15d1db?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '565f48af-ccb3-11f1-972a-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:53:35,795 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:23:32 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '1'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-20 23:53:36,782 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/dc76bde0-9665-41f6-94f7-8a439e15d1db?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '565f48af-ccb3-11f1-972a-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-20 23:53:37,517 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '89129'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:23:34 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             13.2s  0.83 avg  
+2026-10-20 23:53:38,100 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-20 23:53:38,650 - INFO - Going to convert document batch...
+2026-10-20 23:53:38,651 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-20 23:53:38,652 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:53:38,688 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-20 23:53:38,688 - INFO - Initializing Transformers object-detection engine
+2026-10-20 23:53:38,688 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-20 23:53:38,688 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-20 23:53:39,500 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-20 23:53:39,501 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  31%|███       | 237/770 [00:00<00:00, 2138.45it/s]Loading weights:  59%|█████▊    | 451/770 [00:00<00:00, 1898.12it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2731.53it/s]
+2026-10-20 23:53:40,181 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-20 23:53:40,181 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-20 23:53:40,781 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-20 23:53:40,782 - INFO - Accelerator device: 'cpu'
+2026-10-20 23:53:41,419 - INFO - Processing document tmphvg2cvyt.pdf
+2026-10-20 23:54:03,227 - WARNING - RapidOCR returned empty result!
+2026-10-20 23:54:06,660 - INFO - Finished converting document tmphvg2cvyt.pdf in 28.98 sec.
+   docling              29.6s  0.56 avg  
+   opendataloader        2.0s  0.93 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=2/3.
+   pymupdf4llm          13.6s  0.87 avg  
+   hybrid_pdf            6.1s  0.89 avg  
+   smart_pdf            24.8s  0.78 avg  
+2026-10-20 23:54:54,671 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,683 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,690 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,786 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,789 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,796 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,801 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,804 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,857 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,886 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,889 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,892 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,898 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,901 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:54,941 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,120 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,124 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,125 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,129 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,134 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,137 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,139 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+   markitdown            0.7s  0.86 avg  
+2026-10-20 23:54:55,447 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,452 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,455 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,512 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,514 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,518 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,521 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,523 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,567 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,593 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,595 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,597 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,603 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,606 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,639 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,796 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,801 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,802 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,805 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,810 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,813 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:55,816 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+   pdfplumber            0.5s  0.84 avg  
+2026-10-20 23:54:56,120 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,124 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,127 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,174 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,178 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,184 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,189 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,191 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,222 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,244 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,247 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,249 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,255 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,257 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,289 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,391 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,395 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,397 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,400 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,404 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,407 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+2026-10-20 23:54:56,410 - WARNING - Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+   pdfminer              0.4s  0.80 avg  
+   pymupdf               9.3s  0.89 avg  
+   ocr                   5.4s  0.73 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             558.2s  0.64 avg  
+   langchain_loader      0.2s  0.85 avg  
+   llamaindex_reader     0.2s  0.85 avg  
+   haystack_converter    0.1s  0.85 avg  
+[scanned] scanned.pdf
+2026-10-21 00:04:29,642 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '71810'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e2cc67d7-ccb4-11f1-a4ac-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-21 00:04:31,922 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:34:30 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:04:31,924 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/47b4eed6-36d4-4b65-b270-3704e8e63a05?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'e2cc67d7-ccb4-11f1-a4ac-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:04:32,215 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:34:31 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '4'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:04:36,216 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/47b4eed6-36d4-4b65-b270-3704e8e63a05?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'e2cc67d7-ccb4-11f1-a4ac-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:04:36,502 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:34:35 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '1'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:04:37,503 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/47b4eed6-36d4-4b65-b270-3704e8e63a05?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'e2cc67d7-ccb4-11f1-a4ac-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:04:37,799 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:34:36 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '1'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:04:38,800 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/47b4eed6-36d4-4b65-b270-3704e8e63a05?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': 'e2cc67d7-ccb4-11f1-a4ac-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:04:39,133 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '5480'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:34:38 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di              9.5s  1.00 avg  
+2026-10-21 00:04:39,304 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-21 00:04:39,727 - INFO - Going to convert document batch...
+2026-10-21 00:04:39,727 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-21 00:04:39,728 - INFO - Accelerator device: 'cpu'
+2026-10-21 00:04:39,747 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-21 00:04:39,747 - INFO - Initializing Transformers object-detection engine
+2026-10-21 00:04:39,747 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-21 00:04:39,748 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-21 00:04:39,988 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-21 00:04:39,988 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  29%|██▉       | 222/770 [00:00<00:00, 2189.98it/s]Loading weights:  61%|██████    | 466/770 [00:00<00:00, 2329.34it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 3509.77it/s]
+2026-10-21 00:04:40,809 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-21 00:04:40,810 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-21 00:04:40,921 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-21 00:04:40,921 - INFO - Accelerator device: 'cpu'
+2026-10-21 00:04:41,365 - INFO - Processing document tmpu93etv7y.pdf
+2026-10-21 00:04:47,725 - INFO - Finished converting document tmpu93etv7y.pdf in 8.42 sec.
+   docling               8.6s  1.00 avg  
+   opendataloader        0.9s  0.00 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=2/3.
+   pymupdf4llm           2.5s  1.00 avg  
+   hybrid_pdf            1.1s  0.88 avg  
+   smart_pdf             1.0s  0.88 avg  
+   markitdown            0.1s  0.00 avg  
+   pdfplumber            0.0s  0.00 avg  
+   pdfminer              0.0s  0.00 avg  
+   pymupdf               0.2s  0.00 avg  
+   ocr                   0.9s  0.88 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr              26.8s  0.88 avg  
+   langchain_loader      0.0s  0.00 avg  
+   llamaindex_reader     0.0s  0.00 avg  
+2026-10-21 00:05:21,208 - WARNING - PyPDFToDocument could not extract text from the file C:\Users\SHREYA~1.MIS\AppData\Local\Temp\tmpg14ycvcr.pdf. Returning an empty document.
+   haystack_converter    0.0s  0.00 avg  
+[digital + charts/images] SOP  Income Tax Computation Sheet-2026-27.pdf
+2026-10-21 00:05:23,005 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com//documentintelligence/documentModels/prebuilt-layout:analyze?api-version=2024-11-30&outputContentFormat=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Length': '1603061'
+    'content-type': 'application/octet-stream'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '029aed0e-ccb5-11f1-ab41-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+A body is sent with the request
+2026-10-21 00:05:26,320 - INFO - Response status: 202
+Response headers:
+    'Content-Length': '0'
+    'Date': 'Tue, 20 Oct 2026 18:35:25 GMT'
+    'Server': 'istio-envoy'
+    'Operation-Location': 'REDACTED'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:05:26,322 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/a00230ea-9909-4d62-bfcd-0516f86a94be?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '029aed0e-ccb5-11f1-ab41-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:05:26,612 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '106'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:35:26 GMT'
+    'Server': 'istio-envoy'
+    'Retry-After': '6'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+2026-10-21 00:05:32,613 - INFO - Request URL: 'https://cbgenaiazureaidieus.cognitiveservices.azure.com/documentintelligence/documentModels/prebuilt-layout/analyzeResults/a00230ea-9909-4d62-bfcd-0516f86a94be?api-version=2024-11-30'
+Request method: 'GET'
+Request headers:
+    'x-ms-client-request-id': '029aed0e-ccb5-11f1-ab41-8045dda26c9a'
+    'User-Agent': 'azsdk-python-ai-documentintelligence/1.0.2 Python/3.13.15 (Windows-11-10.0.26200-SP0)'
+    'Ocp-Apim-Subscription-Key': 'REDACTED'
+No body was attached to the request
+2026-10-21 00:05:37,155 - INFO - Response status: 200
+Response headers:
+    'Content-Length': '437150'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Date': 'Tue, 20 Oct 2026 18:35:32 GMT'
+    'Server': 'istio-envoy'
+    'x-envoy-upstream-service-time': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+   azure_di             14.3s  0.39 avg  
+2026-10-21 00:05:37,820 - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2026-10-21 00:05:38,196 - INFO - Going to convert document batch...
+2026-10-21 00:05:38,196 - INFO - Initializing pipeline for StandardPdfPipeline with options hash 8b14c14c9dc866396e8bbaf8e87316f6
+2026-10-21 00:05:38,197 - INFO - Accelerator device: 'cpu'
+2026-10-21 00:05:38,213 - INFO - Auto OCR model selected rapidocr with onnxruntime.
+2026-10-21 00:05:38,213 - INFO - Initializing Transformers object-detection engine
+2026-10-21 00:05:38,214 - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+2026-10-21 00:05:38,214 - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+2026-10-21 00:05:38,374 - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+2026-10-21 00:05:38,374 - INFO - Accelerator device: 'cpu'
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  36%|███▋      | 281/770 [00:00<00:00, 2808.16it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 4041.08it/s]
+2026-10-21 00:05:38,775 - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+2026-10-21 00:05:38,775 - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+2026-10-21 00:05:38,986 - INFO - Model docling-project/docling-models already cached at C:\Users\Shreyanshi.Mishra1\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+2026-10-21 00:05:38,986 - INFO - Accelerator device: 'cpu'
+2026-10-21 00:05:39,422 - INFO - Processing document tmpagdfec5b.pdf
+The text detection result is empty
+2026-10-21 00:11:01,165 - WARNING - RapidOCR returned empty result!
+2026-10-21 00:11:22,317 - INFO - Finished converting document tmpagdfec5b.pdf in 344.53 sec.
+   docling             345.1s  0.78 avg  
+   opendataloader        3.1s  0.88 avg  
+
+=== Document parser messages ===
+Using RapidOCR for OCR processing.
+OCR on page.number=0/1.
+OCR on page.number=1/2.
+OCR on page.number=2/3.
+OCR on page.number=3/4.
+OCR on page.number=4/5.
+OCR on page.number=5/6.
+   pymupdf4llm          53.6s  0.45 avg  
+   hybrid_pdf            2.7s  0.99 avg  
+   smart_pdf            77.4s  0.56 avg  
+   markitdown            3.0s  0.89 avg  
+   pdfplumber            1.1s  0.89 avg  
+   pdfminer              0.8s  0.89 avg  
+   pymupdf               5.4s  0.99 avg  
+   ocr                  33.2s  0.41 avg  
+C:\Users\Shreyanshi.Mishra1\Desktop\doc_parsing_poc 2\doc_parsing_poc\.venv\Lib\site-packages\torch\utils\data\dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+   easyocr             597.7s  0.34 avg  
+   langchain_loader      0.2s  0.87 avg  
+   llamaindex_reader     0.2s  0.87 avg  
+   haystack_converter    0.2s  0.87 avg  
+
+wrote eval/benchmark.md
+exit=0

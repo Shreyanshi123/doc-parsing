@@ -1,0 +1,26 @@
+Type: architecture diagram
+
+Boxes/entities:
+- GenAI Agent (container)
+- Preprocessing
+- LLM
+- Postprocessing
+- Data
+- Tools
+- Other models
+- Prompt
+
+Connections:
+- Prompt -> Preprocessing
+- Preprocessing -> LLM
+- LLM -> Postprocessing
+- Preprocessing -> Data (dashed)
+- Preprocessing -> Tools (dashed)
+- Preprocessing -> Other models (dashed)
+- LLM -> Data (dashed)
+- LLM -> Tools (dashed)
+- LLM -> Other models (dashed)
+- Postprocessing -> Data (dashed)
+- Postprocessing -> Tools (dashed)
+- Postprocessing -> Other models (dashed)
+- Postprocessing -> (output arrow)

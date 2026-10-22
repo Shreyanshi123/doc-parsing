@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart:
+Title: Revenue by quarter (USD m)
+Axis labels: 
+- X-axis: Quarter (Q1, Q2, Q3, Q4)
+- Y-axis: Revenue (USD m)
+
+| Quarter | Revenue (USD m) |
+|---------|-----------------|
+| Q1      | 120             |
+| Q2      | 150             |
+| Q3      | 200             |
+| Q4      | 310             |

@@ -1,0 +1,3 @@
+Type: photo
+
+Description: Two images of an anthropomorphic crocodile in a brown coat, comparing results from a VAE (left, smoother and blurrier) and a GAN (right, sharper and more detailed).

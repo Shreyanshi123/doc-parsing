@@ -1,0 +1,4 @@
+Check pump P-4 bearing noise
+Replace filter before Friday
+Call vendor about delayed valves
+Shift handover at 6 pm

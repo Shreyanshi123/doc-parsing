@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: A screenshot of the ViSense Portal welcome page, showing a sign-in option with Outlook and a logo for Digital Intelligence & Robotics (DIR).

@@ -1,0 +1,15 @@
+Type: bar chart
+
+Chart:
+Title: Private investment in generative AI
+Axis labels: 
+- X-axis: Year
+- Y-axis: Total Investment in AI, $ billions
+
+| Year | Total AI Private Investment ($ billions) | Generative AI Private Investment ($ billions) |
+|------|-----------------------------------------|----------------------------------------------|
+| 2019 | 56.88                                   | 0.84                                         |
+| 2020 | 64.2                                    | 2.00                                         |
+| 2021 | 132.36                                  | 4.97                                         |
+| 2022 | 103.4                                   | 2.95                                         |
+| 2023 | 95.99                                   | 25.21                                        |

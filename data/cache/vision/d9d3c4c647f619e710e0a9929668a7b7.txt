@@ -1,0 +1,20 @@
+Type: bar chart
+
+Chart:
+Title: (Not shown)
+Axis labels: 
+- X-axis: Model name
+- Y-axis: Violation % (lower is safer)
+
+| Model                | Violation % |
+|----------------------|-------------|
+| Llama-2 7b-chat      | ~3          |
+| Llama-2 13b-chat     | ~3          |
+| Llama-2 34b-chat     | ~7          |
+| Llama-2 70b-chat     | ~3          |
+| MPT 7b-chat          | ~21         |
+| Vicuna 13b-v1.1      | ~25         |
+| Vicuna 33b-v1.3      | ~36         |
+| Falcon 40b-instruct  | ~7          |
+| PaLM Bison           | ~27         |
+| ChatGPT 0301         | ~7          |

@@ -59,6 +59,9 @@ class Settings:
     # LlamaParse (cloud)
     llama_api_key: str = os.getenv("LLAMA_CLOUD_API_KEY", "")
 
+    # Compare: heavy engines run in a child process and are stopped after this many seconds (0 = no limit)
+    parser_timeout_sec: int = int(os.getenv("PARSER_TIMEOUT_SEC", "600"))
+
     # worker
     worker_threads: int = int(os.getenv("WORKER_THREADS", "1"))
     worker_poll_sec: float = float(os.getenv("WORKER_POLL_SEC", "1.0"))

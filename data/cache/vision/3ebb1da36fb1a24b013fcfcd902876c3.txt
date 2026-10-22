@@ -1,0 +1,14 @@
+Type: line chart
+
+Chart:
+Title: [Not shown]
+X-axis label: N Samples
+Y-axis label: Reward Score
+
+| N Samples | Max of the rewards | Median of the rewards |
+|-----------|-------------------|----------------------|
+| 1         | ~0.54             | ~0.54                |
+| 2         | ~0.58             | ~0.54                |
+| 4         | ~0.61             | ~0.54                |
+| 8         | ~0.64             | ~0.55                |
+| 16        | ~0.66             | ~0.55                |

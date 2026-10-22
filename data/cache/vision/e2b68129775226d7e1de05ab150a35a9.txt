@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: A dashboard interface for ViSense (Digital Intelligence & Robotics) showing options for conference name, session name, screenshot, transcribe, speaker tagging, upload video/audio, conference type, analyse video/audio, and a chatbot button.

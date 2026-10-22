@@ -1,0 +1,18 @@
+Type: line chart
+
+Chart: Proportion of the population living below $2.15/day, by country income level, 2015–2022 (percentage)
+Axis labels: 
+- X-axis: Year
+- Y-axis: Percentage (%)
+
+| Year | Lower-middle-income countries | Low- and middle-income countries | Low-income countries | Middle-income countries |
+|------|------------------------------|----------------------------------|---------------------|------------------------|
+| 2015 | ~15.5                        | ~13.0                            | ~10.5               | ~1.7                   |
+| 2016 | ~15.0                        | ~12.7                            | ~10.2               | ~1.6                   |
+| 2017 | ~14.5                        | ~12.3                            | ~9.9                | ~1.5                   |
+| 2018 | ~13.5                        | ~11.7                            | ~9.3                | ~1.3                   |
+| 2019 | 12.2                         | 10.5                             | 8.9                 | 1.7                    |
+| 2020 | ~13.0                        | ~11.2                            | ~9.3                | ~1.4                   |
+| 2021 | ~12.5                        | ~10.8                            | ~9.2                | ~1.3                   |
+| 2022 | 12.0                         | 10.6                             | 9.0                 | 1.4                    |
+| 2022 |                              |                                  |                     | 0.3                    |

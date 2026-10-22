@@ -1,0 +1,13 @@
+Type: pie chart
+
+Chart:
+Title: Overall progress across targets based on 2015–2024 global aggregate
+Axis labels: None
+
+| Category                | Value |
+|-------------------------|-------|
+| On track or target met  | 17%   |
+| Moderate progress       | 18%   |
+| Marginal progress       | 30%   |
+| No progress or worsening| 18%   |
+| Off track               | 17%   |

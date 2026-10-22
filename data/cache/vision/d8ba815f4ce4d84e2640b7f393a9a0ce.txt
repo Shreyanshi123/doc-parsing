@@ -1,0 +1,3 @@
+Type: logo
+
+Anything else: The image shows the Evalueserve logo with the tagline "Powered by Mind+Machine" underneath.

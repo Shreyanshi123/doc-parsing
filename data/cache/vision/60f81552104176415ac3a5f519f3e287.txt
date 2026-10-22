@@ -1,0 +1,12 @@
+Type: table image
+
+Chart: None (table with text entries)
+Axis labels: None
+
+| Entry                        |
+|------------------------------|
+| प्रत्यायन                    |
+| मीडिया सुविधाएं              |
+| मीडिया कर्मियों की सूची      |
+
+Title: मीडिया-सहभागिता

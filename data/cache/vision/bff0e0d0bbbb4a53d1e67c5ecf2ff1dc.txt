@@ -1,0 +1,3 @@
+Type: Screenshot
+
+Description: A screenshot showing the steps to email a tax calculation sheet, with fields for PAN number, financial period ID, an option to send email, and an OK button highlighted.

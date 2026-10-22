@@ -1,154 +1,871 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Document Parsing POC</title>
+<title>DocParse Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236d5dfc'/%3E%3Cstop offset='1' stop-color='%2300c2a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M10 8h9l4 4v12H10z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M13 16h7M13 20h5' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-  :root { --bg:#f6f7f9; --card:#fff; --fg:#1d2330; --muted:#667085; --line:#e4e7ec; --accent:#2f5bea; --ok:#12805c; --bad:#b42318; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#12151c; --card:#1b202b; --fg:#e8ebf2; --muted:#98a2b3; --line:#2b3242; --accent:#6c8cff; --ok:#3ccf9a; --bad:#ff7b72; }
+  /* ---------- design tokens (the old variable names are kept: the comparison view still uses them) ---------- */
+  :root {
+    --bg:#f4f7fd; --bg2:#eef3fb; --card:rgba(255,255,255,.82); --card2:#f3f6fc; --fg:#0c1424; --muted:#4d5c78; --line:rgba(15,30,60,.10);
+    --accent:#2563eb; --accent2:#7c3aed; --accent-soft:rgba(37,99,235,.10); --ok:#059669; --bad:#e11d48; --warn:#b45309;
+    --violet:#7c3aed; --cyan:#0891b2; --pink:#db2777;
+    --shadow:0 1px 2px rgba(15,30,60,.05), 0 10px 30px -14px rgba(15,30,60,.22);
+    --shadow-lg:0 32px 72px -28px rgba(15,30,60,.3);
+    --glass:rgba(255,255,255,.76);
+    --k-heading:#7c3aed; --k-text:#2563eb; --k-table:#059669; --k-figure:#d97706; --k-scanned:#db2777; --k-image:#0891b2;
+    --radius:14px; --ease:cubic-bezier(.22,.61,.36,1); --spring:cubic-bezier(.34,1.56,.64,1);
+    --grad:linear-gradient(135deg,#2563eb,#7c3aed 55%,#db2777);
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font:14px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
-  header { padding:16px 24px; border-bottom:1px solid var(--line); background:var(--card); }
-  header h1 { margin:0; font-size:18px; }
-  header p { margin:2px 0 0; color:var(--muted); }
-  main { display:grid; grid-template-columns: 380px 1fr; gap:16px; padding:16px 24px; max-width:1400px; margin:auto; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
-  .card h2 { margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-  label { display:block; margin:10px 0 4px; font-weight:600; }
-  input[type=text], select, input[type=file], textarea { width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); font:inherit; }
-  textarea { min-height:70px; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .check { display:flex; align-items:center; gap:6px; margin-top:8px; font-weight:400; }
-  button { padding:8px 12px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; font:inherit; }
-  button.secondary { background:transparent; color:var(--accent); }
-  button:disabled { opacity:.5; cursor:wait; }
-  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:12px; flex-wrap:wrap; }
-  .tab { padding:6px 12px; cursor:pointer; border-bottom:2px solid transparent; color:var(--muted); }
-  .tab.active { color:var(--fg); border-color:var(--accent); }
-  pre { margin:0; padding:12px; background:var(--bg); border:1px solid var(--line); border-radius:6px; overflow:auto; max-height:560px; white-space:pre-wrap; word-break:break-word; font:12px/1.5 ui-monospace, monospace; }
-  table { border-collapse:collapse; width:100%; font-size:13px; }
-  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; }
-  th { color:var(--muted); font-weight:600; }
-  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; border:1px solid var(--line); color:var(--muted); }
-  .ok { color:var(--ok); } .bad { color:var(--bad); }
-  .muted { color:var(--muted); }
-  .hidden { display:none; }
-  .kv { display:grid; grid-template-columns: 140px 1fr; gap:2px 10px; margin-bottom:10px; }
-  .kv div:nth-child(odd) { color:var(--muted); }
-  .parser-result { border:1px solid var(--line); border-radius:8px; margin:10px 0; padding:10px 12px; }
-  .parser-result summary { cursor:pointer; font-weight:600; }
-  .parser-result pre { margin-top:10px; max-height:480px; }
+  :root[data-theme="dark"] {
+    color-scheme:dark;
+    --bg:#070910; --bg2:#0b0e17; --card:rgba(22,27,38,.62); --card2:rgba(255,255,255,.04); --fg:#eef2f9; --muted:#9fadc4; --line:rgba(255,255,255,.08);
+    --accent:#5b8cff; --accent2:#a78bfa; --accent-soft:rgba(91,140,255,.15); --ok:#34d399; --bad:#fb7185; --warn:#fbbf24;
+    --violet:#a78bfa; --cyan:#22d3ee; --pink:#f472b6;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 32px -12px rgba(0,0,0,.7);
+    --shadow-lg:0 32px 80px -24px rgba(0,0,0,.85);
+    --glass:rgba(22,27,38,.62);
+    --k-heading:#a78bfa; --k-text:#5b8cff; --k-table:#34d399; --k-figure:#fbbf24; --k-scanned:#f472b6; --k-image:#22d3ee;
+    --grad:linear-gradient(135deg,#5b8cff,#a78bfa 55%,#f472b6);
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font:15px/1.6 Inter, "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--fg); background:var(--bg); min-height:100vh; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  /* aurora backdrop + fine grid (ParserBench) */
+  body::before { content:""; position:fixed; inset:-25%; z-index:-2; pointer-events:none; filter:blur(58px) saturate(135%); opacity:.42; animation:drift 30s ease-in-out infinite alternate;
+    background: radial-gradient(46rem 34rem at 8% -6%, color-mix(in srgb, var(--accent) 85%, transparent), transparent 60%), radial-gradient(40rem 30rem at 92% 2%, color-mix(in srgb, var(--violet) 75%, transparent), transparent 58%), radial-gradient(34rem 26rem at 72% 42%, color-mix(in srgb, var(--pink) 40%, transparent), transparent 60%), radial-gradient(48rem 34rem at 28% 96%, color-mix(in srgb, var(--cyan) 55%, transparent), transparent 60%); }
+  :root:not([data-theme="dark"]) body::before { opacity:.28; }
+  body::after { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.7; background-image:linear-gradient(to right,var(--line) 1px,transparent 1px),linear-gradient(to bottom,var(--line) 1px,transparent 1px); background-size:58px 58px; -webkit-mask-image:radial-gradient(140% 100% at 50% 0%,#000 8%,transparent 72%); mask-image:radial-gradient(140% 100% at 50% 0%,#000 8%,transparent 72%); }
+  @keyframes drift { 0% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(-2%,1.5%,0) scale(1.05); } 100% { transform:translate3d(1.5%,-1%,0) scale(1.02); } }
+  ::selection { background:var(--accent); color:#fff; }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:var(--line); border-radius:99px; border:2px solid transparent; background-clip:content-box; } ::-webkit-scrollbar-thumb:hover { background:var(--muted); background-clip:content-box; border:2px solid transparent; }
+  .hidden { display:none !important; }
+  .muted { color:var(--muted); } .ok { color:var(--ok); } .bad { color:var(--bad); }
+  h3 { margin:18px 0 8px; font-size:15px; }
+
+  /* ---------- top bar ---------- */
+  header.top { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:18px; padding:12px 28px; background:var(--glass); backdrop-filter:blur(16px) saturate(1.4); -webkit-backdrop-filter:blur(16px) saturate(1.4); border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:12px; margin-right:auto; }
+  .logo { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg,#6d5dfc,#00c2a8); box-shadow:0 8px 20px -6px rgba(109,93,252,.6); transition:transform .5s var(--ease); }
+  .brand:hover .logo { transform:rotate(-8deg) scale(1.08); }
+  .brand h1 { margin:0; font-size:17px; letter-spacing:-.01em; } .brand p { margin:0; font-size:12px; color:var(--muted); }
+  nav.modes { position:relative; display:flex; gap:2px; padding:4px; border-radius:14px; background:var(--card2); border:1px solid var(--line); }
+  nav.modes .pill-bg { position:absolute; top:4px; bottom:4px; left:4px; width:100px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#7f6bff); box-shadow:0 6px 16px -4px rgba(91,77,245,.55); transition:transform .45s var(--ease), width .45s var(--ease); }
+  nav.modes button { position:relative; z-index:1; display:flex; align-items:center; gap:7px; padding:8px 16px; border:0; background:transparent; color:var(--muted); font:600 13px/1 inherit; border-radius:10px; cursor:pointer; transition:color .25s, transform .25s var(--ease); }
+  nav.modes button:hover { color:var(--fg); transform:translateY(-1px); } nav.modes button.active { color:#fff; }
+  nav.modes button svg { width:16px; height:16px; }
+  .icon-btn { width:38px; height:38px; display:grid; place-items:center; border-radius:11px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; transition:all .3s var(--ease); }
+  .icon-btn:hover { transform:translateY(-2px) rotate(12deg); box-shadow:var(--shadow); border-color:var(--accent); color:var(--accent); }
+
+  /* ---------- layout ---------- */
+  .layout { display:grid; grid-template-columns:372px minmax(0,1fr); gap:22px; padding:24px 28px 60px; max-width:1680px; margin:0 auto; align-items:start; }
+  @media (max-width:1000px) { .layout { grid-template-columns:1fr; padding:16px; } header.top { flex-wrap:wrap; padding:12px 16px; } }
+  aside.side { position:sticky; top:82px; display:flex; flex-direction:column; gap:16px; max-height:calc(100vh - 100px); overflow:auto; padding:2px 6px 8px 2px; }
+  @media (max-width:1000px) { aside.side { position:static; max-height:none; } }
+
+  /* ---------- cards with a spotlight that follows the cursor ---------- */
+  .card { position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); transition:transform .35s var(--ease), box-shadow .35s var(--ease), border-color .35s; }
+  .card::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; transition:opacity .35s; background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%), var(--accent-soft), transparent 60%); }
+  .card:hover { border-color:color-mix(in srgb, var(--accent) 40%, var(--line)); box-shadow:var(--shadow-lg); }
+  .card:hover::after { opacity:1; }
+  .card.flat:hover { transform:none; }
+  .card h2 { margin:0 0 12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); display:flex; align-items:center; gap:8px; }
+  .card h2::before { content:""; width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+
+  /* ---------- form controls ---------- */
+  label.l { display:block; margin:12px 0 5px; font-size:12px; font-weight:600; color:var(--muted); }
+  input[type=text], select, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:11px; background:var(--card2); color:var(--fg); font:inherit; outline:none; transition:border-color .2s, box-shadow .2s, background .2s; }
+  input[type=text]:hover, select:hover, textarea:hover { border-color:color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  input[type=text]:focus, select:focus, textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft); background:var(--card); }
+  textarea { min-height:78px; resize:vertical; }
+  .src-tabs { display:flex; gap:4px; padding:3px; border-radius:11px; background:var(--card2); border:1px solid var(--line); margin-bottom:12px; }
+  .src-tabs div { flex:1; text-align:center; padding:7px; border-radius:8px; cursor:pointer; color:var(--muted); font-weight:600; font-size:12.5px; transition:all .25s var(--ease); }
+  .src-tabs div:hover { color:var(--fg); } .src-tabs div.active { background:var(--card); color:var(--accent); box-shadow:var(--shadow); }
+
+  .drop { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:26px 16px; text-align:center; cursor:pointer; border-radius:14px; border:1.5px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); background:linear-gradient(180deg,var(--card2),transparent); transition:all .35s var(--ease); }
+  .drop:hover, .drop.over { border-color:var(--accent); background:var(--accent-soft); transform:translateY(-2px); box-shadow:0 14px 30px -14px rgba(91,77,245,.5); }
+  .drop.over { animation:pulse 1s ease-in-out infinite; }
+  .drop .up { width:48px; height:48px; border-radius:14px; display:grid; place-items:center; color:var(--accent); background:var(--accent-soft); transition:transform .4s var(--ease); }
+  .drop:hover .up { transform:translateY(-4px) scale(1.08); }
+  .drop b { font-size:14px; } .drop small { color:var(--muted); }
+  .filechip { display:flex; align-items:center; gap:12px; padding:12px; border-radius:14px; border:1px solid var(--line); background:var(--card2); animation:pop .45s var(--ease); }
+  .filechip .ext { width:42px; height:42px; border-radius:11px; display:grid; place-items:center; font-weight:800; font-size:11px; color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent2)); text-transform:uppercase; }
+  .filechip .nm { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .filechip .sz { color:var(--muted); font-size:12px; }
+  .filechip .meta { min-width:0; flex:1; } .filechip button { all:unset; cursor:pointer; width:28px; height:28px; display:grid; place-items:center; border-radius:8px; color:var(--muted); transition:all .2s; } .filechip button:hover { background:rgba(217,45,75,.12); color:var(--bad); transform:rotate(90deg); }
+
+  .switch { display:flex; align-items:flex-start; gap:12px; padding:9px 10px; margin:0 -10px; border-radius:11px; cursor:pointer; transition:background .2s; }
+  .switch:hover { background:var(--card2); }
+  .switch input { display:none; }
+  .switch .tg { flex:none; margin-top:2px; width:38px; height:22px; border-radius:99px; background:var(--line); position:relative; transition:background .3s var(--ease); }
+  .switch .tg::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.25); transition:transform .35s var(--ease); }
+  .switch input:checked + .tg { background:linear-gradient(135deg,var(--accent),var(--accent2)); } .switch input:checked + .tg::after { transform:translateX(16px); }
+  .switch b { display:block; font-size:13px; } .switch small { color:var(--muted); font-size:12px; line-height:1.35; display:block; }
+
+  details.adv > summary { cursor:pointer; list-style:none; padding:8px 0; font-weight:600; font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:8px; transition:color .2s; }
+  details.adv > summary::-webkit-details-marker { display:none; }
+  details.adv > summary::before { content:"▸"; transition:transform .3s var(--ease); display:inline-block; }
+  details.adv[open] > summary::before { transform:rotate(90deg); } details.adv > summary:hover { color:var(--accent); }
+
+  /* ---------- buttons ---------- */
+  button.btn { position:relative; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 18px; border:1px solid transparent; border-radius:12px; cursor:pointer; font:600 14px/1 inherit; color:#fff; background:linear-gradient(135deg,var(--accent),#7f6bff); box-shadow:0 10px 22px -8px rgba(91,77,245,.7); transition:transform .3s var(--ease), box-shadow .3s var(--ease), filter .3s; }
+  button.btn::before { content:""; position:absolute; top:0; left:-120%; width:70%; height:100%; transform:skewX(-20deg); background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent); transition:left .7s var(--ease); }
+  button.btn:hover { transform:translateY(-2px); box-shadow:0 16px 30px -10px rgba(91,77,245,.8); } button.btn:hover::before { left:140%; } button.btn:active { transform:translateY(0) scale(.98); }
+  button.btn.secondary { color:var(--accent); background:var(--card); border-color:color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow:none; }
+  button.btn.secondary:hover { background:var(--accent-soft); border-color:var(--accent); box-shadow:0 10px 22px -12px rgba(91,77,245,.6); }
+  button.btn.big { width:100%; padding:14px 18px; font-size:15px; } button.btn.small { padding:7px 12px; font-size:12.5px; border-radius:9px; }
+  button.btn:disabled { opacity:.55; cursor:progress; transform:none; } button.btn:disabled::before { display:none; }
+  .ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,.55); transform:scale(0); animation:ripple .65s ease-out; pointer-events:none; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; } .row .btn { flex:1; }
+  .kbd { font:600 11px ui-monospace, monospace; padding:2px 6px; border-radius:6px; background:rgba(255,255,255,.22); }
+  #status { margin:10px 0 0; font-size:12.5px; min-height:18px; }
+
+  /* ---------- engine chips ---------- */
+  .engines { display:flex; flex-wrap:wrap; gap:6px; }
+  .eng { position:relative; display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:var(--card2); font-size:12px; font-weight:600; cursor:default; transition:all .25s var(--ease); }
+  .eng i { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); } .eng.off { opacity:.55; } .eng.off i { background:var(--bad); box-shadow:none; }
+  .eng:hover { border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 3px var(--accent-soft), var(--shadow); opacity:1; }
+  .eng .tip { position:fixed; left:0; top:0; transform:translateY(6px); width:230px; padding:9px 11px; border-radius:11px; background:var(--fg); color:var(--bg); font-weight:400; font-size:11.5px; line-height:1.4; opacity:0; pointer-events:none; transition:all .25s var(--ease); z-index:20; }
+  .eng:hover .tip { opacity:1; transform:none; }
+
+  /* ---------- tabs in the result area ---------- */
+  .tabs { position:relative; display:inline-flex; gap:2px; padding:4px; border-radius:12px; background:var(--card2); border:1px solid var(--line); margin-bottom:14px; flex-wrap:wrap; }
+  .tab { position:relative; z-index:1; padding:7px 14px; border-radius:9px; cursor:pointer; color:var(--muted); font-weight:600; font-size:13px; transition:all .25s var(--ease); user-select:none; }
+  .tab:hover { color:var(--fg); background:var(--accent-soft); } .tab.active { background:var(--card); color:var(--accent); box-shadow:var(--shadow); }
+
+  /* ---------- tables, pre, misc (also used by the untouched comparison view) ---------- */
+  pre { margin:0; padding:14px; background:var(--card2); border:1px solid var(--line); border-radius:12px; overflow:auto; max-height:600px; white-space:pre-wrap; word-break:break-word; font:12px/1.55 ui-monospace, "Cascadia Code", monospace; }
+  table { border-collapse:separate; border-spacing:0; width:100%; font-size:13px; }
+  th, td { padding:8px 12px; border-bottom:1px solid var(--line); text-align:left; }
+  th { color:var(--muted); font-weight:700; font-size:12px; background:var(--card2); position:sticky; top:0; }
+  tbody tr, table tr { transition:background .2s; } table tr:hover td { background:var(--accent-soft); }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:600; border:1px solid var(--line); color:var(--muted); background:var(--card2); }
+  .kv { display:grid; grid-template-columns:150px 1fr; gap:6px 14px; margin-bottom:14px; padding:14px; border-radius:12px; background:var(--card2); border:1px solid var(--line); }
+  .kv > div:nth-child(odd) { color:var(--muted); font-weight:600; font-size:12.5px; }
+  .parser-result { border:1px solid var(--line); border-radius:12px; margin:10px 0; padding:11px 14px; background:var(--card); transition:all .3s var(--ease); }
+  .parser-result:hover { border-color:var(--accent); transform:translateX(4px); box-shadow:var(--shadow); }
+  .parser-result summary { cursor:pointer; font-weight:600; } .parser-result pre { margin-top:12px; max-height:480px; }
+  details > summary { cursor:pointer; }
+  #view-compare > div > details > summary { padding:6px 0; color:var(--accent); font-weight:600; }
+
+    /* ---------- scoreboard (shared by Compare and Benchmark) ---------- */
+  :root { --h0:#f9d2d6; --h1:#fde2c2; --h2:#f4f0bd; --h3:#cdecc9; --h4:#98dba0; --ref:#fff4d6; --ref-line:#e0b84a; --mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --h0:#5a2a33; --h1:#5a4524; --h2:#4d5224; --h3:#2f5230; --h4:#25693a; --ref:#3a3015; --ref-line:#a8842a; } }
+  :root[data-theme="dark"] { --h0:#5a2a33; --h1:#5a4524; --h2:#4d5224; --h3:#2f5230; --h4:#25693a; --ref:#3a3015; --ref-line:#a8842a; }
+  .sb { display:flex; flex-direction:column; gap:22px; }
+  .sb h4 { margin:0 0 4px; font-size:15px; letter-spacing:-.01em; } .sb .sub { margin:0 0 12px; color:var(--muted); font-size:13px; max-width:80ch; }
+  .hero { position:relative; overflow:hidden; display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:center; padding:24px 28px; border-radius:22px; color:#fff; background:linear-gradient(135deg,#4f41ec,#7a66ff 48%,#00b39b); box-shadow:0 28px 56px -24px rgba(79,65,236,.8); animation:pop .6s var(--ease); }
+  .hero::before { content:""; position:absolute; right:-80px; top:-80px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.28),transparent 65%); transition:transform .8s var(--ease); } .hero:hover::before { transform:translate(-30px,20px) scale(1.2); }
+  .hero .ring { position:relative; width:104px; height:104px; flex:none; } .hero .ring svg { transform:rotate(-90deg); } .hero .ring b { position:absolute; inset:0; display:grid; place-items:center; font-size:27px; font-weight:800; letter-spacing:-.02em; } .hero .ring small { position:absolute; left:0; right:0; bottom:23px; text-align:center; font-size:10px; opacity:.8; }
+  .hero .lbl { font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; opacity:.85; } .hero h3 { margin:2px 0 8px; font-size:28px; letter-spacing:-.02em; line-height:1.15; }
+  .hero .chips { display:flex; flex-wrap:wrap; gap:8px; } .hero .chips span { padding:4px 12px; border-radius:99px; background:rgba(255,255,255,.2); font-size:12.5px; font-weight:600; backdrop-filter:blur(6px); transition:background .2s, transform .2s; } .hero .chips span:hover { background:rgba(255,255,255,.34); transform:translateY(-2px); }
+  .hero p { margin:10px 0 0; font-size:13.5px; opacity:.92; max-width:70ch; }
+  @media (max-width:640px) { .hero { grid-template-columns:1fr; } }
+  .verdict { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+  .vcard { padding:14px 16px; border-radius:16px; background:var(--card2); border:1px solid var(--line); min-width:0; transition:all .35s var(--ease); animation:rise .6s var(--ease) both; }
+  .vcard:hover { transform:translateY(-5px); background:var(--card); border-color:var(--accent); box-shadow:var(--shadow-lg); }
+  .vcard .k { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); } .vcard .v { font-size:17px; font-weight:700; margin:3px 0 4px; letter-spacing:-.01em; overflow-wrap:anywhere; } .vcard .d { font-size:12.5px; color:var(--muted); line-height:1.4; }
+  .ctag { display:inline-block; font-weight:600; font-size:10.5px; color:var(--accent); background:var(--accent-soft); border-radius:6px; padding:1px 7px; margin-left:6px; white-space:nowrap; vertical-align:middle; }
+  .ctag.paid { color:var(--warn); background:color-mix(in srgb, var(--warn) 14%, transparent); } .ctag.free { color:var(--ok); background:color-mix(in srgb, var(--ok) 13%, transparent); }
+  .params { display:grid; grid-template-columns:repeat(auto-fill,minmax(235px,1fr)); gap:12px; }
+  .pc { display:flex; gap:12px; padding:13px 14px; border-radius:16px; background:var(--card2); border:1px solid var(--line); cursor:pointer; transition:all .3s var(--ease); animation:rise .5s var(--ease) both; }
+  .pc .ic { flex:none; width:38px; height:38px; border-radius:12px; display:grid; place-items:center; font-weight:800; color:var(--accent); background:var(--accent-soft); transition:transform .35s var(--ease); }
+  .pc:hover { transform:translateY(-4px); border-color:var(--accent); background:var(--card); box-shadow:var(--shadow-lg); } .pc:hover .ic { transform:rotate(-8deg) scale(1.1); }
+  .pc.sel { border-color:var(--accent); background:var(--accent-soft); } .pc.na { opacity:.55; } .pc b { display:block; font-size:13.5px; } .pc .w { font-size:12px; color:var(--muted); line-height:1.4; margin-top:2px; } .pc .best { margin-top:7px; font-size:12px; font-weight:700; }
+  .sbctl { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:0 0 10px; } .sbctl .hint { margin-left:auto; color:var(--muted); font-size:12px; }
+  .chip { padding:5px 12px; border-radius:99px; border:1px solid var(--line); background:var(--card); color:var(--fg); font:600 12.5px inherit; cursor:pointer; transition:all .25s var(--ease); } .chip:hover { transform:translateY(-2px); border-color:var(--accent); color:var(--accent); } .chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .sbt-wrap { overflow:auto; border:1px solid var(--line); border-radius:18px; background:var(--card); box-shadow:var(--shadow); max-height:660px; }
+  table.sbt { border-collapse:separate; border-spacing:0; width:100%; min-width:780px; font-size:13px; }
+  table.sbt th { position:sticky; top:0; z-index:3; padding:11px 5px 9px; text-align:center; font-size:11.5px; line-height:1.25; font-weight:700; color:var(--muted); background:var(--card2); cursor:pointer; user-select:none; vertical-align:bottom; border-bottom:1px solid var(--line); transition:color .2s, background .2s; width:72px; }
+  table.sbt th:hover { color:var(--accent); background:var(--accent-soft); } table.sbt th.sorted { color:var(--accent); } table.sbt th .ic { display:block; font-size:15px; margin-bottom:3px; } table.sbt th .ar { display:block; height:10px; font-size:9px; }
+  table.sbt th.first { left:0; z-index:5; width:auto; min-width:200px; text-align:left; padding-left:14px; } table.sbt th.wide { width:112px; }
+  table.sbt td { padding:9px 5px; text-align:center; border-bottom:1px solid var(--line); background:var(--card); } table.sbt td.first { position:sticky; left:0; z-index:2; text-align:left; padding-left:14px; white-space:nowrap; font-weight:600; }
+  tr.r { cursor:pointer; animation:slidein .45s var(--ease) both; } tr.r:hover td { background:var(--accent-soft); } tr.r.open td { background:var(--accent-soft); } tr.ref td { background:var(--ref); } tr.ref td.first { box-shadow:inset 3px 0 0 var(--ref-line); }
+  .cell { display:inline-block; min-width:42px; padding:4px 6px; border-radius:9px; font:600 12.5px var(--mono); transition:transform .2s var(--ease), box-shadow .2s; } tr.r:hover .cell { transform:scale(1.1); } .cell:hover { box-shadow:0 8px 18px -6px rgba(0,0,0,.4); }
+  .cell.na { color:var(--muted); background:transparent; border:1px dashed var(--line); font-weight:400; font-size:11px; }
+  .rk { display:inline-grid; place-items:center; width:25px; height:25px; margin-right:10px; border-radius:8px; font-size:12px; font-weight:800; color:var(--muted); background:var(--card2); vertical-align:middle; }
+  .rk.g1 { color:#5a3b00; background:linear-gradient(135deg,#ffe08a,#f5a623); } .rk.g2 { color:#2f3a4a; background:linear-gradient(135deg,#eef1f6,#aab4c3); } .rk.g3 { color:#4a2a12; background:linear-gradient(135deg,#f3c9a4,#cd8a52); }
+  .ovbar { display:inline-block; vertical-align:middle; width:46px; height:7px; margin-right:7px; border-radius:99px; background:var(--line); overflow:hidden; } .ovbar i { display:block; height:100%; border-radius:99px; transition:width .6s var(--ease); }
+  .tmv { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  tr.prof td { padding:0; background:var(--card2); } .prof-in { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:26px; padding:18px 22px; animation:rise .35s var(--ease); } @media (max-width:900px) { .prof-in { grid-template-columns:1fr; } }
+  .pbar { display:grid; grid-template-columns:128px 1fr 32px; gap:10px; align-items:center; margin:6px 0; font-size:12.5px; text-align:left; } .pbar .tr { position:relative; height:9px; border-radius:99px; background:var(--line); } .pbar .tr i { display:block; height:100%; border-radius:99px; transition:width .6s var(--ease); } .pbar .tr u { position:absolute; top:-3px; width:3px; height:15px; border-radius:2px; background:var(--fg); opacity:.5; } .pbar .v { font:600 12px var(--mono); text-align:right; }
+  .prof-in .say { text-align:left; font-size:13px; line-height:1.55; } .prof-in .say p { margin:0 0 9px; } .prof-in .legend2 { color:var(--muted); font-size:11.5px; margin-top:6px; }
+  .scat { padding:16px 18px; border-radius:18px; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); } .scat svg { width:100%; height:auto; display:block; } .scat text { font:11px Inter, "Segoe UI", sans-serif; fill:var(--muted); } .scat .pt { cursor:pointer; transition:r .2s, stroke-width .2s; } .scat .pt:hover { stroke:var(--fg); stroke-width:2.5; } .scat .lg { display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:6px; } .scat .lg i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+  .note { font-size:13px; color:var(--muted); margin:10px 0 0; max-width:96ch; } ul.limits { margin:8px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:7px; max-width:92ch; font-size:13.5px; }
+  .sc-wrap { overflow:auto; border:1px solid var(--line); border-radius:16px; background:var(--card); box-shadow:var(--shadow); max-height:520px; }
+  table.simple th, table.simple td { padding:9px 12px; } table.simple td.n, table.simple th.n { text-align:right; font-family:var(--mono); } table.simple tr.ref td { background:var(--ref); }
+  .mini { display:inline-block; vertical-align:middle; width:70px; height:7px; margin-right:8px; border-radius:99px; background:var(--line); overflow:hidden; } .mini i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+  .bench section.card { margin-bottom:18px; } .two { display:grid; grid-template-columns:1fr 1fr; gap:18px; } @media (max-width:1000px) { .two { grid-template-columns:1fr; } }
+  .bh-top { display:flex; gap:20px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; } .bh-top h2 { margin-bottom:6px; } .bstats { display:flex; gap:10px; } .bs { min-width:92px; padding:10px 16px; border-radius:14px; text-align:center; background:var(--card2); border:1px solid var(--line); transition:all .3s var(--ease); } .bs:hover { transform:translateY(-4px); border-color:var(--accent); box-shadow:var(--shadow); } .bs b { display:block; font-size:24px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; } .bs span { font-size:11.5px; color:var(--muted); font-weight:600; }
+  .picks { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; } .pk { padding:16px 18px; border-radius:16px; background:var(--card2); border:1px solid var(--line); transition:all .35s var(--ease); animation:rise .55s var(--ease) both; } .pk:hover { transform:translateY(-6px); background:var(--card); border-color:var(--accent); box-shadow:var(--shadow-lg); }
+  .pk .k { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); } .pk .big { font-size:20px; font-weight:800; letter-spacing:-.015em; margin:4px 0 6px; } .pk .d { font-size:12.5px; color:var(--muted); line-height:1.5; } .pk .d b { color:var(--fg); }
+  .layout.solo { grid-template-columns:minmax(0,1160px); justify-content:center; } .layout.solo aside { display:none; }
+  .bench table.pick td, .bench table.pick th { text-align:left; white-space:normal; vertical-align:top; }
+  /* ---------- live run panel (Compare + Benchmark) ---------- */
+  .live { padding:16px 18px; border-radius:18px; background:var(--card2); border:1px solid var(--line); margin-bottom:16px; animation:pop .4s var(--ease); }
+  .live-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; } .live-top .lv-now { flex:1; min-width:200px; } .lv-parser { display:block; font-size:19px; font-weight:800; letter-spacing:-.015em; } .lv-sub { color:var(--muted); font-size:12.5px; }
+  .lv-clock { min-width:92px; padding:8px 14px; border-radius:12px; text-align:center; background:var(--card); border:1px solid var(--line); } .lv-clock b { display:block; font:700 20px var(--mono); letter-spacing:-.02em; } .lv-clock small { color:var(--muted); font-size:11px; font-weight:600; }
+  .live .bar { margin:14px 0 12px; } .live.finished .bar > i { animation:none; background:var(--ok); } .live.failed .bar > i { animation:none; background:var(--bad); }
+  .lv-chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .lc { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-size:12.5px; transition:all .3s var(--ease); }
+  .lc .dot { width:9px; height:9px; border-radius:50%; background:var(--line); flex:none; } .lc b { font-weight:700; } .lc .lt { font-family:var(--mono); font-size:11.5px; color:var(--muted); }
+  .lc.wait { opacity:.55; } .lc.run { border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 3px var(--accent-soft); } .lc.run .dot { background:var(--accent); animation:pulse 1s ease-in-out infinite; --c:var(--accent); } .lc.run .lt { color:var(--accent); font-weight:700; }
+  .lc.ok .dot { background:var(--ok); } .lc.err { border-color:color-mix(in srgb, var(--bad) 45%, var(--line)); } .lc.err .dot { background:var(--bad); } .lc.err .lt { color:var(--bad); }
+  .lc:hover { transform:translateY(-2px); border-color:var(--accent); box-shadow:var(--shadow); } .lc .own { font-size:10px; font-weight:700; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:0 5px; }
+  .live .lv-foot { margin-top:10px; font-size:12px; color:var(--muted); }
+  /* ---------- empty state ---------- */
+  .empty { text-align:center; padding:56px 20px 40px; }
+  .empty .orb { width:92px; height:92px; margin:0 auto 18px; border-radius:28px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg,#6d5dfc,#00c2a8); box-shadow:0 24px 50px -16px rgba(109,93,252,.7); animation:float 4s ease-in-out infinite; }
+  .empty h2 { all:unset; display:block; font-size:24px; font-weight:800; letter-spacing:-.02em; margin-bottom:8px; } .empty p { max-width:560px; margin:0 auto; color:var(--muted); font-size:14.5px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:34px; text-align:left; }
+  @media (max-width:760px) { .steps { grid-template-columns:1fr; } }
+  .step { padding:18px; border-radius:14px; border:1px solid var(--line); background:var(--card2); transition:all .4s var(--ease); }
+  .step:hover { transform:translateY(-6px); border-color:var(--accent); box-shadow:var(--shadow-lg); background:var(--card); }
+  .step .n { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent2)); margin-bottom:10px; }
+  .step b { display:block; margin-bottom:4px; } .step span { color:var(--muted); font-size:13px; }
+  .kinds { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:22px; }
+
+  /* ---------- smart extract ---------- */
+  .kind { --c:var(--k-text); display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:700; color:var(--c); background:color-mix(in srgb, var(--c) 13%, transparent); border:1px solid color-mix(in srgb, var(--c) 30%, transparent); }
+  .kind::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--c); }
+  .kind[data-k=heading] { --c:var(--k-heading); } .kind[data-k=text] { --c:var(--k-text); } .kind[data-k=table] { --c:var(--k-table); }
+  .kind[data-k=figure] { --c:var(--k-figure); } .kind[data-k=scanned] { --c:var(--k-scanned); } .kind[data-k=image] { --c:var(--k-image); }
+  button.kind { cursor:pointer; font-family:inherit; transition:all .25s var(--ease); } button.kind:hover { transform:translateY(-2px); box-shadow:0 8px 18px -8px var(--c); }
+  button.kind.off { opacity:.4; filter:grayscale(1); } button.kind.off::before { background:transparent; border:1px solid var(--c); }
+  .pchip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:8px; font:600 12px ui-monospace, "Cascadia Code", monospace; background:var(--card2); border:1px solid var(--line); color:var(--fg); transition:all .25s var(--ease); }
+  .pchip:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); } .pchip em { font-style:normal; color:var(--muted); }
+
+  .progress-card { animation:pop .5s var(--ease); }
+  .bar { height:8px; border-radius:99px; background:var(--line); overflow:hidden; } .bar > i { display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent)); background-size:200% 100%; animation:slide 1.4s linear infinite; transition:width .5s var(--ease); }
+  .now { display:flex; align-items:center; gap:10px; margin:14px 0 10px; font-weight:600; } .spin { width:18px; height:18px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .8s linear infinite; flex:none; }
+  .feed { display:flex; flex-direction:column; gap:6px; max-height:260px; overflow:auto; }
+  .feed .it { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:10px; background:var(--card2); border:1px solid var(--line); font-size:12.5px; animation:slidein .45s var(--ease); }
+  .feed .it .t { margin-left:auto; color:var(--muted); font-size:12px; }
+
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:16px; }
+  .stat { padding:14px 16px; border-radius:14px; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); transition:all .35s var(--ease); animation:rise .6s var(--ease) both; }
+  .stat:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:var(--accent); }
+  .stat b { display:block; font-size:26px; font-weight:800; letter-spacing:-.02em; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; } .stat span { color:var(--muted); font-size:12px; font-weight:600; }
+
+  .route { display:flex; flex-direction:column; gap:10px; }
+  .route .r { display:grid; grid-template-columns:110px 1fr; gap:6px 14px; align-items:center; padding:12px 14px; border-radius:13px; border:1px solid var(--line); background:var(--card2); transition:all .3s var(--ease); animation:rise .6s var(--ease) both; }
+  .route .r:hover { transform:translateX(6px); border-color:var(--accent); background:var(--card); box-shadow:var(--shadow); }
+  .route .r .why { grid-column:2; color:var(--muted); font-size:12.5px; } .route .r .to { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .route .r .to .arrow { color:var(--muted); }
+  @media (max-width:640px) { .route .r { grid-template-columns:1fr; } .route .r .why { grid-column:1; } }
+
+  .xwrap { display:grid; grid-template-columns:minmax(280px,40%) minmax(0,1fr); gap:18px; align-items:start; }
+  .xwrap.nomap { grid-template-columns:1fr; } @media (max-width:1250px) { .xwrap { grid-template-columns:1fr; } }
+  .map { position:sticky; top:82px; max-height:calc(100vh - 100px); overflow:auto; padding:12px; border-radius:var(--radius); background:var(--card2); border:1px solid var(--line); display:flex; flex-direction:column; gap:14px; }
+  @media (max-width:1250px) { .map { position:static; max-height:520px; } }
+  .pg { position:relative; border-radius:8px; overflow:hidden; box-shadow:0 6px 22px -8px rgba(0,0,0,.35); background:#fff; flex:none; }
+  .pg img { display:block; width:100%; height:auto; user-select:none; } .pg .pn { position:absolute; top:8px; left:8px; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; color:#fff; background:rgba(20,22,40,.72); backdrop-filter:blur(6px); z-index:3; }
+  .pg .nopic { padding:40px 10px; text-align:center; color:var(--muted); font-size:12px; }
+  .bx { --c:var(--k-text); position:absolute; border-radius:4px; border:1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background:color-mix(in srgb, var(--c) 10%, transparent); cursor:pointer; transition:all .22s var(--ease); z-index:1; }
+  .bx[data-k=heading] { --c:var(--k-heading); } .bx[data-k=table] { --c:var(--k-table); } .bx[data-k=figure] { --c:var(--k-figure); } .bx[data-k=scanned] { --c:var(--k-scanned); border-style:dashed; } .bx[data-k=image] { --c:var(--k-image); }
+  .bx:hover, .bx.hot { background:color-mix(in srgb, var(--c) 30%, transparent); border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent), 0 8px 24px -4px var(--c); z-index:5; }
+  .bx.hot { animation:pulse 1.2s ease-in-out infinite; } .bx .tg2 { position:absolute; top:-9px; left:6px; padding:0 6px; font:700 9.5px/16px inherit; border-radius:5px; color:#fff; background:var(--c); opacity:0; transform:translateY(4px); transition:all .2s; white-space:nowrap; } .bx:hover .tg2, .bx.hot .tg2 { opacity:1; transform:none; }
+  .hide-heading .bx[data-k=heading], .hide-text .bx[data-k=text], .hide-table .bx[data-k=table], .hide-figure .bx[data-k=figure], .hide-scanned .bx[data-k=scanned], .hide-image .bx[data-k=image] { display:none; }
+  .hide-heading .seg[data-k=heading], .hide-text .seg[data-k=text], .hide-table .seg[data-k=table], .hide-figure .seg[data-k=figure], .hide-scanned .seg[data-k=scanned], .hide-image .seg[data-k=image],
+  .hide-heading .part[data-k=heading], .hide-text .part[data-k=text], .hide-table .part[data-k=table], .hide-figure .part[data-k=figure], .hide-scanned .part[data-k=scanned], .hide-image .part[data-k=image] { display:none; }
+
+  .partlist { display:flex; flex-direction:column; gap:12px; }
+  .part { --c:var(--k-text); position:relative; padding:14px 16px 14px 20px; border-radius:14px; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); transition:all .3s var(--ease); animation:rise .55s var(--ease) both; }
+  .part::before { content:""; position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:0 4px 4px 0; background:var(--c); transition:all .3s var(--ease); }
+  .part[data-k=heading] { --c:var(--k-heading); } .part[data-k=table] { --c:var(--k-table); } .part[data-k=figure] { --c:var(--k-figure); } .part[data-k=scanned] { --c:var(--k-scanned); } .part[data-k=image] { --c:var(--k-image); }
+  .part:hover, .part.hot { transform:translateX(5px); border-color:color-mix(in srgb, var(--c) 60%, var(--line)); box-shadow:0 14px 34px -14px var(--c); } .part:hover::before, .part.hot::before { top:0; bottom:0; width:6px; }
+  .part .hd { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; } .part .hd .sp { margin-left:auto; color:var(--muted); font-size:12px; }
+  .part .body { max-height:230px; overflow:hidden; position:relative; } .part.open .body { max-height:none; } .part .body.fade::after { content:""; position:absolute; left:0; right:0; bottom:0; height:56px; background:linear-gradient(transparent,var(--card)); pointer-events:none; } .part.open .body.fade::after { display:none; }
+  .part .more { all:unset; cursor:pointer; margin-top:8px; font-size:12.5px; font-weight:700; color:var(--accent); display:inline-block; transition:transform .2s; } .part .more:hover { transform:translateX(4px); }
+  .part .why { margin-top:10px; padding:10px 12px; border-radius:10px; background:var(--card2); border:1px dashed var(--line); font-size:12.5px; color:var(--muted); animation:pop .35s var(--ease); }
+  .tried { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; } .tried .pchip.err { color:var(--bad); border-color:color-mix(in srgb, var(--bad) 40%, var(--line)); } .tried .pchip.empty { color:var(--warn); }
+  .figimg { display:block; max-width:100%; max-height:260px; margin-bottom:10px; border-radius:10px; border:1px solid var(--line); transition:transform .4s var(--ease); } .figimg:hover { transform:scale(1.03); box-shadow:var(--shadow-lg); }
+
+  .md { line-height:1.65; word-break:break-word; } .md h1,.md h2,.md h3,.md h4 { margin:.6em 0 .35em; letter-spacing:-.01em; line-height:1.25; } .md h1 { font-size:1.45em; } .md h2 { font-size:1.25em; } .md h3 { font-size:1.1em; } .md p { margin:.45em 0; } .md ul,.md ol { margin:.45em 0; padding-left:1.4em; } .md blockquote { margin:.5em 0; padding:.1em 1em; border-left:3px solid var(--accent); color:var(--muted); background:var(--card2); border-radius:0 8px 8px 0; }
+  .md table { margin:.6em 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; display:block; overflow-x:auto; } .md code { padding:1px 5px; border-radius:5px; background:var(--card2); font-size:.92em; }
+  .doc { padding:26px 30px; border-radius:var(--radius); background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); }
+  .doc.annot .seg { position:relative; padding:4px 0 4px 16px; margin:6px 0; border-left:3px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius:2px; transition:all .25s var(--ease); --c:var(--k-text); }
+  .doc.annot .seg[data-k=heading] { --c:var(--k-heading); } .doc.annot .seg[data-k=table] { --c:var(--k-table); } .doc.annot .seg[data-k=figure] { --c:var(--k-figure); } .doc.annot .seg[data-k=scanned] { --c:var(--k-scanned); } .doc.annot .seg[data-k=image] { --c:var(--k-image); }
+  .doc.annot .seg:hover, .doc.annot .seg.hot { border-left-color:var(--c); background:color-mix(in srgb, var(--c) 8%, transparent); border-radius:0 10px 10px 0; padding-left:20px; }
+  .doc.annot .seg .tag { position:absolute; right:6px; top:4px; opacity:0; transition:opacity .2s; } .doc.annot .seg:hover .tag { opacity:1; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; } .toolbar .grow { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .warn { margin:0 0 14px; padding:12px 14px; border-radius:12px; background:color-mix(in srgb, var(--warn) 12%, transparent); border:1px solid color-mix(in srgb, var(--warn) 40%, transparent); font-size:13px; }
+
+  /* ---------- toast ---------- */
+  #toasts { position:fixed; right:22px; bottom:22px; z-index:100; display:flex; flex-direction:column; gap:10px; }
+  .toast { max-width:380px; padding:12px 16px; border-radius:13px; color:#fff; font-weight:600; font-size:13px; box-shadow:0 18px 40px -12px rgba(0,0,0,.5); animation:toast .5s var(--ease); background:linear-gradient(135deg,#2a2f55,#171a2b); border:1px solid rgba(255,255,255,.12); }
+  .toast.err { background:linear-gradient(135deg,#d92d4b,#a31d38); } .toast.good { background:linear-gradient(135deg,#0f9d6e,#00b8a0); }
+
+  /* ---------- animation ---------- */
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  @keyframes pop { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:none; } }
+  @keyframes slidein { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:none; } }
+  @keyframes toast { from { opacity:0; transform:translateY(20px) scale(.95); } to { opacity:1; transform:none; } }
+  @keyframes spin { to { transform:rotate(360deg); } } @keyframes slide { to { background-position:-200% 0; } }
+  @keyframes float { 50% { transform:translateY(-10px) rotate(2deg); } }
+  @keyframes pulse { 50% { box-shadow:0 0 0 6px color-mix(in srgb, var(--c, var(--accent)) 28%, transparent); } }
+  @keyframes ripple { to { transform:scale(4); opacity:0; } }
+  .view { animation:rise .45s var(--ease); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+
+  /* =====================================================================
+     ParserBench-inspired skin: glass surfaces, gradient accents, mono data.
+     Layered over the rules above so markup and JS stay untouched.
+     ===================================================================== */
+  code, pre, .kbd, .pchip, .cell, .tmv, .pbar .v, table.simple td.n { font-family:"JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace; }
+  h1,h2,h3,h4 { letter-spacing:-.02em; }
+
+  header.top { padding:11px 28px; backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%); }
+  .logo { background:var(--grad); box-shadow:0 4px 20px -4px color-mix(in srgb, var(--violet) 70%, transparent); position:relative; }
+  .logo::after { content:""; position:absolute; inset:-2px; border-radius:13px; z-index:-1; background:inherit; filter:blur(9px); opacity:.55; }
+  .brand h1 { font-size:17px; font-weight:750; background:linear-gradient(100deg,var(--fg),var(--accent)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  nav.modes { background:var(--glass); border-color:var(--line); backdrop-filter:blur(14px); }
+  nav.modes .pill-bg { background:var(--grad); box-shadow:0 6px 18px -4px color-mix(in srgb, var(--accent) 65%, transparent); transition-timing-function:var(--spring); }
+  .icon-btn { background:var(--glass); }
+
+  .card { background:var(--glass); backdrop-filter:blur(16px) saturate(150%); -webkit-backdrop-filter:blur(16px) saturate(150%); border-radius:var(--radius); }
+  .card:hover { border-color:color-mix(in srgb, var(--accent) 35%, var(--line)); }
+  .card h2::before { background:var(--grad); }
+  .card.flat::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(160deg,rgba(255,255,255,.055),transparent 42%); }
+
+  input[type=text], select, textarea { background:var(--card2); }
+  input[type=text]:focus, select:focus, textarea:focus { background:var(--card2); }
+  select option { background:var(--bg2); color:var(--fg); }
+  .src-tabs, .tabs { background:var(--card2); }
+  .src-tabs div.active, .tab.active { background:var(--glass); color:var(--fg); box-shadow:inset 0 0 0 1px var(--line), var(--shadow); }
+
+  .drop { border:1.5px dashed color-mix(in srgb, var(--fg) 20%, transparent); background:var(--glass); backdrop-filter:blur(14px); border-radius:20px; overflow:hidden; isolation:isolate; }
+  .drop::before { content:""; position:absolute; inset:-1px; z-index:-1; opacity:0; transition:opacity .3s var(--ease); background:radial-gradient(40rem 14rem at 50% -10%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 66%), radial-gradient(30rem 12rem at 20% 110%, color-mix(in srgb, var(--violet) 18%, transparent), transparent 62%); }
+  .drop:hover::before, .drop.over::before { opacity:1; }
+  .drop:hover, .drop.over { background:var(--glass); border-color:color-mix(in srgb, var(--accent) 65%, transparent); box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), 0 10px 32px -10px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .drop .up, .filechip .ext, .step .n, .empty .orb { background:var(--grad); color:#fff; box-shadow:0 10px 30px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
+  .drop:hover .up { transform:translateY(-5px) scale(1.07); }
+
+  button.btn { background:var(--grad); box-shadow:0 10px 26px -10px color-mix(in srgb, var(--accent) 80%, transparent); }
+  button.btn:hover { box-shadow:0 16px 32px -10px color-mix(in srgb, var(--accent) 85%, transparent); }
+  button.btn.secondary { background:var(--glass); color:var(--fg); border-color:var(--line); box-shadow:none; }
+  button.btn.secondary:hover { border-color:color-mix(in srgb, var(--accent) 60%, transparent); background:var(--accent-soft); }
+  button.btn.secondary .kbd { background:var(--accent-soft) !important; color:var(--accent) !important; }
+  .switch input:checked + .tg, .mini i, .bar > i { background:var(--grad); }
+  .bar > i { background-size:200% 100%; }
+  .stat b, .bs b { background:var(--grad); -webkit-background-clip:text; background-clip:text; }
+  .stat, .vcard, .pc, .pk, .bs, .step, .route .r, .part, .doc, .scat, .sbt-wrap, .sc-wrap { background:var(--glass); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .vcard:hover, .pc:hover, .pk:hover, .step:hover { background:var(--glass); border-color:color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  table.sbt td { background:transparent; } table.sbt td.first { background:var(--bg2); }
+  th, table.sbt th { background:var(--bg2); }
+
+  /* hero / headline treatments */
+  .hero { background:linear-gradient(135deg,#2748c9,#6d4de0 50%,#b53a8f); box-shadow:0 28px 56px -24px color-mix(in srgb, var(--accent) 70%, transparent); border:1px solid rgba(255,255,255,.14); }
+  .empty h2 { font-size:2.15rem; font-weight:800; letter-spacing:-.04em; line-height:1.15; margin-bottom:10px; background:linear-gradient(96deg,var(--fg) 0%,var(--accent) 42%,var(--violet) 72%,var(--pink) 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:hue 9s ease-in-out infinite alternate; }
+  @keyframes hue { from { background-position:0% center; } to { background-position:90% center; } }
+  .empty p { max-width:62ch; }
+  .steps { position:relative; }
+  .step .n { width:28px; height:28px; border-radius:8px; font-size:13px; }
+
+  .part, .doc { box-shadow:var(--shadow); }
+  .ctag, .kind, .pchip { backdrop-filter:blur(6px); }
+  .toast { background:linear-gradient(135deg,rgba(30,36,56,.96),rgba(14,17,28,.96)); backdrop-filter:blur(12px); }
+  .toast.good { background:linear-gradient(135deg,#047857,#0891b2); } .toast.err { background:linear-gradient(135deg,#be123c,#9f1239); }
+  .eng .tip { background:var(--bg2); color:var(--fg); border:1px solid var(--line); box-shadow:var(--shadow-lg); }
+  pre { background:rgba(0,0,0,.18); } :root:not([data-theme="dark"]) pre { background:var(--card2); }
+  .pg { background:#fff; }
+
+  /* scorecard behind the routing choices */
+  .rgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .rblock { padding:14px 16px; border-radius:14px; background:var(--card2); border:1px solid var(--line); }
+  .rblock h4 { margin:0 0 10px; font-size:13.5px; } .rblock h4 small { font-weight:500; color:var(--muted); font-size:11.5px; margin-left:4px; }
+  .rrow { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 30px 46px; gap:10px; align-items:center; margin:7px 0; font-size:12.5px; }
+  .rrow .rn { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rrow .rt { height:8px; border-radius:99px; background:var(--line); overflow:hidden; } .rrow .rt i { display:block; height:100%; border-radius:99px; background:color-mix(in srgb, var(--accent) 55%, transparent); }
+  .rrow.win .rt i { background:var(--grad); } .rrow.win .rn { color:var(--accent); }
+  .rrow .rv { font:600 12px "JetBrains Mono", monospace; text-align:right; } .rrow .rs { font:11.5px "JetBrains Mono", monospace; color:var(--muted); text-align:right; }
+  @media (prefers-reduced-motion: reduce) { body::before, .empty h2 { animation:none; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>Document Parsing POC</h1>
-  <p>Upload a file, let the router pick a parser (or force one), and compare engines side by side.</p>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h4"/></svg></div>
+    <div><h1>DocParse Studio</h1><p>Right parser for every part of your document</p></div>
+  </div>
+  <nav class="modes" id="modes">
+    <span class="pill-bg" id="pillbg"></span>
+    <button data-mode="extract" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.7 1.8L21.5 19.5l-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg>Smart Extract</button>
+    <button data-mode="compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6h6zM19 8l-3 6h6zM5 8h14"/></svg>Compare parsers</button>
+    <button data-mode="bench"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Benchmark</button>
+    <button data-mode="parse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Single parse</button>
+  </nav>
+  <button class="icon-btn" id="theme" title="Switch light / dark" aria-label="Switch theme"><svg id="theme-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg></button>
 </header>
 
-<main>
-  <section class="card">
-    <h2>Input</h2>
-    <div class="tabs">
-      <div class="tab active" data-src="upload">Upload file</div>
-      <div class="tab" data-src="url">Blob URL / path</div>
+<div class="layout" id="layout">
+  <!-- ===================================================== left: input ===================================================== -->
+  <aside class="side">
+    <section class="card flat">
+      <h2>Document</h2>
+      <div class="src-tabs" id="src-tabs" data-modes="compare parse">
+        <div class="active" data-src="upload">Upload file</div>
+        <div data-src="url">Blob URL / path</div>
+      </div>
+
+      <div id="src-upload">
+        <input type="file" id="file" class="hidden">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose or drop a file">
+          <div class="up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg></div>
+          <b>Drop a document here</b><small>or click to browse · PDF, Word, PowerPoint, Excel, CSV, images</small>
+        </div>
+        <div class="filechip hidden" id="chip"><div class="ext" id="chip-ext">pdf</div><div class="meta"><div class="nm" id="chip-name"></div><div class="sz" id="chip-size"></div></div><button id="chip-x" title="Remove file" aria-label="Remove file">✕</button></div>
+      </div>
+      <div id="src-url" class="hidden">
+        <label class="l">file_path (blob URL with SAS, azure://container/blob, or local path)</label>
+        <input type="text" id="file_path" placeholder="https://acct.blob.core.windows.net/docs/x.pdf?sv=...">
+        <label class="l">file_name</label>
+        <input type="text" id="file_name" placeholder="x.pdf">
+      </div>
+
+      <div data-modes="extract" style="margin-top:12px">
+        <label class="l" style="margin-top:0">How to read the document</label>
+        <div class="src-tabs" id="x-mode" style="margin-bottom:6px"><div class="active" data-xmode="document">By document</div><div data-xmode="part">By part</div></div>
+        <p class="muted" id="x-mode-hint" style="font-size:12px;line-height:1.4;margin:0 0 6px"></p>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="switch" data-modes="parse"><input type="checkbox" id="extract_images"><span class="tg"></span><span><b>Extract embedded images</b><small>Return picture bytes found in the file</small></span></label>
+        <label class="switch"><input type="checkbox" id="prefer_quality"><span class="tg"></span><span><b>Prefer quality</b><small>Slower, more accurate engines first (docling, vision LLM)</small></span></label>
+        <label class="switch" data-modes="parse"><input type="checkbox" id="include_images"><span class="tg"></span><span><b>Include image bytes in response</b></span></label>
+        <label class="switch" data-modes="extract compare"><input type="checkbox" id="include_paid"><span class="tg"></span><span><b>Include paid parsers</b><small>Azure Document Intelligence · costs per page</small></span></label>
+      </div>
+
+      <div data-modes="compare">
+        <label class="l">Reference text for scoring (optional)</label>
+        <textarea id="reference" placeholder="Paste the known-correct text to get F1 / similarity scores"></textarea>
+      </div>
+
+      <details class="adv" style="margin-top:6px">
+        <summary>Advanced options</summary>
+        <label class="l">Max pages (blank = all)</label>
+        <input type="text" id="max_pages" placeholder="e.g. 3">
+        <div data-modes="parse">
+          <label class="l">Parser</label>
+          <select id="parser"><option value="auto">auto (router decides)</option></select>
+          <label class="l">tenant_id</label>
+          <input type="text" id="tenant_id" value="tenant-demo">
+          <label class="l">file_id</label>
+          <input type="text" id="file_id" placeholder="(auto)">
+        </div>
+      </details>
+
+      <div class="row" data-modes="extract"><button class="btn big" id="btn-extract"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Extract with the best parsers <span class="kbd">Ctrl ↵</span></button></div>
+      <div class="row" data-modes="compare"><button class="btn big secondary" id="btn-compare">Compare all parsers <span class="kbd" style="background:var(--accent-soft);color:var(--accent)">Ctrl ↵</span></button></div>
+      <div class="row" data-modes="parse"><button class="btn" id="btn-parse">Parse</button><button class="btn secondary" id="btn-job">Queue as job</button></div>
+      <p class="muted" id="status"></p>
+    </section>
+
+    <section class="card flat">
+      <h2>Engines</h2>
+      <div id="providers" class="engines muted">loading…</div>
+    </section>
+  </aside>
+
+  <!-- ===================================================== right: results ===================================================== -->
+  <main>
+    <!-- ---------- Smart Extract ---------- -->
+    <div id="ws-extract">
+      <section class="card flat" id="x-empty">
+        <div class="empty">
+          <div class="orb"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.7 1.8L21.5 19.5l-1.8.7L19 22l-.7-1.8-1.8-.7 1.8-.7z"/></svg></div>
+          <h2>One document, many specialists</h2>
+          <p>Drop a file and it gets cut into headings, text, tables, figures and scanned pages. Each part is handed to the parser that reads that kind of content best, then stitched back together in reading order.</p>
+          <div class="steps">
+            <div class="step"><div class="n">1</div><b>Dissect</b><span>Every page is split into typed parts with exact positions.</span></div>
+            <div class="step"><div class="n">2</div><b>Route</b><span>Each part goes to its best engine, with a fallback chain if that engine fails.</span></div>
+            <div class="step"><div class="n">3</div><b>Assemble</b><span>One clean Markdown file, plus a map that shows who read what.</span></div>
+          </div>
+          <div class="kinds"><span class="kind" data-k="heading">Headings</span><span class="kind" data-k="text">Text</span><span class="kind" data-k="table">Tables</span><span class="kind" data-k="figure">Charts &amp; figures</span><span class="kind" data-k="scanned">Scanned pages</span></div>
+        </div>
+      </section>
+      <section class="card flat progress-card hidden" id="x-progress">
+        <h2>Extracting</h2>
+        <div class="bar"><i id="x-bar"></i></div>
+        <div class="now"><div class="spin"></div><span id="x-now">Reading the document…</span></div>
+        <div class="feed" id="x-feed"></div>
+      </section>
+      <div id="x-result" class="hidden"></div>
     </div>
 
-    <div id="src-upload">
-      <label>File</label>
-      <input type="file" id="file">
+    <!-- ---------- Benchmark scorecard (stored results from the 15-parser, 11-PDF test) ---------- -->
+    <div id="ws-bench" class="bench hidden">
+      <section class="card flat">
+        <div class="bh-top">
+          <div><h2>Parser benchmark</h2><p class="muted" id="b-intro" style="margin:0;max-width:70ch"></p></div>
+          <div class="bstats" id="b-stats"></div>
+        </div>
+        <details class="adv" id="b-builder" open style="margin-top:14px">
+          <summary>Add documents to the benchmark</summary>
+          <div class="drop mini" id="b-drop" tabindex="0" role="button" style="margin-top:6px">
+            <b>Drop documents here or click to choose</b>
+            <small>Select several files at once. Put <code>name.pdf.truth.md</code> next to <code>name.pdf</code> to score it against your answer key. Every “Compare parsers” run is added automatically too.</small>
+            <input type="file" id="b-files" multiple class="hidden">
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px">
+            <label class="switch" style="margin:0"><input type="checkbox" id="b-paid"><span class="tg"></span><span><b>Use Azure DI as the reference</b><small>For files without a .truth.md · paid, per page</small></span></label>
+            <div style="margin-left:auto;display:flex;gap:8px"><button class="btn secondary" id="b-clear">Clear benchmark</button><button class="btn" id="b-run">Run benchmark</button></div>
+          </div>
+          <div id="b-live" class="hidden" style="margin-top:14px"></div>
+          <div class="feed" id="b-queue" style="margin-top:12px"></div>
+        </details>
+      </section>
+      <section class="card flat" id="b-empty"><div class="empty" style="padding:30px 10px"><div class="orb" style="width:72px;height:72px;border-radius:22px"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></div><h2 style="font-size:20px">No benchmark yet</h2><p>Add a few documents above, or run “Compare parsers” on a document with a reference. The scoreboard, picks and limits below are all computed from those runs.</p></div></section>
+      <div id="b-body" class="hidden">
+        <section class="card flat">
+          <h2>Scoreboard</h2>
+          <div class="tabs" id="b-tabs"></div>
+          <div id="b-sb"></div>
+          <p class="note" id="b-note"></p>
+        </section>
+        <section class="card flat"><h2>Which parser for which document</h2><div class="picks" id="b-pick"></div></section>
+        <section class="card flat"><h2>Speed, tables and figures</h2>
+          <div class="two"><div><h4 style="margin:0 0 8px">Speed</h4><div class="sc-wrap"><table class="simple" id="b-big"></table></div></div>
+          <div><h4 style="margin:0 0 8px">Tables and figures found</h4><div class="sc-wrap"><table class="simple" id="b-tfq"></table></div></div></div>
+        </section>
+        <section class="card flat"><h2>Documents in this benchmark</h2><div class="sc-wrap"><table class="simple" id="b-runs"></table></div></section>
+        <section class="card flat"><h2>Limits of this test</h2><ul class="limits" id="b-limits"></ul></section>
+      </div>
     </div>
-    <div id="src-url" class="hidden">
-      <label>file_path (blob URL with SAS, azure://container/blob, or local path)</label>
-      <input type="text" id="file_path" placeholder="https://acct.blob.core.windows.net/docs/x.pdf?sv=...">
-      <label>file_name</label>
-      <input type="text" id="file_name" placeholder="x.pdf">
+    <!-- ---------- Compare / Single parse (unchanged logic) ---------- -->
+    <div id="ws-classic" class="hidden">
+      <section class="card flat">
+        <h2 id="classic-title">Result</h2>
+        <div id="cmp-live" class="hidden"></div>
+        <div id="summary"></div>
+        <div class="tabs" id="result-tabs">
+          <div class="tab active" data-view="markdown">Markdown</div>
+          <div class="tab" data-view="json">JSON</div>
+          <div class="tab" data-view="compare">Comparison</div>
+        </div>
+        <div id="view-markdown" class="view"><pre id="out-md">Nothing yet.</pre></div>
+        <div id="view-json" class="hidden view"><pre id="out-json"></pre></div>
+        <div id="view-compare" class="hidden view"><div id="out-compare" class="muted">Run "Compare all parsers".</div></div>
+      </section>
     </div>
-
-    <label>tenant_id</label>
-    <input type="text" id="tenant_id" value="tenant-demo">
-    <label>file_id</label>
-    <input type="text" id="file_id" placeholder="(auto)">
-
-    <label>Parser</label>
-    <select id="parser"><option value="auto">auto (router decides)</option></select>
-
-    <div class="check"><input type="checkbox" id="extract_images"><span>Extract embedded images (bytes)</span></div>
-    <div class="check"><input type="checkbox" id="prefer_quality"><span>Prefer quality (vision LLM first)</span></div>
-    <div class="check"><input type="checkbox" id="include_images"><span>Include image bytes in response</span></div>
-    <div class="check"><input type="checkbox" id="include_paid"><span>Include paid parsers in Compare (Azure; costs per page)</span></div>
-
-    <label>Max pages (blank = all)</label>
-    <input type="text" id="max_pages" placeholder="e.g. 3">
-
-    <label>Reference text for scoring (optional, compare only)</label>
-    <textarea id="reference" placeholder="Paste the known-correct text to get F1 / similarity scores"></textarea>
-
-    <div class="row">
-      <button id="btn-parse">Parse</button>
-      <button id="btn-compare" class="secondary">Compare all parsers</button>
-      <button id="btn-job" class="secondary">Queue as job</button>
-    </div>
-    <p class="muted" id="status"></p>
-
-    <h2 style="margin-top:20px">Parsers</h2>
-    <div id="providers" class="muted">loading…</div>
-  </section>
-
-  <section class="card">
-    <h2>Result</h2>
-    <div id="summary"></div>
-    <div class="tabs" id="result-tabs">
-      <div class="tab active" data-view="markdown">Markdown</div>
-      <div class="tab" data-view="json">JSON</div>
-      <div class="tab" data-view="compare">Comparison</div>
-    </div>
-    <div id="view-markdown"><pre id="out-md">Nothing yet.</pre></div>
-    <div id="view-json" class="hidden"><pre id="out-json"></pre></div>
-    <div id="view-compare" class="hidden"><div id="out-compare" class="muted">Run "Compare all parsers".</div></div>
-  </section>
-</main>
+  </main>
+</div>
+<div id="toasts"></div>
 
 <script>
 const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const escA = s => esc(s).replace(/"/g, "&quot;");
 let srcMode = "upload";
+let mode = "extract";
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 
-// ---- tabs ----
-document.querySelectorAll("[data-src]").forEach(t => t.onclick = () => {
-  srcMode = t.dataset.src;
-  document.querySelectorAll("[data-src]").forEach(x => x.classList.toggle("active", x === t));
-  $("src-upload").classList.toggle("hidden", srcMode !== "upload");
-  $("src-url").classList.toggle("hidden", srcMode !== "url");
-});
+/* ============================== theme ============================== */
+const ICON_SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const ICON_MOON = '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>';
+function applyTheme(t) { if (t) document.documentElement.dataset.theme = t; const dark = (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark"; $("theme-ic").innerHTML = dark ? ICON_SUN : ICON_MOON; }
+$("theme").onclick = () => { const dark = (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark"; const t = dark ? "light" : "dark"; store.set("theme", t); applyTheme(t); };
+applyTheme(store.get("theme"));
+
+/* ============================== cards: spotlight follows the cursor ============================== */
+document.addEventListener("pointermove", e => { const c = e.target.closest && e.target.closest(".card"); if (!c) return; const r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px"); });
+/* ripple on buttons */
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button.btn"); if (!b || b.disabled) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height); const s = document.createElement("span"); s.className = "ripple"; s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`; b.appendChild(s); setTimeout(() => s.remove(), 700); });
+function toast(msg, kind) { const t = document.createElement("div"); t.className = "toast " + (kind || ""); t.textContent = msg; $("toasts").appendChild(t); setTimeout(() => { t.style.transition = "all .4s"; t.style.opacity = 0; t.style.transform = "translateY(10px)"; setTimeout(() => t.remove(), 400); }, kind === "err" ? 6000 : 2600); }
+
+/* ============================== mode switching ============================== */
+function setMode(m) {
+  mode = m; store.set("mode", m);
+  document.querySelectorAll("#modes button").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
+  const act = document.querySelector(`#modes button[data-mode="${m}"]`);
+  $("pillbg").style.width = act.offsetWidth + "px"; $("pillbg").style.transform = `translateX(${act.offsetLeft - 4}px)`;
+  document.querySelectorAll("[data-modes]").forEach(el => el.classList.toggle("hidden", !el.dataset.modes.split(" ").includes(m)));
+  $("ws-extract").classList.toggle("hidden", m !== "extract"); $("ws-classic").classList.toggle("hidden", m === "extract" || m === "bench"); $("ws-bench").classList.toggle("hidden", m !== "bench");
+  $("layout").classList.toggle("solo", m === "bench"); if (m === "bench") loadBench();
+  $("cmp-live").classList.toggle("hidden", m !== "compare" || !$("cmp-live").innerHTML);
+  if (m === "extract" && srcMode !== "upload") setSrc("upload");
+  if (m !== "extract") { $("classic-title").textContent = m === "compare" ? "Parser comparison" : "Parse result"; if (m === "compare" && $("out-compare").dataset.ready) showView("compare"); }
+  history.replaceState(null, "", "#" + m);
+}
+document.querySelectorAll("#modes button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+function setSrc(s) {
+  srcMode = s;
+  document.querySelectorAll("[data-src]").forEach(x => x.classList.toggle("active", x.dataset.src === s));
+  $("src-upload").classList.toggle("hidden", s !== "upload"); $("src-url").classList.toggle("hidden", s !== "url");
+}
+document.querySelectorAll("[data-src]").forEach(t => t.onclick = () => setSrc(t.dataset.src));
 function showView(v) {
   document.querySelectorAll("[data-view]").forEach(x => x.classList.toggle("active", x.dataset.view === v));
   ["markdown", "json", "compare"].forEach(n => $("view-" + n).classList.toggle("hidden", n !== v));
 }
 document.querySelectorAll("[data-view]").forEach(t => t.onclick = () => showView(t.dataset.view));
 
-// ---- providers ----
-fetch("/api/providers").then(r => r.json()).then(list => {
-  $("providers").innerHTML = "<table><tr><th>name</th><th>types</th><th>cost</th><th></th></tr>" + list.map(p =>
-    `<tr><td>${p.name}</td><td>${p.supported_types.join(", ")}</td><td>${p.cost}</td>
-     <td class="${p.available ? "ok" : "bad"}" title="${p.unavailable_reason}">${p.available ? "ready" : "unavailable"}</td></tr>`).join("") + "</table>";
-  list.filter(p => p.available).forEach(p => {
-    const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; $("parser").appendChild(o);
-  });
-});
+/* ============================== file drop zone ============================== */
+const drop = $("drop");
+function human(n) { return n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(1) + " MB"; }
+function showFile() {
+  const f = $("file").files[0];
+  drop.classList.toggle("hidden", !!f); $("chip").classList.toggle("hidden", !f);
+  if (f) { $("chip-name").textContent = f.name; $("chip-size").textContent = human(f.size); $("chip-ext").textContent = (f.name.split(".").pop() || "file").slice(0, 4); }
+}
+drop.onclick = () => $("file").click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } };
+$("file").onchange = showFile;
+$("chip-x").onclick = () => { $("file").value = ""; showFile(); };
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => { if (e.dataTransfer.files.length) { $("file").files = e.dataTransfer.files; showFile(); } });
+window.addEventListener("dragover", e => e.preventDefault()); window.addEventListener("drop", e => e.preventDefault());
 
-// ---- helpers ----
+/* ============================== engines ============================== */
+fetch("/api/providers").then(r => r.json()).then(list => {
+  $("providers").classList.remove("muted");
+  $("providers").innerHTML = list.map(p => `<span class="eng ${p.available ? "" : "off"}"><i></i>${esc(p.name)}<span class="tip"><b>${esc(p.name)}</b> · ${esc(p.cost)}<br>${esc(p.description || "")}<br><span style="opacity:.75">${esc(p.supported_types.join(", "))}${p.available ? "" : " · unavailable: " + esc(p.unavailable_reason)}</span></span></span>`).join("");
+  list.filter(p => p.available).forEach(p => { const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; $("parser").appendChild(o); });
+}).catch(() => { $("providers").textContent = "Could not load engines."; });
+
+document.addEventListener("pointerover", e => { const c = e.target.closest && e.target.closest(".eng"); if (!c) return; const tip = c.querySelector(".tip"), r = c.getBoundingClientRect(); tip.style.left = Math.min(Math.max(8, r.left + r.width / 2 - 115), innerWidth - 238) + "px"; tip.style.top = Math.max(8, r.top - tip.offsetHeight - 10) + "px"; });
+
+/* ============================== shared helpers ============================== */
 function options() {
   const o = { extract_images: $("extract_images").checked, prefer_quality: $("prefer_quality").checked };
   const mp = parseInt($("max_pages").value); if (mp > 0) o.max_pages = mp;
   return o;
 }
-function busy(b, msg) { document.querySelectorAll("button").forEach(x => x.disabled = b); $("status").textContent = msg || ""; }
-function esc(s) { return String(s ?? "").replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function busy(b, msg) { document.querySelectorAll("button.btn").forEach(x => x.disabled = b); $("status").textContent = msg || ""; }
+function countUp(el, to, dur = 900) { const dec = Number.isInteger(to) ? 0 : 1, t0 = performance.now(); const f = n => { const p = Math.max(0, Math.min(1, (n - t0) / dur)), e = 1 - Math.pow(1 - p, 3); el.textContent = dec ? (to * e).toFixed(1) : Math.round(to * e).toLocaleString(); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
 
+/* ============================== scoreboard (shared by Compare and Benchmark) ============================== */
+const PARAMS = [
+  { k: "Text Accuracy", label: "Text accuracy", ic: "Aa", what: "Are the words right? Word-by-word match against the correct text.", na: "always tested" },
+  { k: "Table Reconstruction", label: "Table rebuild", ic: "▦", what: "Are table cells in the right rows and columns? Cell-by-cell match with the correct tables.", na: "this document has no tables" },
+  { k: "Chart Understanding", label: "Chart values", ic: "▥", what: "Are the numbers behind bars and lines read out (label and value)?", na: "this document has no charts" },
+  { k: "Infographic Parsing", label: "Diagram flow", ic: "⇢", what: "Are the boxes and arrows of flowcharts and diagrams captured (A → B)?", na: "this document has no diagrams" },
+  { k: "Entity & Numeric Fidelity", label: "Numbers & dates", ic: "#", what: "Are numbers, amounts and dates kept exactly as written?", na: "this document has no numbers" },
+  { k: "Structure", label: "Structure & order", ic: "≡", what: "Are headings found and is the reading order right?", na: "always tested" },
+  { k: "Completeness", label: "Completeness", ic: "◔", what: "How much of the correct text was captured? Nothing dropped.", na: "always tested" },
+  { k: "Hallucination Penalty", label: "No invented text", ic: "✓", what: "Is everything in the output really in the document? 5 means nothing was made up.", na: "always tested" }
+];
+const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract", smart_pdf: "PyMuPDF + Tesseract + vision model" };
+const heat = v => v == null ? "" : `background:var(--h${v >= 4.5 ? 4 : v >= 3.5 ? 3 : v >= 2.5 ? 2 : v >= 1.2 ? 1 : 0})`;
+const ovr = m => { const v = m.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const isPaid = r => ["paid", "cloud"].includes(r.cost);
+const nameCell = r => `${esc(r.p)}${COMBO[r.p] ? `<span class="ctag" title="${escA(COMBO[r.p])}">our combo</span>` : ""}${r.ref ? '<span class="ctag">reference</span>' : ""}${r.cost ? `<span class="ctag ${isPaid(r) ? "paid" : "free"}">${isPaid(r) ? "paid" : "free"}</span>` : ""}${r.note ? `<span class="ctag" title="${escA(r.noteTitle || "")}">${esc(r.note)}</span>` : ""}`;
+const cellHtml = (v, k) => v == null ? `<span class="cell na" title="${escA(PARAMS[k].label)}: not tested here (${escA(PARAMS[k].na)})">n/a</span>` : `<span class="cell" style="${heat(v)}" title="${escA(PARAMS[k].label)}: ${v.toFixed(1)} out of 5. ${escA(PARAMS[k].what)}">${v.toFixed(1)}</span>`;
+const ovColor = o => o >= 4.5 ? "var(--ok)" : o >= 3.5 ? "var(--accent2)" : o >= 2.5 ? "var(--warn)" : "var(--bad)";
+let lastSC = [];
+
+function scatterSvg(rows, pick) {
+  const pts = rows.filter(r => r.o != null && r.s != null); if (pts.length < 2) return "";
+  const W = 680, H = 320, L = 50, R = 18, T = 18, Bm = 46;
+  let lo = Math.log10(Math.max(Math.min(...pts.map(r => r.s)), .1)) - .12, hi = Math.log10(Math.max(...pts.map(r => r.s), .2)) + .12; if (hi - lo < 1) hi = lo + 1;
+  const X = s => L + (Math.log10(Math.max(s, .1)) - lo) / (hi - lo) * (W - L - R), Y = o => T + (5 - o) / 5 * (H - T - Bm);
+  const med = [...pts.map(r => r.s)].sort((a, b) => a - b)[Math.floor(pts.length / 2)];
+  let g = `<rect x="${L}" y="${Y(5)}" width="${Math.max(0, X(med) - L)}" height="${Y(4) - Y(5)}" rx="8" fill="var(--ok)" opacity=".1"/><text x="${L + 8}" y="${Y(5) + 15}" style="fill:var(--ok);font-weight:700">Sweet spot: fast and accurate</text>`;
+  for (let o = 0; o <= 5; o++) g += `<line x1="${L}" x2="${W - R}" y1="${Y(o)}" y2="${Y(o)}" stroke="var(--line)"/><text x="${L - 8}" y="${Y(o) + 4}" text-anchor="end">${o}</text>`;
+  for (let t = Math.floor(lo); t <= Math.ceil(hi); t++) { const x = X(Math.pow(10, t)); if (x < L - 1 || x > W - R + 1) continue; g += `<line x1="${x}" x2="${x}" y1="${T}" y2="${H - Bm}" stroke="var(--line)" stroke-dasharray="3 4"/><text x="${x}" y="${H - Bm + 16}" text-anchor="middle">${Math.pow(10, t)} s</text>`; }
+  g += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">Time per document (log scale), faster is left</text><text transform="translate(14 ${(T + H - Bm) / 2}) rotate(-90)" text-anchor="middle">Overall quality (0 to 5)</text>`;
+  const placed = []; let lab = "", dots = "";
+  [...pts].sort((a, b) => b.o - a.o).forEach(r => {
+    const x = X(r.s), y = Y(r.o), w = r.p.length * 6.4 + 4;
+    for (const [dx, anchor] of [[11, "start"], [-11, "end"]]) {
+      const bx = anchor === "start" ? x + dx : x + dx - w, box = [bx, y - 9, bx + w, y + 5];
+      if (box[2] < W && box[0] > 2 && !placed.some(p => !(box[2] < p[0] || box[0] > p[2] || box[3] < p[1] || box[1] > p[3]))) { placed.push(box); lab += `<text x="${x + dx}" y="${y + 4}" text-anchor="${anchor}" style="fill:var(--fg);font-weight:${r.p === pick ? 800 : 600}">${esc(r.p)}</text>`; break; }
+    }
+    const fill = r.ref ? "#f5a623" : isPaid(r) ? "var(--k-figure)" : "var(--accent)";
+    dots += `<circle class="pt" data-p="${escA(r.p)}" cx="${x}" cy="${y}" r="${r.p === pick ? 9 : 7}" fill="${fill}" stroke="${r.p === pick ? "var(--fg)" : "var(--card)"}" stroke-width="2"><title>${esc(r.p)}: quality ${r.o.toFixed(1)} / 5, ${r.s.toFixed(1)} s${isPaid(r) ? " (paid)" : ""}. Click for details.</title></circle>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Quality against time per parser">${g}${dots}<g style="paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round;pointer-events:none">${lab}</g></svg><div class="lg"><span><i style="background:var(--accent)"></i>free parser</span><span><i style="background:var(--k-figure)"></i>paid parser</span><span><i style="background:#f5a623"></i>reference (Azure DI)</span><span>Outlined dot = best overall</span></div>`;
+}
+
+function scoreboard(el, cfg) {
+  const rows = cfg.rows.map(r => ({ ...r, o: ovr(r.m) })), scored = rows.filter(r => r.o != null);
+  if (!scored.length) { el.innerHTML = '<div class="warn">No scores for this set yet. Scores need something to compare against: paste the correct text in “Reference text”, add a <code>.truth.md</code> file, or use Azure DI as the reference.</div>'; return; }
+  const st = { key: "o", desc: true, free: false, open: null, sel: null };
+  const byO = [...scored].sort((a, b) => b.o - a.o || a.s - b.s), best = byO[0], ref = rows.find(r => r.ref && r.o != null);
+  const nTested = Math.max(...scored.map(r => r.m.filter(v => v != null).length));
+  const strong = r => PARAMS.filter((p, i) => r.m[i] != null && r.m[i] >= 4.5).map(p => p.label.toLowerCase());
+  const winner = (i) => { const c = scored.filter(r => r.m[i] != null); if (!c.length) return null; const top = Math.max(...c.map(r => r.m[i])); return c.filter(r => r.m[i] === top).sort((a, b) => a.s - b.s)[0]; };
+  const freeBest = byO.find(r => !isPaid(r) && !r.ref), fast = byO.filter(r => r.o >= best.o - .25).sort((a, b) => a.s - b.s)[0], charts = winner(2);
+  const C = 2 * Math.PI * 44, dash = best.o / 5 * C;
+  const also = [
+    isPaid(best) || best.ref ? ["Best free option", freeBest ? esc(freeBest.p) : "none", freeBest ? `Overall ${freeBest.o.toFixed(1)} / 5 in ${freeBest.s.toFixed(1)} s. ${(best.o - freeBest.o) <= .05 ? "As good as the winner." : `${(best.o - freeBest.o).toFixed(1)} below the winner.`}` : "No free parser produced a score."] : ["Runner-up", byO[1] ? esc(byO[1].p) : "none", byO[1] ? `Overall ${byO[1].o.toFixed(1)} / 5 in ${byO[1].s.toFixed(1)} s.` : "Only one parser was scored."],
+    ["Best value", esc(fast.p), fast.p === best.p ? "The winner is also the best value: nothing within 0.25 points is faster." : `Within 0.25 points of the winner and ${(best.s / Math.max(fast.s, .05)).toFixed(1)}x faster (${fast.s.toFixed(1)} s instead of ${best.s.toFixed(1)} s).`],
+    ["Charts and diagrams", charts && charts.m[2] > 0 ? esc(charts.p) : (charts ? "Nobody read chart values" : "Not tested here"), charts && charts.m[2] > 0 ? `Chart values ${charts.m[2].toFixed(1)} / 5. Reading charts needs a vision model.` : (charts ? "Every parser scored 0 on chart values." : "This document set has no charts.")],
+    ["Against Azure DI", ref && freeBest ? `${Math.round(100 * freeBest.o / Math.max(ref.o, .01))}% of Azure DI` : ref ? (best.ref ? "Azure DI is the winner" : `${best.o >= ref.o ? "+" : ""}${(best.o - ref.o).toFixed(1)} vs Azure DI`) : "No reference scored", ref ? (freeBest ? `${esc(freeBest.p)}, the best free parser, scores ${freeBest.o.toFixed(1)} against Azure DI ${ref.o.toFixed(1)}: that quality at zero licence cost.` : `Azure DI scored ${ref.o.toFixed(1)} / 5.`) : "Azure DI was the answer key, or was not run."]
+  ];
+  el.innerHTML = `<div class="sb">
+    <div class="hero"><div class="ring"><svg width="104" height="104"><circle cx="52" cy="52" r="44" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="9"/><circle cx="52" cy="52" r="44" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="${dash} ${C}"/></svg><b>${best.o.toFixed(1)}<small>out of 5</small></b></div>
+      <div><div class="lbl">Best overall</div><h3>${esc(best.p)}</h3><div class="chips"><span>${best.s.toFixed(1)} s</span><span>${isPaid(best) ? "paid" : "free"}</span>${COMBO[best.p] ? `<span>our combo: ${esc(COMBO[best.p])}</span>` : ""}<span>${scored.length} parsers scored</span>${strong(best).length ? `<span>strong at ${esc(strong(best).slice(0, 3).join(", "))}</span>` : ""}</div>
+      <p>Overall = the average of the ${nTested} parameter${nTested > 1 ? "s" : ""} this document set can test, each scored 0 to 5. ${cfg.context ? esc(cfg.context) : ""}</p></div></div>
+    <div class="verdict">${also.map((a, i) => `<div class="vcard" style="animation-delay:${i * 70}ms"><div class="k">${a[0]}</div><div class="v">${a[1]}</div><div class="d">${a[2]}</div></div>`).join("")}</div>
+    <div><h4>What is being measured</h4><p class="sub">Each parser gets a score from 0 to 5 on up to eight parameters. Click a parameter to sort the table by it. “n/a” means this document set has nothing to test that parameter with.</p>
+      <div class="params">${PARAMS.map((p, i) => { const w = winner(i); return `<div class="pc ${w ? "" : "na"}" data-k="${i}" style="animation-delay:${i * 40}ms"><div class="ic">${p.ic}</div><div><b>${p.label}</b><div class="w">${p.what}</div><div class="best">${w ? `Best: ${esc(w.p)} · ${w.m[i].toFixed(1)}` : `Not tested (${p.na})`}</div></div></div>`; }).join("")}</div></div>
+    <div><h4>Ranking</h4><div class="sbctl"><button class="chip" data-free>Free parsers only</button><span class="hint">Click a column to sort · click a row for the full profile</span></div><div class="sbt-wrap"><table class="sbt"></table></div></div>
+    <div class="scat"><h4>Quality against speed</h4><p class="sub">The best parser is not always the right one: the top-left corner is both accurate and fast. Click a dot for details.</p>${scatterSvg(rows, best.p)}</div></div>`;
+
+  const tbl = el.querySelector("table.sbt");
+  const sortVal = r => st.key === "o" ? r.o : st.key === "s" ? r.s : st.key === "p" ? r.p : r.m[st.key];
+  const profile = r => {
+    const strongL = strong(r), weak = PARAMS.filter((p, i) => r.m[i] != null && r.m[i] <= 2.5).map(p => p.label.toLowerCase()), na = PARAMS.filter((p, i) => r.m[i] == null).map(p => p.label.toLowerCase());
+    const slower = scored.filter(x => x.s != null && x.s < r.s).length;
+    return `<tr class="prof"><td colspan="${PARAMS.length + 4}"><div class="prof-in"><div>${PARAMS.map((p, i) => { const b = winner(i); return `<div class="pbar"><span>${p.label}</span><div class="tr">${r.m[i] != null ? `<i style="width:${r.m[i] / 5 * 100}%;background:${ovColor(r.m[i])}"></i>` : ""}${b ? `<u style="left:calc(${b.m[i] / 5 * 100}% - 1px)" title="Best: ${escA(b.p)} ${b.m[i].toFixed(1)}"></u>` : ""}</div><span class="v">${r.m[i] == null ? "n/a" : r.m[i].toFixed(1)}</span></div>`; }).join("")}<div class="legend2">Coloured bar = this parser. Dark tick = the best parser on that parameter.</div></div>
+      <div class="say"><p><b>${esc(r.p)}</b> scored <b>${r.o == null ? "–" : r.o.toFixed(1)} / 5</b> overall${r.s != null ? ` in ${r.s.toFixed(1)} s` : ""}.</p>${strongL.length ? `<p><b class="ok">Strong at:</b> ${esc(strongL.join(", "))}.</p>` : ""}${weak.length ? `<p><b class="bad">Weak at:</b> ${esc(weak.join(", "))}.</p>` : ""}${na.length ? `<p class="muted">Not tested: ${esc(na.join(", "))}.</p>` : ""}${r.s != null ? `<p>${slower === 0 ? "The fastest parser here." : `Faster than ${scored.length - 1 - slower} of ${scored.length - 1} other parsers.`}</p>` : ""}${COMBO[r.p] ? `<p class="muted">Our combo built from: ${esc(COMBO[r.p])}.</p>` : ""}</div></div></td></tr>`;
+  };
+  const draw = () => {
+    let list = rows.filter(r => !st.free || !isPaid(r) || r.ref);
+    list = [...list].sort((a, b) => { const x = sortVal(a), y = sortVal(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (typeof x === "string" ? x.localeCompare(y) : x - y) * (st.desc ? -1 : 1); });
+    const th = (k, label, ic, cls = "") => `<th class="${cls} ${st.key === k ? "sorted" : ""}" data-sort="${k}" title="Sort by ${escA(label)}">${ic ? `<span class="ic">${ic}</span>` : ""}${label}<span class="ar">${st.key === k ? (st.desc ? "▼" : "▲") : ""}</span></th>`;
+    tbl.innerHTML = (`<tr>${th("p", "Parser", "", "first")}${th("o", "Overall", "★", "wide")}${PARAMS.map((p, i) => th(i, p.label, p.ic)).join("")}${th("s", "Time", "⏱")}</tr>` + list.map((r, i) => {
+      const rank = byO.indexOf(r) + 1;
+      return `<tr class="r ${r.ref ? "ref" : ""} ${st.open === r.p ? "open" : ""}" data-p="${escA(r.p)}" style="animation-delay:${Math.min(i, 18) * 30}ms"><td class="first"><span class="rk ${rank > 0 && rank <= 3 ? "g" + rank : ""}">${rank > 0 ? rank : "–"}</span>${nameCell(r)}</td><td>${r.o == null ? '<span class="cell na">n/a</span>' : `<span class="ovbar"><i style="width:${r.o / 5 * 100}%;background:${ovColor(r.o)}"></i></span><b>${r.o.toFixed(1)}</b>`}</td>${r.m.map((v, k) => `<td>${cellHtml(v, k)}</td>`).join("")}<td><span class="tmv">${r.s == null ? "–" : r.s.toFixed(1) + " s"}</span></td></tr>${st.open === r.p ? profile(r) : ""}`;
+    }).join(""));
+  };
+  const sortBy = k => { if (st.key === k) st.desc = !st.desc; else { st.key = k; st.desc = k !== "p" && k !== "s"; } el.querySelectorAll(".pc").forEach(c => c.classList.toggle("sel", st.key === +c.dataset.k && c.dataset.k !== undefined)); draw(); };
+  el.querySelector("[data-free]").onclick = e => { st.free = !st.free; e.currentTarget.classList.toggle("on", st.free); draw(); };
+  el.querySelectorAll(".pc").forEach(c => c.onclick = () => { st.key = +c.dataset.k; st.desc = true; el.querySelectorAll(".pc").forEach(x => x.classList.toggle("sel", x === c)); draw(); el.querySelector(".sbt-wrap").scrollIntoView({ behavior: "smooth", block: "nearest" }); });
+  el.querySelectorAll(".pt").forEach(c => c.onclick = () => { st.open = c.dataset.p; draw(); const row = el.querySelector(`tr.r[data-p="${CSS.escape(c.dataset.p)}"]`); if (row) row.scrollIntoView({ behavior: "smooth", block: "center" }); });
+  tbl.addEventListener("click", e => { const h = e.target.closest("th[data-sort]"); if (h) { const k = h.dataset.sort; sortBy(k === "o" || k === "s" || k === "p" ? k : +k); return; } const r = e.target.closest("tr.r"); if (r) { st.open = st.open === r.dataset.p ? null : r.dataset.p; draw(); } });
+  draw();
+}
+/* ============================== Benchmark mode (computed from your Compare runs) ============================== */
+let B = null, bGroup = "Overall";
+const B_LABEL = { "Overall": "All documents", "digital": "Digital", "digital + tables": "With tables", "mixed": "Mixed", "scanned": "Scanned", "digital + charts/images": "Charts and images", "other": "Other formats" };
+const B_ORDER = ["Overall", "digital", "digital + tables", "mixed", "scanned", "digital + charts/images", "other"];
+const bFmt = v => v == null ? "–" : v.toFixed(1);
+const bRows = g => g.rows.map(r => ({ p: r.p, cost: r.cost, m: r.m, t: r.t, s: r.s, ref: r.ref, note: r.failed ? `${r.failed} failed` : (r.n < g.docs ? `${r.n}/${g.docs} docs` : ""), noteTitle: r.failed ? "Crashed or timed out on this many documents: counted as 0" : "Tried on fewer documents than the others" }));
+function benchShow(k) {
+  bGroup = k; const g = B.groups[k];
+  document.querySelectorAll("#b-tabs .tab").forEach(t => t.classList.toggle("active", t.dataset.k === k));
+  scoreboard($("b-sb"), { rows: bRows(g), context: `Computed from ${g.docs} document${g.docs > 1 ? "s" : ""}${k === "Overall" ? "" : " (" + B_LABEL[k].toLowerCase() + ")"}.` });
+  $("b-note").textContent = `Each parameter is the average of the 0 to 5 scores over the documents that can test it. Averages are only comparable inside one tab. Azure DI is highlighted.`;
+}
+function benchPick() {
+  return B_ORDER.slice(1).filter(k => B.groups[k]).map((k, i) => {
+    const rows = bRows(B.groups[k]).map(r => ({ ...r, o: ovr(r.m) })).filter(r => r.o != null).sort((a, b) => b.o - a.o); if (!rows.length) return "";
+    const top = rows[0], pick = rows.filter(r => !r.ref && r.o >= top.o - .2).sort((a, b) => a.s - b.s)[0] || top, adi = rows.find(r => r.ref);
+    const alt = rows.filter(r => !r.ref && !isPaid(r) && r.p !== pick.p).sort((a, b) => b.o - a.o)[0];
+    return `<div class="pk" style="animation-delay:${i * 60}ms"><div class="k">${B_LABEL[k]} · ${B.groups[k].docs} doc${B.groups[k].docs > 1 ? "s" : ""}</div><div class="big">${esc(pick.p)}</div><div>${nameCell({ p: "", cost: pick.cost, ref: false }).replace(/^/, "")}</div><div class="d"><b>${pick.o.toFixed(1)} / 5</b> in ${pick.s.toFixed(1)} s${adi ? ` · Azure DI ${adi.o.toFixed(1)}` : ""}.<br>Pick = the fastest parser within 0.2 of the best score.${alt ? `<br>Free alternative: <b>${esc(alt.p)}</b> (${alt.o.toFixed(1)}, ${alt.s.toFixed(1)} s).` : ""}</div></div>`;
+  }).join("");
+}
+function benchLimits() {
+  const G = B.groups, n = G.Overall.docs, li = [];
+  li.push(`The set is ${n < 10 ? "small" : "modest"}: ${n} document${n > 1 ? "s" : ""} (${B_ORDER.slice(1).filter(k => G[k]).map(k => `${G[k].docs} ${B_LABEL[k].toLowerCase()}`).join(", ")}). Treat gaps under about 0.2 points as ties.`);
+  const thin = B_ORDER.slice(1).filter(k => G[k] && G[k].docs < 3).map(k => B_LABEL[k].toLowerCase());
+  if (thin.length) li.push(`Fewer than 3 documents for: ${thin.join(", ")}. Those results are a first look, not a finding.`);
+  const rk = Object.entries(B.reference_kinds).map(([k, v]) => `${v} against ${k}`).join(", ");
+  li.push(`Scored against: ${rk}. ${B.reference_kinds["azure_di"] ? "Where Azure DI is the reference, scores show closeness to Azure DI, not correctness, and Azure DI itself cannot be scored on those documents. " : ""}Only your own answer keys (.truth.md) measure accuracy.`);
+  const partial = G.Overall.rows.filter(r => r.n < n).map(r => `${r.p} (${r.n}/${n})`);
+  if (partial.length) li.push(`Some parsers were tried on fewer documents than the rest: ${partial.join(", ")}. Averages over different document sets are not directly comparable.`);
+  const bad = G.Overall.rows.filter(r => r.failed).map(r => `${r.p} (${r.failed})`);
+  if (bad.length) li.push(`A parser that crashed or timed out counts as 0 on that document, so it cannot rank higher by failing on hard files: ${bad.join(", ")}.`);
+  const vis = G.Overall.rows.filter(r => ["smart_pdf", "vlm"].includes(r.p)).map(r => r.p);
+  if (vis.length) li.push(`${vis.join(" and ")} use a vision model, so their chart scores are not like-for-like with the text-only parsers. They can also lose “No invented text” points because the model adds descriptions the answer key lacks.`);
+  li.push(`Speeds come from this machine and include model loading the first time an engine is used. ${B.pages} pages in total.`);
+  return li.map(x => `<li>${esc(x)}</li>`).join("");
+}
+function renderBench() {
+  const has = B.groups.Overall && B.groups.Overall.docs > 0, ov = has && B.groups.Overall;
+  $("b-empty").classList.toggle("hidden", has); $("b-body").classList.toggle("hidden", !has);
+  $("b-intro").textContent = has ? "Every row is computed from your own comparison runs, so the more documents you add, the more reliable it gets. Rows tagged “our combo” are written in this repo from existing pieces." : "Build a benchmark from your own documents: add files below, or run “Compare parsers” on a document with a reference.";
+  $("b-stats").innerHTML = has ? [[ov.docs, "documents"], [B.pages, "pages"], [ov.rows.length, "parsers"]].map(s => `<div class="bs"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("") : "";
+  $("b-builder").open = !has;
+  if (!has) return;
+  $("b-tabs").innerHTML = B_ORDER.filter(k => B.groups[k]).map(k => `<div class="tab" data-k="${k}">${B_LABEL[k]} · ${B.groups[k].docs}</div>`).join("");
+  document.querySelectorAll("#b-tabs .tab").forEach(t => t.onclick = () => benchShow(t.dataset.k));
+  benchShow(B.groups[bGroup] ? bGroup : "Overall");
+  $("b-pick").innerHTML = benchPick();
+  const tg = r => nameCell({ p: r.p, ref: r.ref, cost: r.cost }), maxS = Math.max(...B.speed.map(r => r.s_page || 0), .01);
+  $("b-big").innerHTML = `<tr><th>Parser</th><th class="n">Docs</th><th>Seconds per page</th><th class="n">Per document</th></tr>` + B.speed.map(r => `<tr class="${r.ref ? "ref" : ""}"><td>${tg(r)}</td><td class="n">${r.n}</td><td><span class="mini"><i style="width:${Math.max(3, (r.s_page || 0) / maxS * 100)}%"></i></span><b class="tmv">${r.s_page == null ? "–" : r.s_page.toFixed(2)}</b></td><td class="n">${bFmt(r.s_doc)}</td></tr>`).join("");
+  $("b-tfq").innerHTML = `<tr><th>Parser</th><th class="n">Tables / doc</th><th>Table cell match</th><th class="n">Figures / doc</th></tr>` + B.tables_figures.map(r => `<tr class="${r.ref ? "ref" : ""}"><td>${tg(r)}</td><td class="n">${bFmt(r.tables)}</td><td>${r.cell_match == null ? "–" : `<span class="mini"><i style="width:${Math.round(r.cell_match * 100)}%"></i></span><b class="tmv">${Math.round(r.cell_match * 100)}%</b>`}</td><td class="n">${bFmt(r.figures)}</td></tr>`).join("");
+  $("b-runs").innerHTML = `<tr><th>Document</th><th>Type</th><th class="n">Pages</th><th>Scored against</th><th class="n">Parsers</th><th></th></tr>` + B.runs.map(r => `<tr><td>${esc(r.file_name)}</td><td>${esc(B_LABEL[r.group] || r.group)}</td><td class="n">${r.pages}</td><td>${esc(r.reference_kind)}</td><td class="n">${r.parsers}</td><td><button class="btn secondary small" data-del="${r.id}">Remove</button></td></tr>`).join("");
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { await fetch("/api/benchmark/runs/" + b.dataset.del, { method: "DELETE" }); loadBench(); });
+  $("b-limits").innerHTML = benchLimits();
+}
+async function loadBench() {
+  try { B = await (await fetch("/api/benchmark")).json(); } catch { toast("Could not load the benchmark", "err"); return; }
+  renderBench();
+}/* batch runner: every file is compared with all parsers; the server saves each scored run */
+const bq = (name, st, cls) => { const d = document.createElement("div"); d.className = "it"; d.innerHTML = `<span class="pchip">${esc(name)}</span><span class="${cls || ""}">${esc(st)}</span><span class="t"></span>`; $("b-queue").prepend(d); return d; };
+const benchLive = LiveRun($("b-live"));
+async function runBenchBatch(files) {
+  files = [...files]; const truths = new Map(files.filter(f => f.name.endsWith(".truth.md")).map(f => [f.name.replace(/\.truth\.md$/, ""), f]));
+  const docs = files.filter(f => !f.name.endsWith(".truth.md")); if (!docs.length) { toast("Choose at least one document", "err"); return; }
+  busy(true, ""); $("b-queue").innerHTML = ""; let added = 0, i = 0;
+  for (const f of docs) {
+    i++;
+    const truth = truths.get(f.name) || truths.get(f.name.replace(/\.[^.]+$/, ""));
+    if (!truth && !$("b-paid").checked) { bq(f.name, "skipped: add a .truth.md or tick Azure DI as the reference", "bad"); continue; }
+    const row = bq(f.name, truth ? "waiting… (answer key found)" : "waiting… (Azure DI = reference)");
+    const t0 = performance.now();
+    try {
+      const fd = new FormData(); fd.append("file", f); fd.append("options", JSON.stringify({ prefer_quality: $("prefer_quality").checked })); fd.append("include_paid", $("b-paid").checked); fd.append("reference_text", truth ? await truth.text() : "");
+      benchLive.reset(`Document ${i} of ${docs.length}: ${f.name}`); row.children[1].textContent = "comparing all parsers…";
+      const j = await streamCompare(fd, benchLive);
+      if (j.benchmark_run) { added++; benchLive.finish(`${f.name} added to the benchmark`); row.children[1].className = "ok"; row.children[1].textContent = "added to the benchmark"; await loadBench(); }
+      else { benchLive.finish(`${f.name}: compared, not scored`); row.children[1].className = "bad"; row.children[1].textContent = "compared, but not scored (no reference available)"; }
+    } catch (e) { benchLive.fail(e.message); row.children[1].className = "bad"; row.children[1].textContent = "failed: " + e.message; }
+    row.children[2].textContent = fmtT(performance.now() - t0);
+  }
+  busy(false, ""); await loadBench(); toast(`${added} of ${docs.length} document(s) added`, added ? "good" : "err");
+}$("b-drop").onclick = () => $("b-files").click();
+$("b-drop").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("b-files").click(); } };
+$("b-files").onchange = () => { const n = $("b-files").files.length; $("b-drop").querySelector("b").textContent = n ? `${n} file${n > 1 ? "s" : ""} selected` : "Add documents to the benchmark"; };
+["dragenter", "dragover"].forEach(ev => $("b-drop").addEventListener(ev, e => { e.preventDefault(); $("b-drop").classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => $("b-drop").addEventListener(ev, e => { e.preventDefault(); $("b-drop").classList.remove("over"); }));
+$("b-drop").addEventListener("drop", e => { if (e.dataTransfer.files.length) { $("b-files").files = e.dataTransfer.files; $("b-files").onchange(); } });
+$("b-run").onclick = () => runBenchBatch($("b-files").files);
+$("b-clear").onclick = async () => { if (!confirm("Remove every document from the benchmark?")) return; await fetch("/api/benchmark", { method: "DELETE" }); loadBench(); };
+/* ============================== live run panel: which parser is running, and for how long ============================== */
+function fmtT(ms) { const s = ms / 1000; return s < 60 ? s.toFixed(1) + " s" : Math.floor(s / 60) + " m " + Math.round(s % 60) + " s"; }
+function LiveRun(el) {
+  let names = [], st = {}, isolated = [], timeout = 0, cur = null, curT0 = 0, t0 = 0, timer = null, done = 0, title = "";
+  const chip = n => `<div class="lc ${st[n].s}" data-n="${escA(n)}" title="${escA(st[n].tip || "")}"><span class="dot"></span><b>${esc(n)}</b>${isolated.includes(n) ? '<span class="own" title="Runs in its own process, so a hang or crash cannot stop the comparison">own process</span>' : ""}<span class="lt">${esc(st[n].t || (st[n].s === "wait" ? "waiting" : ""))}</span></div>`;
+  const draw = () => {
+    const p = el.querySelector(".lv-chips"); if (p) p.innerHTML = names.map(chip).join("");
+    const bar = el.querySelector(".lv-bar"); if (bar) bar.style.width = Math.max(4, Math.round(done / Math.max(names.length, 1) * 100)) + "%";
+  };
+  const tick = () => { const a = el.querySelector(".lv-t"), b = el.querySelector(".lv-tt"), c = cur && el.querySelector(`.lc.run[data-n="${CSS.escape(cur)}"] .lt`); const now = performance.now(); if (a) a.textContent = cur ? fmtT(now - curT0) : "–"; if (b) b.textContent = fmtT(now - t0); if (c) c.textContent = fmtT(now - curT0); };
+  const api = {
+    reset(heading) {
+      title = heading || "Comparing parsers"; names = []; st = {}; cur = null; done = 0; t0 = performance.now(); clearInterval(timer); timer = setInterval(tick, 150);
+      el.classList.remove("hidden");
+      el.innerHTML = `<div class="live"><div class="live-top"><div class="spin"></div><div class="lv-now"><b class="lv-parser">Reading the document…</b><span class="lv-sub">${esc(title)}</span></div><div class="lv-clock"><b class="lv-t">–</b><small>this parser</small></div><div class="lv-clock"><b class="lv-tt">0.0 s</b><small>total</small></div></div><div class="bar"><i class="lv-bar"></i></div><div class="lv-chips"></div><div class="lv-foot"></div></div>`;
+    },
+    start(ev) {
+      names = ev.parsers.map(p => p.name); isolated = ev.isolated || []; timeout = ev.timeout_sec || 0; names.forEach(n => st[n] = { s: "wait" });
+      el.querySelector(".lv-sub").textContent = `${title} · ${names.length} parsers to run · ${ev.profile ? ev.file_type.toUpperCase() + ", " + ev.profile.classification + ", " + (ev.profile.page_count || 1) + " page(s)" : ""}`;
+      el.querySelector(".lv-foot").textContent = timeout > 0 ? `Heavy engines run in their own process and are stopped after ${timeout} s so one stuck parser cannot block the rest.` : "";
+      draw();
+    },
+    running(n) { cur = n; curT0 = performance.now(); if (st[n]) st[n] = { s: "run" }; el.querySelector(".lv-parser").textContent = n; el.querySelector(".lv-sub").textContent = `Parser ${names.indexOf(n) + 1} of ${names.length}${isolated.includes(n) ? " · own process" + (timeout ? ", stops after " + timeout + " s" : "") : " · in-process"}`; draw(); tick(); },
+    parserDone(ev) { done++; const ok = ev.status === "ok"; st[ev.parser] = { s: ok ? "ok" : "err", t: ok ? fmtT(ev.elapsed_ms) : (/timeout/i.test(ev.error || "") ? "timed out · " + fmtT(ev.elapsed_ms) : "failed · " + fmtT(ev.elapsed_ms)), tip: ev.error || "" }; cur = null; draw(); tick(); },
+    scoring() { cur = null; el.querySelector(".lv-parser").textContent = "Scoring the results…"; el.querySelector(".lv-sub").textContent = "Comparing every output with the reference"; el.querySelector(".lv-t").textContent = "–"; },
+    finish(msg) { clearInterval(timer); tick(); const l = el.querySelector(".live"); l.classList.add("finished"); l.querySelector(".spin").style.display = "none"; el.querySelector(".lv-parser").textContent = msg || "Finished"; el.querySelector(".lv-sub").textContent = `${done} of ${names.length} parsers finished in ${fmtT(performance.now() - t0)}`; el.querySelector(".lv-bar").style.width = "100%"; el.querySelector(".lv-t").textContent = "–"; },
+    fail(msg) { clearInterval(timer); const l = el.querySelector(".live"); if (!l) return; l.classList.add("failed"); l.querySelector(".spin").style.display = "none"; el.querySelector(".lv-parser").textContent = "Stopped"; el.querySelector(".lv-sub").textContent = msg; },
+    elapsed() { return performance.now() - t0; }
+  };
+  return api;
+}
+/* one streaming comparison; `live` receives each step as it happens */
+async function streamCompare(fd, live) {
+  const r = await fetch("/api/compare/upload/stream", { method: "POST", body: fd });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || r.statusText); }
+  const rd = r.body.getReader(), dec = new TextDecoder(); let buf = "", result = null;
+  const handle = ev => {
+    if (ev.event === "start") live.start(ev); else if (ev.event === "running") live.running(ev.parser); else if (ev.event === "parser") live.parserDone(ev);
+    else if (ev.event === "scoring") live.scoring(); else if (ev.event === "error") throw new Error(ev.detail); else if (ev.event === "done") result = ev.result;
+  };
+  for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let k; while ((k = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, k).trim(); buf = buf.slice(k + 1); if (line) handle(JSON.parse(line)); } }
+  if (buf.trim()) handle(JSON.parse(buf));
+  if (!result) throw new Error("The server closed the connection before the comparison finished.");
+  return result;
+}
+const cmpLive = LiveRun($("cmp-live"));
+/* ============================== Compare + Parse (logic unchanged) ============================== */
 async function call(kind) {
   // kind: parse | compare | job
   const base = { upload: { parse: "/api/parse/upload", compare: "/api/compare/upload", job: "/api/jobs/upload" },
@@ -199,25 +916,32 @@ function leaderboard(c) {
   const bar = v => v == null ? "" : `<div style="background:var(--line);border-radius:4px;height:8px;width:120px"><div style="background:${v >= .9 ? "var(--ok)" : v >= .5 ? "var(--accent)" : "var(--bad)"};height:8px;border-radius:4px;width:${Math.round(v * 100)}%"></div></div>`;
   const rows = order.map((n, i) => {
     const r = byName[n];
-    if (r.status !== "ok") return `<tr><td>–</td><td>${esc(n)}</td><td colspan="5" class="bad">failed: ${esc(r.error || "")}</td></tr>`;
+    if (r.status !== "ok") return `<tr><td>–</td><td>${esc(n)}</td><td colspan="6" class="bad">failed: ${esc(r.error || "")}</td></tr>`;
     return `<tr><td>${i + 1}</td><td><b>${esc(n)}</b></td><td>${bar(r.score)}${pct(r.score)}</td>
-      <td>${c.has_reference ? pct(r.text_score) : "–"}</td><td>${c.has_reference ? pct(r.headings_score) : "–"}</td><td>${c.has_reference ? pct(r.tables_score) : "–"}</td>
+      <td>${c.has_reference ? pct(r.text_score) : "–"}</td><td>${c.has_reference ? pct(r.headings_score) : "–"}</td><td>${c.has_reference ? pct(r.tables_score) : "–"}</td><td>${c.has_reference ? pct(r.similarity) : "–"}</td>
       <td>${(Number(r.elapsed_ms || 0) / 1000).toFixed(1)}s</td></tr>`;
   }).join("");
-  return `<table><tr><th>#</th><th>parser</th><th>score</th><th>text</th><th>headings</th><th>tables</th><th>time</th></tr>${rows}</table>
-    <p class="muted">"–" under headings/tables means the reference text has none of those (not counted).</p>`;
-}
-function renderCompare(c) {
-  const best = c.ranking[0];
+  const M = ["Text Accuracy", "Table Reconstruction", "Chart Understanding", "Infographic Parsing", "Entity & Numeric Fidelity", "Structure", "Completeness", "Hallucination Penalty"];
+  lastSC = order.filter(n => byName[n].status === "ok" && (byName[n].scorecard || n === "azure_di")).map(n => {
+    const r = byName[n];
+    return { p: n, cost: r.cost, m: M.map(m => r.scorecard ? (r.scorecard[m] ?? null) : null), t: r.scorecard ? r.total : null, s: Number(r.elapsed_ms || 0) / 1000, ref: n === "azure_di" };
+  });
+  const tested = M.map((_, i) => lastSC.some(r => r.m[i] != null));
+  order.filter(n => byName[n].status !== "ok").forEach(n => { const r = byName[n], to = /timeout/i.test(r.error || ""); lastSC.push({ p: n, cost: r.cost, m: tested.map(t => t ? 0 : null), t: 0, s: Number(r.elapsed_ms || 0) / 1000, ref: false, note: to ? "timed out" : "failed", noteTitle: r.error || "" }); });
+  const scored = lastSC.some(r => r.t != null);
+  const classic = `<details style="margin-top:18px"><summary>Show the classic score table (score, text, headings, tables, order)</summary><div class="sc-wrap" style="margin-top:10px"><table class="simple"><tr><th>#</th><th>parser</th><th>score</th><th>text</th><th>headings</th><th>tables</th><th>order</th><th>time</th></tr>${rows}</table></div><p class="muted">"–" under headings/tables means the reference text has none of those (not counted).</p></details>`;
+  return (scored ? `<div id="sb-compare" style="margin-top:6px"></div>` : `<div class="warn" style="margin-top:8px"><b>This run has no parameter scores.</b> Scores need something to compare against. Paste the correct text under “Reference text for scoring”, or tick “Include paid parsers” so Azure DI acts as the reference, then run again.</div>`) + classic;
+}function renderCompare(c) {
+  const best = c.best || c.ranking[0];
   $("summary").innerHTML = `<div class="kv">
-    <div>Document</div><div>${esc(c.file_name)} · ${esc(c.file_type)} / ${esc(c.profile.classification)} · ${c.profile.page_count} page(s)</div>
-    <div>Best parser</div><div><b>${esc(best || "n/a")}</b> ${c.has_reference ? "" : '<span class="pill">not verified</span>'}</div>
+    <div>Document</div><div><b>${esc(c.file_name)}</b> · ${esc(c.file_type)} / ${esc(c.profile.classification)} · ${c.profile.page_count} page(s)</div>
+    ${c.has_reference ? "" : `<div>Best parser</div><div><b>${esc(best || "n/a")}</b> <span class="pill">not verified</span><div class="muted">${esc(c.why || "")}</div></div>`}
     <div>Router's current pick</div><div>${esc(c.router_would_pick || "not available")}</div></div>
     ${c.has_reference
-      ? '<p class="ok">Scored against your reference text: text = right words, headings = headings detected, tables = table cells correct.</p>'
-      : '<p class="bad">No reference text given, so this ranking only compares parsers with each other (more words + agreement). It does NOT prove correctness. Paste the correct text in "Reference text" and run again for a real score.</p>'}
+      ? '<p class="ok" style="margin:0 0 14px">✓ Scored against ' + esc(c.reference_kind) + (c.reference_kind === "azure_di" ? ". Scores show closeness to Azure DI, not proven correctness. Add your own reference text for a real accuracy score." : ".") + "</p>"
+      : '<p class="bad" style="margin:0 0 14px">No reference text was given, so parsers are only compared with each other (more words and agreement). That does not prove correctness. Paste the correct text under “Reference text for scoring” and run again.</p>'}
     ${leaderboard(c)}`;
-  const cols = ["parser", "status", "elapsed_ms", "pages", "words", "headings", "tables", "images", "coverage", "agreement", "heuristic", "f1", "similarity"];
+  if ($("sb-compare")) scoreboard($("sb-compare"), { rows: lastSC, context: `Scored against ${c.reference_kind || "the reference"}.` });  const cols = ["parser", "status", "elapsed_ms", "pages", "words", "headings", "tables", "images", "coverage", "agreement", "heuristic", "f1", "similarity"];
   const outputs = c.results.map(r => {
     const shortStats = r.status === "ok"
       ? `${esc(r.pages ?? "?")} pages · ${esc(r.words ?? 0)} words · ${(Number(r.elapsed_ms || 0) / 1000).toFixed(1)} seconds`
@@ -230,6 +954,7 @@ function renderCompare(c) {
   const technical = "<details><summary>Show technical measurements</summary><div style=\"overflow:auto;margin-top:8px\"><table><tr>" + cols.map(x => `<th>${esc(x)}</th>`).join("") + "</tr>" +
     c.results.map(r => "<tr>" + cols.map(x => `<td class="${x === "status" ? (r.status === "ok" ? "ok" : "bad") : ""}">${esc(r[x] ?? "")}</td>`).join("") + "</tr>").join("") + "</table></div></details>";
   $("out-compare").innerHTML = `<h3>What each parser read</h3>${outputs}${technical}`;
+  $("out-compare").dataset.ready = "1";
   $("out-json").textContent = JSON.stringify(c, null, 2);
   $("out-md").textContent = c.report_markdown;
   showView("compare");
@@ -243,10 +968,185 @@ async function pollJob(id) {
     await new Promise(r => setTimeout(r, 1000));
   }
 }
+async function run(label, fn) {
+  busy(true, label); let err = "";
+  try { await fn(); } catch (e) { err = e.message; toast(e.message, "err"); }
+  busy(false, err ? "Error: " + err : "");
+  $("status").className = err ? "bad" : "muted";
+}
+$("btn-parse").onclick = () => run("parsing…", async () => renderParse(await call("parse")));
+$("btn-compare").onclick = () => run("running every parser…", async () => {
+  if (srcMode !== "upload") { renderCompare(await call("compare")); toast("Comparison ready", "good"); return; }
+  const f = $("file").files[0]; if (!f) throw new Error("Choose a file first");
+  const fd = new FormData(); fd.append("file", f); fd.append("options", JSON.stringify(options())); fd.append("reference_text", $("reference").value); fd.append("include_paid", $("include_paid").checked);
+  $("summary").innerHTML = ""; cmpLive.reset(`Comparing ${f.name}`);
+  try { const c = await streamCompare(fd, cmpLive); cmpLive.finish("Comparison finished"); renderCompare(c); toast("Comparison ready", "good"); }
+  catch (e) { cmpLive.fail(e.message); throw e; }
+});
+$("btn-job").onclick = () => run("queueing…", async () => { const j = await call("job"); await pollJob(j.job_id); });
 
-$("btn-parse").onclick = async () => { busy(true, "parsing…"); try { renderParse(await call("parse")); $("status").textContent = ""; } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
-$("btn-compare").onclick = async () => { busy(true, "running every parser…"); try { renderCompare(await call("compare")); $("status").textContent = ""; } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
-$("btn-job").onclick = async () => { busy(true, "queueing…"); try { const j = await call("job"); await pollJob(j.job_id); } catch (e) { $("status").textContent = "Error: " + e.message; } busy(false, $("status").textContent); };
+/* ============================== Smart Extract ============================== */
+const KIND_LABEL = { heading: "Heading", text: "Text", table: "Table", figure: "Figure", scanned: "Scanned page", image: "Image" };
+const KIND_PLURAL = { heading: "Headings", text: "Text", table: "Tables", figure: "Figures & charts", scanned: "Scanned pages", image: "Images" };
+let X = null;   // last extraction
+
+/* --- tiny Markdown renderer (escapes everything; only table tags from HTML tables are kept) --- */
+function inline(s) { return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>"); }
+function safeTable(html) {
+  const t = document.createElement("template"); t.innerHTML = html; const ok = new Set(["TABLE", "THEAD", "TBODY", "TR", "TH", "TD", "CAPTION"]);
+  const walk = n => { let out = ""; n.childNodes.forEach(c => { if (c.nodeType === 3) out += esc(c.textContent); else if (c.nodeType === 1) { const inner = walk(c); out += ok.has(c.tagName) ? `<${c.tagName.toLowerCase()}${(c.tagName === "TD" || c.tagName === "TH") && c.getAttribute("colspan") ? ` colspan="${parseInt(c.getAttribute("colspan")) || 1}"` : ""}>${inner}</${c.tagName.toLowerCase()}>` : inner; } }); return out; };
+  return walk(t.content);
+}
+function md2html(md) {
+  const L = String(md || "").replace(/\r/g, "").split("\n"); let out = "", i = 0;
+  const isSep = l => /^\s*\|?[\s:|-]+\|?\s*$/.test(l) && l.includes("-");
+  while (i < L.length) {
+    const l = L[i];
+    if (!l.trim()) { i++; continue; }
+    if (/^\s*<table/i.test(l)) { let h = ""; while (i < L.length) { h += L[i] + "\n"; if (/<\/table>/i.test(L[i])) { i++; break; } i++; } out += safeTable(h); continue; }
+    if (l.trim().startsWith("|")) {
+      const rows = []; while (i < L.length && L[i].trim().startsWith("|")) { if (!isSep(L[i])) rows.push(L[i].trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim())); i++; }
+      out += "<table>" + rows.map((r, k) => "<tr>" + r.map(c => k === 0 ? `<th>${inline(c)}</th>` : `<td>${inline(c)}</td>`).join("") + "</tr>").join("") + "</table>"; continue;
+    }
+    const h = /^(#{1,6})\s+(.*)$/.exec(l); if (h) { const n = Math.min(h[1].length, 4); out += `<h${n}>${inline(h[2])}</h${n}>`; i++; continue; }
+    if (/^\s*[-*•]\s+/.test(l)) { let li = ""; while (i < L.length && /^\s*[-*•]\s+/.test(L[i])) { li += `<li>${inline(L[i].replace(/^\s*[-*•]\s+/, ""))}</li>`; i++; } out += `<ul>${li}</ul>`; continue; }
+    if (/^\s*\d+[.)]\s+/.test(l)) { let li = ""; while (i < L.length && /^\s*\d+[.)]\s+/.test(L[i])) { li += `<li>${inline(L[i].replace(/^\s*\d+[.)]\s+/, ""))}</li>`; i++; } out += `<ol>${li}</ol>`; continue; }
+    if (l.startsWith(">")) { let q = []; while (i < L.length && L[i].startsWith(">")) { q.push(L[i].replace(/^>\s?/, "")); i++; } out += `<blockquote>${q.map(inline).join("<br>")}</blockquote>`; continue; }
+    const p = []; while (i < L.length && L[i].trim() && !/^(#{1,6}\s|\s*[-*•]\s|\s*\d+[.)]\s|>|\s*\||\s*<table)/.test(L[i])) { p.push(L[i]); i++; }
+    if (!p.length) { p.push(L[i]); i++; }
+    out += `<p>${p.map(inline).join("<br>")}</p>`;
+  }
+  return out;
+}
+
+/* --- run + stream --- */
+/* --- how to read: one parser for the whole document, or the best parser for each part --- */
+const X_MODE_HINT = { document: "Classifies the file, then one parser, the one the scorecard recommends for that type of document, reads all of it.", part: "Cuts every page into headings, text, tables, figures and scans and gives each part to its own parser." };
+let xmode = store.get("xmode") === "part" ? "part" : "document";
+function setXMode(m) { xmode = m; store.set("xmode", m); document.querySelectorAll("#x-mode div").forEach(d => d.classList.toggle("active", d.dataset.xmode === m)); $("x-mode-hint").textContent = X_MODE_HINT[m]; }
+document.querySelectorAll("#x-mode div").forEach(d => d.onclick = () => setXMode(d.dataset.xmode));
+setXMode(xmode);
+
+async function runExtract() {
+  const f = $("file").files[0]; if (!f) { toast("Choose a file first", "err"); drop.animate([{ transform: "translateX(0)" }, { transform: "translateX(-8px)" }, { transform: "translateX(8px)" }, { transform: "translateX(0)" }], { duration: 300 }); return; }
+  busy(true, ""); X = null;
+  $("x-empty").classList.add("hidden"); $("x-result").classList.add("hidden"); $("x-progress").classList.remove("hidden");
+  $("x-feed").innerHTML = ""; $("x-bar").style.width = "4%"; $("x-now").textContent = "Reading " + f.name + "…";
+  const fd = new FormData(); fd.append("file", f); fd.append("options", JSON.stringify({ prefer_quality: $("prefer_quality").checked, ...(parseInt($("max_pages").value) > 0 ? { max_pages: parseInt($("max_pages").value) } : {}) })); fd.append("include_paid", $("include_paid").checked); fd.append("mode", xmode);
+  let result = null, total = 1, nSeg = 0;
+  try {
+    const r = await fetch("/api/extract/upload/stream", { method: "POST", body: fd });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || r.statusText); }
+    const rd = r.body.getReader(), dec = new TextDecoder(); let buf = "";
+    const handle = ev => {
+      if (ev.event === "start") { total = Math.max(ev.profile.page_count || 1, 1); $("x-now").textContent = `${ev.file_type.toUpperCase()} · ${ev.profile.classification} · ${ev.profile.page_count || 1} page(s) — dissecting…`; }
+      else if (ev.event === "page") { total = ev.pages || total; $("x-bar").style.width = Math.max(6, Math.round((ev.page - 1) / total * 100)) + "%"; $("x-now").textContent = `Page ${ev.page} of ${total} — finding headings, text, tables and figures…`; }
+      else if (ev.event === "working") { $("x-now").textContent = ev.kind === "document" ? `Reading the whole document with ${ev.parser}…` : `Page ${ev.page} — reading a ${KIND_LABEL[ev.kind] || ev.kind} with ${ev.parser}…`; }
+      else if (ev.event === "segment") { const s = ev.segment; nSeg++; const d = document.createElement("div"); d.className = "it"; d.innerHTML = `<span class="kind" data-k="${s.kind}">${KIND_LABEL[s.kind] || s.kind}</span><span>p${s.page}</span><span class="pchip">${esc(s.parser)}</span><span class="t">${s.ms ? (s.ms / 1000).toFixed(1) + "s" : ""}</span>`; $("x-feed").prepend(d); }
+      else if (ev.event === "error") throw new Error(ev.detail);
+      else if (ev.event === "done") result = ev.result;
+    };
+    for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let k; while ((k = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, k).trim(); buf = buf.slice(k + 1); if (line) handle(JSON.parse(line)); } }
+    if (buf.trim()) handle(JSON.parse(buf));
+    if (!result) throw new Error("The server closed the connection before finishing.");
+    $("x-bar").style.width = "100%";
+    await new Promise(r => setTimeout(r, 350));
+    X = result; renderExtract(result);
+    $("x-progress").classList.add("hidden"); $("x-result").classList.remove("hidden");
+    toast(`Done: ${result.summary.segments} parts read by ${Object.keys(result.summary.parsers_used).length} parser(s)`, "good");
+    $("x-result").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    $("x-progress").classList.add("hidden"); $("x-empty").classList.remove("hidden"); toast(e.message, "err"); $("status").textContent = "Error: " + e.message;
+  }
+  busy(false, $("status").textContent);
+}
+$("btn-extract").onclick = runExtract;
+
+/* --- render --- */
+function bodyHtml(s) { if (s.note) return (s.image ? `<img class="figimg" src="${escA(s.image)}" alt="figure">` : "") + `<div class="warn" style="margin:0"><b>Not read.</b> ${esc(s.note)}</div>`; return (s.image ? `<img class="figimg" src="${escA(s.image)}" alt="figure">` : "") + `<div class="md">${md2html(s.content) || '<span class="muted">(nothing was read from this part)</span>'}</div>`; }
+function routingCard(rt) {
+  if (!rt) return "";
+  const block = b => {
+    if (!b || !b.ranking.length) return `<div class="rblock"><h4>${esc(b ? b.label : "")}</h4><p class="muted">No scorecard data for the parsers available here yet. Run Compare parsers with a reference text to add some.</p></div>`;
+    const rows = b.ranking.map((e, i) => `<div class="rrow${e.parser === b.chosen ? " win" : ""}"><span class="rn">${e.parser === b.chosen ? "★ " : ""}${esc(e.parser)}${e.live ? `<em class="ctag free">+${e.live} yours</em>` : ""}</span><span class="rt"><i style="width:${Math.max(2, e.score / 5 * 100)}%"></i></span><span class="rv">${e.score.toFixed(1)}</span><span class="rs">${e.secs}s</span></div>`).join("");
+    return `<div class="rblock"><h4>${esc(b.label)} <small>ranked by ${esc(b.metric)}</small></h4>${rows}</div>`;
+  };
+    return `<section class="card flat" style="margin-bottom:16px"><h2>Scorecard behind these choices</h2>
+    <p class="note" style="margin:0 0 12px">This document was classified as <b>${esc(rt.group)}</b>. The parser marked ★ is the one used: it is what the test reports (REPORT.md, BENCHMARK_REPORT.md) recommend for this kind of document. The bars are the measured scores out of 5 for the best parsers on documents like this, so you can see how the choice compares. Scores come from the truth-scored test run plus any Compare runs you scored with your own reference text.</p>
+    <div class="rgrid">${block(rt.document)}${block(rt.tables)}${block(rt.scanned)}</div></section>`;
+}
+function renderExtract(r) {
+  const sm = r.summary, kinds = Object.keys(sm.by_kind), hasMap = r.pages.some(p => p.preview);
+  const stat = (n, label, i) => `<div class="stat" style="animation-delay:${i * 70}ms"><b data-n="${n}">0</b><span>${label}</span></div>`;
+  const routeRows = kinds.sort((a, b) => KIND_ORDER(a) - KIND_ORDER(b)).map((k, i) => {
+    const first = r.segments.find(s => s.kind === k);
+    const chips = Object.entries(sm.by_kind[k].parsers).map(([p, c]) => `<span class="pchip">${esc(p)}<em>×${c}</em></span>`).join('<span class="arrow">+</span>');
+    return `<div class="r" style="animation-delay:${i * 80}ms"><span class="kind" data-k="${k}">${KIND_PLURAL[k] || k} · ${sm.by_kind[k].count}</span><div class="to"><span class="arrow">→</span>${chips}</div><div class="why">${esc(first.why)}</div></div>`;
+  }).join("");
+  const legend = kinds.map(k => `<button class="kind" data-k="${k}" data-toggle="${k}" title="Show / hide ${KIND_PLURAL[k]}">${KIND_PLURAL[k]}</button>`).join("");
+  const warns = (r.warnings || []).length ? `<div class="warn"><b>Heads up</b><br>${r.warnings.map(esc).join("<br>")}</div>` : "";
+  const empties = sm.empty_segments.length ? `<div class="warn">${sm.empty_segments.length} part(s) came back empty (${sm.empty_segments.map(esc).join(", ")}). Try "Prefer quality" or "Include paid parsers".</div>` : "";
+  const map = hasMap ? `<div class="map" id="x-map">${r.pages.map(p => `<div class="pg" data-page="${p.page}">${p.preview ? `<span class="pn">Page ${p.page}</span><img src="${escA(p.preview)}" alt="page ${p.page}" loading="lazy">` : `<div class="nopic">Page ${p.page}: preview not rendered (first 15 pages only)</div>`}${r.segments.filter(s => s.page === p.page && p.width).flatMap(s => s.bboxes.map(b => `<div class="bx" data-k="${s.kind}" data-id="${s.id}" style="left:${b[0] / p.width * 100}%;top:${b[1] / p.height * 100}%;width:${(b[2] - b[0]) / p.width * 100}%;height:${(b[3] - b[1]) / p.height * 100}%"><span class="tg2">${KIND_LABEL[s.kind]} · ${esc(s.parser)}</span></div>`)).join("")}</div>`).join("")}</div>` : "";
+  const parts = r.segments.map((s, i) => `<article class="part" data-k="${s.kind}" data-id="${s.id}" style="animation-delay:${Math.min(i, 14) * 45}ms">
+      <div class="hd"><span class="kind" data-k="${s.kind}">${KIND_LABEL[s.kind]}${s.figure_kind ? " · " + esc(s.figure_kind) : ""}</span><span class="muted">${r.pages.length > 1 || r.file_type === "pdf" ? "Page " + s.page : ""}</span>
+        <span class="pchip" title="Read by this parser">${esc(s.parser)}</span><span class="sp">${s.words} words${s.ms ? " · " + (s.ms / 1000).toFixed(1) + "s" : ""}</span></div>
+      <div class="body">${bodyHtml(s)}</div>
+      <button class="more" data-more>Show more</button> <button class="more" data-why style="margin-left:14px">Why ${esc(s.parser)}?</button>
+      <div class="whybox hidden"></div></article>`).join("");
+  const docAnnot = r.segments.map(s => `<div class="seg" data-k="${s.kind}" data-id="${s.id}"><span class="tag kind" data-k="${s.kind}">${KIND_LABEL[s.kind]} · ${esc(s.parser)}</span>${bodyHtml(s)}</div>`).join("");
+  const j = JSON.stringify(r, (k, v) => k === "preview" || k === "image" ? "…" : v, 2);
+  $("x-result").innerHTML = `
+    <div class="stats">${stat(sm.segments, "parts found", 0)}${stat(r.pages.length, "page(s)", 1)}${stat(sm.words, "words extracted", 2)}${stat(Object.keys(sm.parsers_used).length, "parsers used", 3)}${stat(+(sm.total_ms / 1000).toFixed(1), "seconds", 4)}</div>
+    ${warns}${empties}
+    <section class="card flat" style="margin-bottom:16px"><h2>Who read what</h2><div class="route">${routeRows}</div></section>
+    ${routingCard(sm.routing)}
+    <section class="card flat"><div class="toolbar">
+        <div class="tabs" style="margin:0" id="x-tabs"><div class="tab active" data-xv="parts">Parts</div><div class="tab" data-xv="doc">Extracted document</div><div class="tab" data-xv="md">Markdown</div><div class="tab" data-xv="json">JSON</div></div>
+        <div class="grow"><button class="btn small secondary" id="x-copy">Copy Markdown</button><button class="btn small" id="x-dl">Download .md</button></div></div>
+      <div class="legend" id="x-legend">${legend}</div>
+      <div class="xwrap ${hasMap ? "" : "nomap"}" id="x-wrap">${map}<div>
+        <div id="xv-parts" class="view"><div class="partlist">${parts}</div></div>
+        <div id="xv-doc" class="view hidden"><div style="margin-bottom:10px"><label class="switch" style="margin:0"><input type="checkbox" id="x-annot" checked><span class="tg"></span><span><b>Show who read each part</b></span></label></div><div class="doc annot" id="x-doc">${docAnnot}</div></div>
+        <div id="xv-md" class="view hidden"><pre id="x-md"></pre></div>
+        <div id="xv-json" class="view hidden"><pre id="x-json"></pre></div>
+      </div></div></section>`;
+  $("x-md").textContent = r.markdown || "(empty)"; $("x-json").textContent = j;
+  r.segments.forEach(s => { const b = document.querySelector(`.part[data-id="${s.id}"] .whybox`); if (b) b.innerHTML = `<div class="why"><b>${esc(s.parser)}</b> — ${esc(s.why)}<div class="tried">${s.tried.map(t => `<span class="pchip ${t.status === "ok" ? "" : t.status === "error" ? "err" : "empty"}" title="${escA(t.error || t.note || "")}">${esc(t.parser)} <em>${t.status}${t.ms ? " · " + (t.ms / 1000).toFixed(1) + "s" : ""}</em></span>`).join("")}</div></div>`; });
+  document.querySelectorAll(".part .body").forEach(b => { if (b.scrollHeight > 235) b.classList.add("fade"); else b.parentElement.querySelector("[data-more]").classList.add("hidden"); });
+  document.querySelectorAll("#x-result [data-n]").forEach((el, i) => setTimeout(() => countUp(el, parseFloat(el.dataset.n)), i * 80));
+  wireExtract();
+}
+function KIND_ORDER(k) { return ["heading", "text", "table", "figure", "scanned", "image"].indexOf(k); }
+
+function wireExtract() {
+  const root = $("x-result");
+  root.querySelectorAll("[data-xv]").forEach(t => t.onclick = () => {
+    root.querySelectorAll("[data-xv]").forEach(x => x.classList.toggle("active", x === t));
+    ["parts", "doc", "md", "json"].forEach(n => $("xv-" + n).classList.toggle("hidden", n !== t.dataset.xv));
+  });
+  root.querySelectorAll("[data-toggle]").forEach(b => b.onclick = () => { b.classList.toggle("off"); $("x-wrap").classList.toggle("hide-" + b.dataset.toggle, b.classList.contains("off")); $("x-doc").classList.toggle("hide-" + b.dataset.toggle, b.classList.contains("off")); });
+  root.querySelectorAll("[data-more]").forEach(b => b.onclick = () => { const p = b.closest(".part"); p.classList.toggle("open"); b.textContent = p.classList.contains("open") ? "Show less" : "Show more"; });
+  root.querySelectorAll("[data-why]").forEach(b => b.onclick = () => b.parentElement.querySelector(".whybox").classList.toggle("hidden"));
+  $("x-annot").onchange = e => $("x-doc").classList.toggle("annot", e.target.checked);
+  // two-way highlight: hovering a box lights the part (and the other way round); clicking jumps there
+  const lit = (id, on) => root.querySelectorAll(`[data-id="${id}"]`).forEach(el => el.classList.toggle("hot", on));
+  root.addEventListener("pointerover", e => { const el = e.target.closest("[data-id]"); if (el) lit(el.dataset.id, true); });
+  root.addEventListener("pointerout", e => { const el = e.target.closest("[data-id]"); if (el) lit(el.dataset.id, false); });
+  root.querySelectorAll(".bx").forEach(b => b.onclick = () => {
+    root.querySelector('[data-xv="parts"]').click();
+    const p = root.querySelector(`.part[data-id="${b.dataset.id}"]`); if (p) { p.scrollIntoView({ behavior: "smooth", block: "center" }); p.animate([{ transform: "scale(1.02)" }, { transform: "scale(1)" }], { duration: 500, easing: "ease-out" }); }
+  });
+  root.querySelectorAll(".part").forEach(p => p.addEventListener("pointerenter", () => { const bx = root.querySelector(`.bx[data-id="${p.dataset.id}"]`); const map = $("x-map"); if (bx && map) { const mr = map.getBoundingClientRect(), br = bx.getBoundingClientRect(); if (br.top < mr.top || br.bottom > mr.bottom) map.scrollBy({ top: br.top - mr.top - mr.height / 3, behavior: "smooth" }); } }));
+  $("x-copy").onclick = async () => { try { await navigator.clipboard.writeText(X.markdown); toast("Markdown copied", "good"); } catch { toast("Copy was blocked by the browser", "err"); } };
+  $("x-dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([X.markdown], { type: "text/markdown" })); a.download = X.file_name.replace(/\.[^.]+$/, "") + ".extracted.md"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+}
+
+/* ============================== keyboard + start ============================== */
+document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); const b = { extract: "btn-extract", compare: "btn-compare", parse: "btn-parse" }[mode]; if (b && !$(b).disabled) $(b).click(); } });
+window.addEventListener("resize", () => setMode(mode));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setMode(mode));
+const MODES = ["extract", "compare", "bench", "parse"];
+setMode(MODES.includes(location.hash.slice(1)) ? location.hash.slice(1) : (MODES.includes(store.get("mode")) ? store.get("mode") : "extract"));
 </script>
 </body>
 </html>

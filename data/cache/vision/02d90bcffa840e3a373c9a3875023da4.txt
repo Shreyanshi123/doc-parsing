@@ -1,0 +1,27 @@
+Type: architecture diagram
+
+Entities/boxes:
+- Pretraining data
+- Self-supervised learning
+- Llama 2
+- Human preference data
+- Safety Reward Model
+- Helpful Reward Model
+- Rejection Sampling
+- Proximal Policy Optimization
+- RLHF
+- Supervised fine-tuning
+- Llama-2-chat
+
+Connections:
+- Pretraining data -> Self-supervised learning
+- Self-supervised learning -> Llama 2
+- Llama 2 -> Supervised fine-tuning
+- Supervised fine-tuning -> Llama-2-chat
+- Human preference data -> Safety Reward Model
+- Human preference data -> Helpful Reward Model
+- Safety Reward Model -> Rejection Sampling
+- Helpful Reward Model -> Rejection Sampling
+- Rejection Sampling <-> Proximal Policy Optimization
+- Proximal Policy Optimization -> RLHF
+- RLHF -> Llama-2-chat

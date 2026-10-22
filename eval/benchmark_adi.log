@@ -1,0 +1,27 @@
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+[mixed] AI_agent_mixed.pdf
+   azure_di             12.0s  0.99 avg  
+[digital] AI_agent_p1-3.pdf
+   azure_di              9.7s  0.99 avg  
+[scanned] AI_agent_scanned_clean.pdf
+   azure_di             11.0s  0.99 avg  
+[scanned] AI_agent_scanned_noisy.pdf
+   azure_di             11.3s  0.99 avg  
+[digital + charts/images] chart_sample.pdf
+   azure_di              9.2s  0.54 avg  
+[digital + tables] digital.pdf
+   azure_di              6.9s  1.00 avg  
+[digital + charts/images] Generative_AI_p1-6.pdf
+   azure_di             12.8s  0.96 avg  
+[mixed] mixed.pdf
+   azure_di             11.9s  1.00 avg  
+[digital + charts/images] Overview of Amazon Web Services - Overview of Amazon Web Services.pdf
+   azure_di              9.7s  0.59 avg  
+[digital + charts/images] PIB_home_p1-6.pdf
+   azure_di             12.1s  0.83 avg  
+[scanned] scanned.pdf
+   azure_di              7.1s  1.00 avg  
+[digital + charts/images] SOP  Income Tax Computation Sheet-2026-27.pdf
+   azure_di             12.2s  0.36 avg  
+
+wrote eval/benchmark.md

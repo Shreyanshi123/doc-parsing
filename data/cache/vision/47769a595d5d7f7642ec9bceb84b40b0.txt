@@ -1,0 +1,53 @@
+Type: architecture diagram
+
+Boxes/entities:
+- Input
+- Input Embedding
+- Positional Encoding
+- Dropout
+- Transformer Block (Layer 1, Layer 2, Layer N)
+- LayerNorm
+- Linear
+- Softmax
+- Output
+- Transformer Block Input
+- LayerNorm (inside Transformer Block)
+- Linear (inside Transformer Block)
+- Dropout (inside Transformer Block)
+- Matmul (Head 1, Head 2, Head N)
+- Mask (Head 1, Head 2, Head N)
+- Softmax (Head 1, Head 2, Head N)
+- Dropout (Head 1, Head 2, Head N)
+- Linear (inside Transformer Block, after heads)
+- GELU (inside Transformer Block)
+- Transformer Block Output
+
+Connections:
+- Input -> Input Embedding
+- Input Embedding -> Positional Encoding
+- Positional Encoding -> Dropout
+- Dropout -> Transformer Block Layer 1
+- Transformer Block Layer 1 -> Transformer Block Layer 2
+- Transformer Block Layer 2 -> Transformer Block Layer N
+- Transformer Block Layer N -> LayerNorm
+- LayerNorm -> Linear
+- Linear -> Softmax
+- Softmax -> Output
+
+Inside Transformer Block:
+- Transformer Block Input -> LayerNorm
+- LayerNorm -> Linear
+- Linear -> Dropout
+- Dropout -> Matmul (Head 1, Head 2, Head N)
+- Matmul (Head 1, Head 2, Head N) -> Mask (Head 1, Head 2, Head N)
+- Mask (Head 1, Head 2, Head N) -> Softmax (Head 1, Head 2, Head N)
+- Softmax (Head 1, Head 2, Head N) -> Dropout (Head 1, Head 2, Head N)
+- Dropout (Head 1, Head 2, Head N) -> Matmul (Head 1, Head 2, Head N)
+- Matmul (Head 1, Head 2, Head N) -> Linear
+- Linear -> Dropout
+- Dropout -> LayerNorm
+- LayerNorm -> Linear
+- Linear -> GELU
+- GELU -> Linear
+- Linear -> Dropout
+- Dropout -> Transformer Block Output

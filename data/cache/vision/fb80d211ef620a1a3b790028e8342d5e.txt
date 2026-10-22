@@ -1,0 +1,20 @@
+Type: flowchart
+
+Boxes/entities:
+- PDF page
+- Text layer on the page?
+- PyMuPDF
+- Tesseract OCR
+- Find figures
+- Vision model
+- Markdown output
+
+Connections:
+- PDF page -> Text layer on the page?
+- Text layer on the page? (yes) -> PyMuPDF
+- Text layer on the page? (no, a scan) -> Tesseract OCR
+- PDF page -> Find figures
+- Find figures -> Vision model
+- PyMuPDF -> Markdown output
+- Tesseract OCR -> Markdown output
+- Vision model -> Markdown output

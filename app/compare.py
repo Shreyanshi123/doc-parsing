@@ -17,6 +17,8 @@ import time
 from collections import Counter
 from typing import Optional
 
+from app.config import settings
+from app.isolate import ISOLATED, run_isolated
 from app.models import ParseOptions
 from app.normalizer import normalize_document
 from app.parsers import get_parser_class, parsers_for
@@ -26,7 +28,8 @@ from app.routing.router import route
 
 
 def _tokens(text: str) -> list[str]:
-    text = re.sub(r"[#*|>`_\-]+", " ", text.lower())  # ignore markdown syntax
+    text = re.sub(r"<[^>]+>", " ", text.lower())  # ignore HTML tags (Azure DI returns tables/figures as HTML)
+    text = re.sub(r"[#*|>`_\-]+", " ", text)  # ignore markdown syntax
     return re.findall(r"\w+", text)
 
 
@@ -55,6 +58,10 @@ def _headings(md: str) -> list[str]:
 
 def _table_cells(md: str) -> list[str]:
     cells = []
+    # Azure DI returns tables as HTML; count their cells the same way as Markdown cells.
+    for html in re.findall(r"<table.*?</table>", md, flags=re.S | re.I):
+        cells += [c for c in (_norm(re.sub(r"<[^>]+>", "", x)) for x in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", html, flags=re.S | re.I)) if c]
+    md = re.sub(r"<table.*?</table>", "", md, flags=re.S | re.I)
     for line in md.splitlines():
         line = line.strip()
         if not line.startswith("|") or re.fullmatch(r"[|\-:\s]+", line):
@@ -70,6 +77,26 @@ def _list_f1(truth: list[str], got: list[str]) -> float:
         return 0.0
     p, r = overlap / sum(b.values()), overlap / sum(a.values())
     return 2 * p * r / (p + r)
+
+
+def count_tables(md: str) -> int:
+    """Tables in the output, Markdown or HTML (Azure DI returns HTML)."""
+    html = len(re.findall(r"<table", md, flags=re.I))
+    md_only = re.sub(r"<table.*?</table>", "", md, flags=re.S | re.I)
+    blocks, run = 0, 0
+    for line in md_only.splitlines():
+        if line.strip().startswith("|"):
+            run += 1
+        else:
+            blocks += run >= 3  # a header, a separator and at least one row
+            run = 0
+    return html + blocks + (run >= 3)
+
+
+def figure_markers(md: str) -> int:
+    """Figure or image markers left in the output."""
+    return (len(re.findall(r"<figure", md, flags=re.I)) + len(re.findall(r"<!--\s*image\s*-->", md))
+            + len(re.findall(r"!\[", md)) + len(re.findall(r"^\*\*Figure \(page", md, flags=re.M)))
 
 
 def score_against_truth(truth: str, out: str) -> dict:
@@ -93,7 +120,9 @@ def compare_parsers(
     reference_text: Optional[str] = None,
     parsers: Optional[list[str]] = None,
     include_paid: bool = False,
+    progress=None,
 ) -> dict:
+    """`progress`, if given, is called with small dicts as the run goes (start, running, parser, scoring) so a UI can show live status."""
     options = options or ParseOptions()
     file_type = resolve_file_type(data, file_name)
     profile = analyze(data, file_type, options)
@@ -105,14 +134,23 @@ def compare_parsers(
     if parsers:
         classes = [get_parser_class(p) for p in parsers]
     else:
-        classes = [c for c in parsers_for(file_type) if include_paid or c.cost not in ("paid", "cloud")]
+        # Azure DI is always included when configured: it is the quality reference.
+        classes = [c for c in parsers_for(file_type) if include_paid or c.cost not in ("paid", "cloud") or c.name == "azure_di"]
 
     rows, outputs = [], {}
+    if progress:
+        progress({"event": "start", "parsers": [{"name": k.name, "cost": k.cost} for k in classes], "file_type": file_type, "profile": profile.to_dict(),
+                  "timeout_sec": settings.parser_timeout_sec, "isolated": sorted(k.name for k in classes if k.name in ISOLATED)})
     for cls in classes:
         row = {"parser": cls.name, "cost": cls.cost}
+        if progress:
+            progress({"event": "running", "parser": cls.name})
         t = time.perf_counter()
         try:
-            doc = normalize_document(cls().parse(data, file_name, file_type, options))
+            if cls.name in ISOLATED and settings.parser_timeout_sec != -1:
+                doc = run_isolated(cls.name, data, file_name, file_type, options, settings.parser_timeout_sec)
+            else:
+                doc = normalize_document(cls().parse(data, file_name, file_type, options))
             row["elapsed_ms"] = int((time.perf_counter() - t) * 1000)
             row.update(doc.stats())
             row["status"] = "ok"
@@ -120,15 +158,24 @@ def compare_parsers(
             # Keep the complete extraction so the comparison view can show what
             # each parser actually returned, not just a short sample.
             row["output"] = doc.markdown
+            row["tables_found"], row["figures_found"] = count_tables(doc.markdown), figure_markers(doc.markdown)
         except Exception as e:  # noqa: BLE001
             row.update(status="error", error=f"{type(e).__name__}: {e}",
                        elapsed_ms=int((time.perf_counter() - t) * 1000))
         rows.append(row)
+        if progress:
+            progress({"event": "parser", "parser": cls.name, "status": row["status"], "elapsed_ms": row["elapsed_ms"], "error": row.get("error")})
 
+    if progress:
+        progress({"event": "scoring"})
     # scoring -------------------------------------------------------------
     ok_names = list(outputs)
     non_empty = [n for n in ok_names if outputs[n].strip()]
     max_words = max((len(outputs[n].split()) for n in non_empty), default=0)
+    # Reference to score against: your text if given, otherwise Azure DI's output.
+    reference, ref_kind = reference_text, "your reference text" if reference_text else None
+    if not reference and outputs.get("azure_di", "").strip():
+        reference, ref_kind = outputs["azure_di"], "azure_di"
     for row in rows:
         if row["status"] != "ok":
             continue
@@ -142,10 +189,17 @@ def compare_parsers(
         )
         # heuristic (only used when there is no reference text)
         row["heuristic"] = round(row["coverage"] * (row["agreement"] if row["agreement"] is not None else 1.0), 3)
-        if reference_text:
-            row["f1"] = round(word_f1(reference_text, mine), 3)
-            row["similarity"] = round(similarity(reference_text, mine), 3)
-            sc = score_against_truth(reference_text, mine)  # separate keys: 'headings'/'tables' already hold parser counts
+        if ref_kind == "azure_di" and row["parser"] == "azure_di":
+            row["is_reference"] = True  # it IS the reference, so it is not scored against itself
+            continue
+        if reference:
+            row["f1"] = round(word_f1(reference, mine), 3)
+            row["similarity"] = round(similarity(reference, mine), 3)  # order-sensitive = reading order
+            sc = score_against_truth(reference, mine)  # separate keys: 'headings'/'tables' already hold parser counts
+            from app.scorecard import score as card  # local import: scorecard imports this module
+            cd = card(reference, mine)
+            row["scorecard"] = {m: round(5 * v, 1) for m, v in cd.items() if v is not None}
+            row["total"] = round(sum(row["scorecard"].values()), 1)
             row.update(score=sc["score"], text_score=sc["text"], headings_score=sc.get("headings"), tables_score=sc.get("tables"))
         elif row.get("heuristic") is not None:
             row["score"] = row["heuristic"]
@@ -153,13 +207,22 @@ def compare_parsers(
     key = "score"
     ranked = sorted([r for r in rows if r.get("status") == "ok" and r.get(key) is not None],
                     key=lambda r: (-r[key], r["elapsed_ms"]))
+    # Best = fastest parser whose score is within 0.05 of the top one (a slower parser must earn its time).
+    best, why = (ranked[0]["parser"] if ranked else None), ""
+    if ranked:
+        top = ranked[0]["score"]
+        best = min((r for r in ranked if r["score"] >= top - 0.05), key=lambda r: r["elapsed_ms"])["parser"]
+        t, f = profile.traits, profile.figure_count
+        has = ("tables" if "tables" in t else "") + (" and " if "tables" in t and f else "") + (f"{f} figure(s)" if f else "")
+        why = f"{best}: fastest within 5 points of the top score ({top:.2f})" + (f"; this document has {has}, so tables/figures are part of the score" if has else "")
     return {
+        "best": best, "why": why, "reference_kind": ref_kind,
         "file_name": file_name,
         "file_type": file_type,
         "profile": profile.to_dict(),
         "router_would_pick": auto_pick,
-        "has_reference": bool(reference_text),
-        "ranked_by": "score vs your reference text (words + headings + tables)" if reference_text else "heuristic = coverage x agreement (NO ground truth - provide reference_text for a real ranking)",
+        "has_reference": bool(reference),
+        "ranked_by": f"score vs {ref_kind} (words + headings + tables + reading order)" if reference else "heuristic = coverage x agreement (NO ground truth - provide reference_text for a real ranking)",
         "ranking": [r["parser"] for r in ranked],
         "results": rows,
     }

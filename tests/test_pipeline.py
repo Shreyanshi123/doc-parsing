@@ -156,7 +156,8 @@ class ParserTests(unittest.TestCase):
 class RegistryTests(unittest.TestCase):
     EXPECTED = {"pymupdf", "pymupdf4llm", "pdfminer", "pdfplumber", "ocr", "easyocr", "hybrid_pdf", "vlm",
                 "opendataloader", "docling", "unstructured", "markitdown", "llamaparse", "azure_di",
-                "docx", "pptx", "spreadsheet", "text"}
+                "docx", "pptx", "spreadsheet", "text", "smart_pdf",
+                "langchain_loader", "llamaindex_reader", "haystack_converter"}
 
     def test_all_parsers_registered_and_report_availability(self):
         infos = {p["name"]: p for p in list_parsers()}

@@ -1,0 +1,3 @@
+Type: Screenshot
+
+Description: A dashboard interface for a video/audio conference analysis tool, showing options for entering conference and session names, selecting features (Screenshot, Transcribe, Speaker Tagging), and buttons for uploading media, choosing conference type, and analyzing video/audio.

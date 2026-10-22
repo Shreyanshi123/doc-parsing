@@ -1,0 +1,15 @@
+Type: bar chart  
+Chart:  
+Title: [Not fully visible, partial: "... and sustainable agriculture, 2021"]  
+Axis labels: [Not visible]  
+| Region                | Value |
+|-----------------------|-------|
+| Africa                | 2.7   |
+| Asia                  | 2.8   |
+| Asia                  | 2.8   |
+| [Not visible]ean      | 3.6   |
+| [Not visible]ania     | 3.7   |
+| Asia                  | 3.8   |
+| Africa                | 4.1   |
+| [Not visible]ries     | 2.6   |
+| [Not visible]ries     | 2.6   |

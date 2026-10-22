@@ -1,0 +1,10 @@
+Type: table image
+
+Chart:
+Title: Past Executions
+Axis labels: None
+
+| ID   | CONFERENCE NAME | SESSION NAME | URL | EXECUTED BY         | STATUS     | TIME TAKEN |
+|------|-----------------|-------------|-----|---------------------|------------|------------|
+| 4753 | Video Test      | 1           | 🔗  | Pushpgandha Tiwari  | Error      | 0m 00s     |
+| 4752 | Test            | 27          | 🔗  | Pushpgandha Tiwari  | Completed  | 0m 58s     |

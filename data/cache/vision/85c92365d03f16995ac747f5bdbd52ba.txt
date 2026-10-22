@@ -1,0 +1,16 @@
+Type: line chart
+
+Chart:
+Title: Training Loss for Llama 2 models
+Axis labels: 
+- X-axis: Processed Tokens (Billions)
+- Y-axis: Train PPL
+
+| Processed Tokens (Billions) | 7B (red) | 13B (blue) | 34B (green) | 70B (pink) |
+|----------------------------|----------|------------|-------------|------------|
+| 0                          | ~2.2     | ~2.15      | ~2.1        | ~2.05      |
+| 250                        | ~1.9     | ~1.85      | ~1.8        | ~1.75      |
+| 500                        | ~1.85    | ~1.8       | ~1.75       | ~1.7       |
+| 1000                       | ~1.8     | ~1.75      | ~1.7        | ~1.65      |
+| 1500                       | ~1.75    | ~1.7       | ~1.65       | ~1.6       |
+| 2000                       | ~1.7     | ~1.65      | ~1.6        | ~1.55      |

@@ -1,0 +1,3 @@
+Type: Screenshot
+
+Description: This is a screenshot of a web application interface showing the navigation menu for "Finance and Operations" with modules and an "Employee Portal" section, displaying a list of main forms such as Salary slip, Tax calculation sheet, Reimbursement slip, and others.

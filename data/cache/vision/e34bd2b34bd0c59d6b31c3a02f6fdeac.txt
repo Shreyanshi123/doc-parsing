@@ -1,0 +1,14 @@
+Type: architecture diagram
+
+Diagram:
+- Boxes/entities:
+  - Discriminative Neural Network
+    - Input: image of a cat
+    - Output: 0.03 Bird, 0.92 Cat, 0.05 Dog, ...
+  - Generative Neural Network
+    - Input: "photo of a tabby cat" (text)
+    - Output: image of a cat
+
+- Connections:
+  - image of a cat (Input) -> Discriminative Neural Network -> 0.03 Bird, 0.92 Cat, 0.05 Dog, ... (Output)
+  - "photo of a tabby cat" (Input) -> Generative Neural Network -> image of a cat (Output)

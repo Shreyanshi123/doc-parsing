@@ -6,12 +6,15 @@ from __future__ import annotations
 
 import html
 import re
+import sys
 from pathlib import Path
 
 import pymupdf
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / "eval" / "REPORT.md", ROOT / "eval" / "REPORT.pdf"
+if len(sys.argv) == 3:  # python scripts/report_to_pdf.py in.md out.pdf
+    SRC, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 
 CSS = """
 body { font-family: sans-serif; font-size: 9.5pt; color: #1d2330; }

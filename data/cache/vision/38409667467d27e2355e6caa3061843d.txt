@@ -1,0 +1,15 @@
+Type: architecture diagram
+
+Boxes/entities:
+- INTERNET
+- Kubernetes Cluster
+- Cont. to Cont. (left)
+- Cont. to Cont. (right)
+- Pad to Pad
+
+Connections:
+- INTERNET -> Kubernetes Cluster (label: Internet to Kubernetes)
+- Kubernetes Cluster -> Cont. to Cont. (left)
+- Kubernetes Cluster -> Cont. to Cont. (right)
+- Cont. to Cont. (left) -> Pad to Pad
+- Cont. to Cont. (right) -> Pad to Pad

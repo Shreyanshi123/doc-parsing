@@ -1,0 +1,12 @@
+Type: pie chart
+
+Chart:
+Title: Sales mix
+Axis labels: None
+Markdown table:
+
+| Product | Percentage (%) |
+|---------|---------------|
+| Pumps   | 45            |
+| Valves  | 30            |
+| Seals   | 25            |

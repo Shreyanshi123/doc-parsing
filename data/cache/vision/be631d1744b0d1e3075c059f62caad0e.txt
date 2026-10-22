@@ -1,0 +1,14 @@
+Type: flowchart
+
+Boxes/entities:
+- Training data
+- Generator, G (Multilayer neural network)
+- Discriminator, D (Multilayer neural network)
+- Random noise
+
+Connections:
+- Random noise -> Generator, G
+- Training data -> Discriminator, D ("real" samples)
+- Generator, G -> Discriminator, D (Generated "fake" samples)
+- Discriminator, D -> Discriminator loss (Backpropagation)
+- Generator, G -> Generator loss (Backpropagation)

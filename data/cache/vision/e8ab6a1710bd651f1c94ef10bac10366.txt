@@ -1,0 +1,8 @@
+Type: table image
+
+| Get Started                        | Service Guides                                 | Developer Tools                        | Helpful Links                                      |
+|-------------------------------------|------------------------------------------------|----------------------------------------|----------------------------------------------------|
+| AWS Hands-On Tutorials              | Choosing a generative AI service               | AWS Code Example Library               | Download the AWS Docs MCP Server                   |
+| (https://aws.amazon.com/getting-started/hands-on/) | (https://docs.aws.amazon.com/decision-guides/latest/decision-guides/genai-guide.html) | (https://docs.aws.amazon.com/code-library/latest/ug/what-is-code-library.html) | (https://github.com/awslabs/mcp/tree/main/src/aws-documentation-mcp-server) |
+| AWS Solutions Library               |                                                |                                        |                                                    |
+| (https://aws.amazon.com/solutions/) |                                                |                                        |                                                    |

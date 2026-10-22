@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find the best parser</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#ffffff; --fg:#1b2230; --muted:#5d687a; --line:#dde2ea; --accent:#1f5fbf; --accent-soft:#e6eefb;
+          --ok:#12805c; --bad:#b42318; --warn:#9a6700; --best:#e9f6ef; --ref:#fff4d6; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161d; --card:#1a202a; --fg:#e6e9ef; --muted:#98a2b3; --line:#2b3342; --accent:#7aa7f0; --accent-soft:#1f2c44;
+            --ok:#3ccf9a; --bad:#ff7b72; --warn:#e3b341; --best:#16322a; --ref:#3a3015; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width:940px; margin:0 auto; padding:28px 16px 64px; display:flex; flex-direction:column; gap:18px; }
+  h1 { margin:0; font-size:26px; line-height:1.2; }
+  .sub { margin:6px 0 0; color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; }
+  .step { display:flex; align-items:center; gap:10px; margin:0 0 10px; font-weight:600; }
+  .step i { display:inline-grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-style:normal; font-size:13px; }
+  .step + * { margin-bottom:0; }
+  .gap { height:22px; }
+  .drop { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:26px 16px; border:2px dashed var(--line);
+          border-radius:10px; cursor:pointer; text-align:center; }
+  .drop.over, .drop:hover { border-color:var(--accent); background:var(--accent-soft); }
+  .drop b { font-size:16px; } .drop span { color:var(--muted); font-size:13px; }
+  .drop.has { border-style:solid; border-color:var(--ok); }
+  input[type=file] { display:none; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:640px) { .choices { grid-template-columns:1fr; } }
+  .choice { display:flex; gap:10px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; cursor:pointer; }
+  .choice:has(input:checked) { border-color:var(--accent); background:var(--accent-soft); }
+  .choice b { display:block; } .choice small { color:var(--muted); }
+  .choice input { margin-top:4px; }
+  .extras { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .extras label { display:flex; gap:10px; align-items:flex-start; }
+  .extras small { color:var(--muted); }
+  .extras input { margin-top:4px; }
+  details.adv { margin-top:16px; } details.adv summary { cursor:pointer; color:var(--muted); }
+  details.adv .grid { display:grid; gap:12px; margin-top:10px; }
+  details.adv label { display:block; font-weight:600; margin-bottom:4px; }
+  input[type=text], textarea { width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); font:inherit; }
+  textarea { min-height:70px; }
+  button.go { margin-top:20px; padding:13px 26px; font:inherit; font-size:16px; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:8px; cursor:pointer; }
+  button.go:disabled { opacity:.55; cursor:wait; }
+  button.ghost { font:inherit; padding:6px 12px; color:var(--accent); background:transparent; border:1px solid var(--accent); border-radius:6px; cursor:pointer; }
+  .status { margin-top:14px; color:var(--muted); } .status.err { color:var(--bad); }
+  .bar { display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .bar b { word-break:break-all; } .bar span { color:var(--muted); }
+  #result { display:none; flex-direction:column; gap:18px; }
+  .best { background:var(--best); border-color:var(--ok); }
+  .best .label { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ok); }
+  .best .name { font-size:32px; font-weight:700; margin:2px 0 6px; line-height:1.2; }
+  .facts { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip { padding:2px 10px; border:1px solid var(--line); border-radius:99px; font-size:13px; color:var(--muted); background:var(--card); }
+  .note { font-size:13px; color:var(--muted); margin-top:10px; } .note.warn { color:var(--warn); }
+  h2 { margin:0 0 4px; font-size:18px; } .explain { margin:0 0 14px; color:var(--muted); font-size:13px; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { padding:10px 10px; text-align:left; border-bottom:1px solid var(--line); }
+  th { font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr.bestrow td { background:var(--best); } tr.refrow td { background:var(--ref); } tr.failrow td { color:var(--muted); }
+  .pbar { display:inline-block; width:80px; height:8px; background:var(--line); border-radius:4px; vertical-align:middle; margin-right:8px; overflow:hidden; }
+  .pbar i { display:block; height:8px; background:var(--accent); }
+  .tag { font-size:11px; padding:1px 6px; border-radius:4px; background:var(--accent-soft); color:var(--accent); margin-left:6px; white-space:nowrap; }
+  .badge { font-size:11px; padding:1px 7px; border-radius:99px; background:var(--ok); color:#fff; margin-left:6px; white-space:nowrap; }
+  .badge.alt { background:var(--accent); }
+  .link { color:var(--accent); cursor:pointer; background:none; border:0; font:inherit; padding:0; text-decoration:underline; }
+  pre { margin:0; padding:12px; background:var(--bg); border:1px solid var(--line); border-radius:6px; overflow:auto; max-height:420px; white-space:pre-wrap; word-break:break-word; font:12px/1.5 ui-monospace, Consolas, monospace; }
+  tr.out td { padding:0 10px 14px; }
+  .read { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:4px; }
+  .read div { font-size:13px; color:var(--muted); } .read b { color:var(--fg); display:block; }
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation:none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Find the best parser for a document</h1>
+    <p class="sub">Upload a file. We run several parsers on it and tell you which one reads it best, and how fast.</p>
+  </header>
+
+  <section class="card bar" id="bar">
+    <div><span>Document</span><br><b id="barName"></b> <span id="barMode"></span></div>
+    <button class="ghost" id="change">Try another document or setting</button>
+  </section>
+
+  <section class="card" id="input">
+    <div class="step"><i>1</i> Choose your document</div>
+    <label class="drop" id="drop" for="file">
+      <b id="dropTitle">Click to choose a file, or drop it here</b>
+      <span id="dropSub">PDF, Word, PowerPoint, Excel, CSV or an image</span>
+    </label>
+    <input type="file" id="file">
+    <div class="gap"></div>
+
+    <div class="step"><i>2</i> Pick how thorough</div>
+    <div class="choices">
+      <label class="choice"><input type="radio" name="mode" value="quick" checked><span><b>Quick</b><small>About 1 to 2 minutes. Leaves out the slow parsers (Docling, OCR).</small></span></label>
+      <label class="choice"><input type="radio" name="mode" value="full"><span><b>Thorough</b><small>Every installed parser. 10 minutes or more on long files.</small></span></label>
+    </div>
+    <div class="extras">
+      <label id="adiRow"><input type="checkbox" id="useAdi" checked><span>Use Azure Document Intelligence as the yardstick <small>(paid, about $0.01 per page)</small></span></label>
+      <label id="chartRow"><input type="checkbox" id="useCharts"><span>Also try reading charts and figures <small>(PDF only, uses a vision model, a few cents per figure)</small></span></label>
+    </div>
+
+    <details class="adv">
+      <summary>More options</summary>
+      <div class="grid">
+        <div><label for="blob">Use a link instead of a file</label><input type="text" id="blob" placeholder="https://account.blob.core.windows.net/docs/file.pdf?sv=...  or a local path"></div>
+        <div><label for="maxPages">Only the first N pages</label><input type="text" id="maxPages" placeholder="for example 10"></div>
+        <div><label for="reference">The correct text, if you have it</label><textarea id="reference" placeholder="Paste it here and parsers are scored against it instead of Azure DI"></textarea></div>
+      </div>
+    </details>
+
+    <div class="gap"></div>
+    <div class="step"><i>3</i> Run it</div>
+    <button class="go" id="go">Find the best parser</button>
+    <div class="status" id="status"></div>
+  </section>
+
+  <div id="result">
+    <section class="card best" id="bestCard"></section>
+    <section class="card">
+      <h2>All parsers, best first</h2>
+      <p class="explain">Click "view text" to see what a parser read.</p>
+      <div class="scroll"><table id="tbl"></table></div>
+      <div class="gap"></div>
+      <div class="read" id="readGuide"></div>
+    </section>
+    <section class="card">
+      <details>
+        <summary><b>Detailed scores (8 parameters, 0 to 5)</b></summary>
+        <p class="explain" style="margin-top:8px">Text, Tables, Charts, Diagrams, Numbers, Structure, Completeness and No-invent. A dash means this document has nothing to test that parameter with.</p>
+        <div class="scroll"><table id="cardTbl"></table></div>
+      </details>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const SLOW = new Set(["docling", "easyocr", "ocr", "unstructured"]);
+const WRAPPERS = new Set(["langchain_loader", "llamaindex_reader", "haystack_converter"]);
+const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision model" };
+const METRICS = ["Text Accuracy", "Table Reconstruction", "Chart Understanding", "Infographic Parsing", "Entity & Numeric Fidelity", "Structure", "Completeness", "Hallucination Penalty"];
+const SHORT = ["Text", "Tables", "Charts", "Diagrams", "Numbers", "Structure", "Complete", "No-invent"];
+let providers = [], chosen = null;
+
+fetch("/api/providers").then(r => r.json()).then(list => {
+  providers = list;
+  const adi = list.find(p => p.name === "azure_di");
+  if (!adi || !adi.available) { $("useAdi").checked = false; $("useAdi").disabled = true; $("adiRow").querySelector("small").textContent = "(not set up: AZURE_DI_ENDPOINT and AZURE_DI_KEY are missing)"; }
+  const sp = list.find(p => p.name === "smart_pdf");
+  if (!sp || !sp.available) { $("useCharts").disabled = true; $("chartRow").querySelector("small").textContent = "(not available on this machine)"; }
+});
+
+// ---- choosing a file ----
+function setFile(f) {
+  chosen = f;
+  $("drop").classList.toggle("has", !!f);
+  $("dropTitle").textContent = f ? f.name : "Click to choose a file, or drop it here";
+  $("dropSub").textContent = f ? (f.size / 1e6).toFixed(1) + " MB. Click to change." : "PDF, Word, PowerPoint, Excel, CSV or an image";
+}
+$("file").onchange = e => setFile(e.target.files[0] || null);
+["dragover", "dragenter"].forEach(ev => $("drop").addEventListener(ev, e => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => $("drop").addEventListener(ev, e => { e.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", e => { if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+function typeOf(name) {
+  const ext = (name.split(".").pop() || "").toLowerCase();
+  if (ext === "pdf") return "pdf";
+  if (ext === "docx" || ext === "doc") return "docx";
+  if (ext === "pptx") return "pptx";
+  if (ext === "xlsx" || ext === "xlsm") return "xlsx";
+  if (ext === "csv") return "csv";
+  if (["png", "jpg", "jpeg", "bmp", "tif", "tiff", "webp"].includes(ext)) return "image";
+  return "text";
+}
+function pickParsers(name) {
+  const t = typeOf(name), mode = document.querySelector("input[name=mode]:checked").value;
+  return providers.filter(p => p.available && p.supported_types.includes(t)).filter(p => {
+    if (p.name === "azure_di") return $("useAdi").checked;
+    if (p.name === "smart_pdf") return $("useCharts").checked && t === "pdf";
+    if (p.name === "vlm" || p.name === "llamaparse") return false;
+    if (mode === "quick") return !SLOW.has(p.name) && !WRAPPERS.has(p.name);
+    return true;
+  }).map(p => p.name);
+}
+
+// ---- layout: the input card folds into a one-line bar once there is a result ----
+function fold(on, name) {
+  $("input").style.display = on ? "none" : "block";
+  $("bar").style.display = on ? "flex" : "none";
+  if (on) {
+    $("barName").textContent = name;
+    $("barMode").textContent = "· " + (document.querySelector("input[name=mode]:checked").value === "quick" ? "Quick" : "Thorough") + (chosen || $("blob").value ? "" : "");
+  }
+}
+$("change").onclick = () => { fold(false); $("input").scrollIntoView({ behavior: "smooth" }); };
+
+// ---- run ----
+let timer = null;
+async function run() {
+  const link = $("blob").value.trim();
+  if (!chosen && !link) { setStatus("Choose a file first.", true); return; }
+  const name = chosen ? chosen.name : (link.split("?")[0].split("/").pop() || "document.pdf");
+  const parsers = pickParsers(name);
+  if (!parsers.length) { setStatus("No parser is available for this file type.", true); return; }
+  const options = {}; const mp = parseInt($("maxPages").value); if (mp > 0) options.max_pages = mp;
+  $("go").disabled = true; $("result").style.display = "none";
+  const t0 = Date.now();
+  timer = setInterval(() => setStatus(`<span class="spinner"></span>Running ${parsers.length} parsers on ${esc(name)}… ${Math.round((Date.now() - t0) / 1000)} s. Keep this tab open.`), 500);
+  try {
+    let r;
+    if (chosen) {
+      const fd = new FormData();
+      fd.append("file", chosen); fd.append("options", JSON.stringify(options));
+      fd.append("reference_text", $("reference").value); fd.append("parsers", parsers.join(",")); fd.append("include_paid", "false");
+      r = await fetch("/api/compare/upload", { method: "POST", body: fd });
+    } else {
+      r = await fetch("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_id: name, file_name: name, file_path: link, options, reference_text: $("reference").value || null, parsers, include_paid: false }) });
+    }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.detail || r.statusText);
+    setStatus("");
+    render(j); fold(true, name);
+  } catch (e) { setStatus("Something went wrong: " + esc(e.message), true); }
+  clearInterval(timer); $("go").disabled = false;
+}
+function setStatus(html, err) { $("status").className = "status" + (err ? " err" : ""); $("status").innerHTML = html; }
+$("go").onclick = run;
+
+// ---- the result ----
+const secs = ms => (Number(ms || 0) / 1000).toFixed(1) + " s";
+function render(c) {
+  const rows = c.results;
+  const ok = rows.filter(r => r.status === "ok");
+  const by = Object.fromEntries(rows.map(r => [r.parser, r]));
+  const ranked = (c.ranking || []).map(n => by[n]).filter(Boolean);
+  const refRow = ok.find(r => r.is_reference);
+  const failed = rows.filter(r => r.status !== "ok");
+  const best = c.best && by[c.best];
+  const p = c.profile || {};
+  const refName = c.reference_kind === "azure_di" ? "Azure DI" : "your text";
+
+  // plain-language reason
+  let why = "";
+  if (best) {
+    const top = Math.max(...ranked.map(r => r.score || 0));
+    const near = ranked.filter(r => (r.score || 0) >= top - 0.05);
+    const pct = Math.round((best.score || 0) * 100);
+    if (c.has_reference) {
+      why = near.length > 1
+        ? `It matches ${refName} ${pct}% and is the fastest (${secs(best.elapsed_ms)}) of the ${near.length} parsers within 5 points of the top score.`
+        : `It has the highest match with ${refName}: ${pct}% in ${secs(best.elapsed_ms)}.`;
+    } else {
+      why = `Its text agrees most with the other parsers (${pct}%), in ${secs(best.elapsed_ms)}. Nothing was used as a yardstick, so this is a guess.`;
+    }
+  }
+  const facts = [esc(c.file_type), p.classification && !["native_office", "text", "image"].includes(p.classification) ? esc(p.classification) : "",
+    p.page_count ? `${p.page_count} page${p.page_count > 1 ? "s" : ""}` : "", (p.traits || []).includes("tables") ? "has tables" : "",
+    (p.traits || []).includes("figures") ? `has figures (${p.figure_count})` : ""].filter(Boolean);
+  $("bestCard").innerHTML = best ? `
+    <div class="label">Best parser for this document</div>
+    <div class="name">${esc(best.parser)}</div>
+    <div>${esc(why)}</div>
+    ${COMBO[best.parser] ? `<div class="note">${esc(best.parser)} is our own combination of ${esc(COMBO[best.parser])}, not a ready-made tool.</div>` : ""}
+    <div class="facts">${facts.map(f => `<span class="chip">${f}</span>`).join("")}</div>
+    ${(p.traits || []).includes("figures") ? `<div class="note warn">This document has ${p.figure_count} figure(s). Ordinary parsers and Azure DI keep only the text around charts, not their values. ${by.smart_pdf ? "smart_pdf did try to read them: open its text below. It scores lower on Match partly because it adds chart values that Azure DI does not have." : 'To read chart values, run again with "Also try reading charts and figures" ticked.'}</div>` : ""}
+    ${c.reference_kind === "azure_di" ? '<div class="note">"Match" means how close a parser is to Azure Document Intelligence. Close to Azure DI is not the same as correct.</div>' : ""}` :
+    `<div class="label">No result</div><div class="name">Nothing could be ranked</div><div>${esc(failed.map(r => r.parser + ": " + r.error).join("; ") || "Every parser returned nothing.")}</div>`;
+
+  // badges: fastest and highest match, among scored parsers
+  const scored = ranked.filter(r => !r.is_reference);
+  const fastest = scored.length ? scored.reduce((a, b) => (b.elapsed_ms < a.elapsed_ms ? b : a)) : null;
+  const sharpest = scored.length ? scored.reduce((a, b) => ((b.score || 0) > (a.score || 0) ? b : a)) : null;
+  const scoreHead = c.has_reference ? "Match" : "Agreement";
+  const tables = r => r.tables_found ?? r.tables ?? 0, figures = r => r.figures_found ?? r.images ?? 0;
+  const line = (r, kls) => `<tr class="${kls}"><td><b>${esc(r.parser)}</b>
+      ${r.parser === c.best ? '<span class="badge">best pick</span>' : ""}${r === fastest && r.parser !== c.best ? '<span class="badge alt">fastest</span>' : ""}${r === sharpest && r.parser !== c.best ? '<span class="badge alt">highest match</span>' : ""}
+      ${COMBO[r.parser] ? `<span class="tag" title="${esc(COMBO[r.parser])}">our combo</span>` : ""}${r.cost === "paid" || r.cost === "cloud" ? '<span class="tag">paid</span>' : ""}</td>
+    <td>${r.is_reference ? "yardstick" : `<span class="pbar"><i style="width:${Math.round((r.score || 0) * 100)}%"></i></span>${Math.round((r.score || 0) * 100)}%`}</td>
+    <td class="n">${secs(r.elapsed_ms)}</td><td class="n">${tables(r)}</td><td class="n">${figures(r)}</td>
+    <td><button class="link" data-view="${esc(r.parser)}">view text</button></td></tr>
+    <tr class="out" id="out-${esc(r.parser)}" style="display:none"><td colspan="6"><pre>${esc(r.output || "(this parser returned no text)")}</pre></td></tr>`;
+  let html = `<tr><th>Parser</th><th>${scoreHead}</th><th class="n">Time</th><th class="n">Tables found</th><th class="n">Figures found</th><th></th></tr>`;
+  if (refRow) html += line(refRow, "refrow");
+  html += ranked.filter(r => !r.is_reference).map(r => line(r, r.parser === c.best ? "bestrow" : "")).join("");
+  html += ok.filter(r => !ranked.includes(r) && r !== refRow).map(r => line(r, "")).join("");
+  html += failed.map(r => `<tr class="failrow"><td><b>${esc(r.parser)}</b></td><td colspan="5">failed: ${esc((r.error || "").slice(0, 140))}</td></tr>`).join("");
+  $("tbl").innerHTML = html;
+  $("tbl").querySelectorAll("[data-view]").forEach(b => b.onclick = () => {
+    const el = $("out-" + b.dataset.view), open = el.style.display === "none";
+    el.style.display = open ? "table-row" : "none"; b.textContent = open ? "hide text" : "view text";
+  });
+  $("readGuide").innerHTML = `
+    <div><b>${scoreHead}</b>${c.has_reference ? `How close the text, headings and tables are to ${refName}.` : "How much each parser's text overlaps with the others."}</div>
+    <div><b>Tables and figures found</b>How many each parser kept. A parser that shows 0 may have dropped them silently.</div>
+    <div><b>The yellow row</b>${refRow ? "Azure DI is the yardstick, so it is timed but not scored." : "No yardstick was used."}</div>`;
+
+  const cardRows = ok.filter(r => r.scorecard).sort((a, b) => b.total - a.total).map(r =>
+    `<tr><td><b>${esc(r.parser)}</b></td>${METRICS.map(m => `<td class="n">${r.scorecard[m] ?? "–"}</td>`).join("")}<td class="n"><b>${r.total}</b></td></tr>`).join("");
+  $("cardTbl").innerHTML = cardRows ? `<tr><th>Parser</th>${SHORT.map(s => `<th class="n">${s}</th>`).join("")}<th class="n">Total</th></tr>${cardRows}` : '<tr><td>This needs a yardstick: use Azure DI or paste the correct text.</td></tr>';
+  $("result").style.display = "flex";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+</body>
+</html>

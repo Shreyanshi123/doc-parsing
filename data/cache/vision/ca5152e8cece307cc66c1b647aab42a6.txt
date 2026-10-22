@@ -1,0 +1,20 @@
+Type: bar chart
+
+Chart:
+Title: Docling takes 16.8 seconds per page on large PDFs, almost seven times pymupdf4llm
+Axis labels: 
+- X-axis: Seconds per page (no units)
+- Y-axis: Parser/tool name
+
+| Parser/tool                  | Seconds per page |
+|-----------------------------|------------------|
+| opendataloader               | 0.3              |
+| pdfplumber                   | 0.4              |
+| markitdown                   | 0.5              |
+| azure_di                     | 0.8              |
+| pymupdf                      | 1.5              |
+| hybrid_pdf (our combo)       | 1.5              |
+| pymupdf4llm                  | 2.5              |
+| smart_pdf (our combo)        | 2.7              |
+| ocr (Tesseract)              | 9.1              |
+| docling                      | 16.8             |

@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: A screenshot showing links to AWS documentation and resources, footer information, and a language selection dropdown.

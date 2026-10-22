@@ -1,0 +1,13 @@
+Type: scatter plot
+
+Chart: 
+Title: Win-rate % for helpfulness and safety between commercial-licensed base models and Llama-2, according to GPT-4
+Axis labels: 
+- X-axis: Helpfulness Win Rate (%)
+- Y-axis: Safety Win Rate (%)
+
+| Model Comparison                | Helpfulness Win Rate (%) | Safety Win Rate (%) |
+|----------------------------------|-------------------------|--------------------|
+| ChatGPT-0301 vs. Llama 2 (70b)   | ~45                     | ~45                |
+| PaLM-Bison vs. Llama 2 (70b)     | ~30                     | ~20                |
+| Falcon-40b-instruct vs. Llama 2 (70b) | ~10                | ~10                |

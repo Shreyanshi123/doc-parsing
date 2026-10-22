@@ -1,0 +1,10 @@
+Type: architecture diagram
+
+Entities:
+- Services
+- Pod- (three separate entities labeled Pod-)
+
+Connections:
+- Services -> Pod- (top)
+- Services -> Pod- (middle)
+- Services -> Pod- (bottom)

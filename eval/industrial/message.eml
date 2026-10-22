@@ -1,0 +1,6 @@
+From: ops@example.com
+To: plant@example.com
+Subject: Line 2 downtime
+Content-Type: text/plain
+
+Line 2 was down for 20 minutes today.

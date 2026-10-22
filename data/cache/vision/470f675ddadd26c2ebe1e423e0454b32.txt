@@ -1,0 +1,12 @@
+Type: flowchart
+
+Boxes/entities:
+- Plan
+- Continuous Feedback
+- Integration
+- Deploy
+
+Connections:
+- Plan -> Continuous Feedback
+- Continuous Feedback -> Integration
+- Integration -> Deploy

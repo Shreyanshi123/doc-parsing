@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: The image shows a screenshot of a web page with instructions to log in using a system login password and click the OK button, highlighting the login fields and OK button on a "Tax calculation sheet" interface.

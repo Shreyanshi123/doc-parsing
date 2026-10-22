@@ -12,20 +12,24 @@ FastAPI entrypoint.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
+import threading
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
+from app import benchmark
 from app.compare import compare_parsers, report_markdown
 from app.config import settings
+from app.extract import extract_document
 from app.jobs.store import COMPLETED, JobStore
 from app.jobs.worker import WorkerPool
 from app.models import ParseOptions
@@ -79,6 +83,15 @@ def _opts(options_json: str) -> OptionsIn:
         return OptionsIn(**json.loads(options_json or "{}"))
     except Exception as e:
         raise HTTPException(400, f"options must be a JSON object: {e}")
+
+
+def _remember(cmp: dict) -> None:
+    """Every scored comparison also feeds the Benchmark tab."""
+    try:
+        rec = benchmark.record(cmp)
+        cmp["benchmark_run"] = rec["id"] if rec else None
+    except Exception:  # noqa: BLE001 - the benchmark must never break a comparison
+        log.exception("could not save benchmark record")
 
 
 async def _save_upload(file: UploadFile) -> tuple[bytes, str, str]:
@@ -139,9 +152,126 @@ async def compare_upload(
             [p.strip() for p in parsers.split(",") if p.strip()] or None, include_paid,
         )
         cmp["report_markdown"] = report_markdown(cmp)
+        _remember(cmp)
         return cmp
     except Exception as e:
         raise _http(e)
+
+
+@app.post("/api/compare/upload/stream")
+async def compare_upload_stream(
+    file: UploadFile = File(...),
+    options: str = Form("{}"),
+    reference_text: str = Form(""),
+    parsers: str = Form(""),
+    include_paid: bool = Form(False),
+):
+    """Same as /api/compare/upload, but streams one JSON line per step (start, running, parser, scoring) and ends with {"event":"done","result":...}.
+    The UI uses it to show live progress; the plain endpoint above is unchanged."""
+    data = await file.read()
+    name = Path(file.filename or "upload.bin").name
+    loop = asyncio.get_running_loop()
+    q: asyncio.Queue = asyncio.Queue()
+
+    def push(item):
+        loop.call_soon_threadsafe(q.put_nowait, item)
+
+    def work():
+        try:
+            cmp = compare_parsers(data, name, _opts(options).to_options(), reference_text or None,
+                                  [p.strip() for p in parsers.split(",") if p.strip()] or None, include_paid, progress=push)
+            cmp["report_markdown"] = report_markdown(cmp)
+            _remember(cmp)
+            push({"event": "done", "result": cmp})
+        except Exception as e:  # noqa: BLE001
+            push({"event": "error", "detail": str(e)})
+        push(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    async def gen():
+        while True:
+            item = await q.get()
+            if item is None:
+                break
+            yield json.dumps(item, default=str) + chr(10)
+
+    return StreamingResponse(gen(), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ----------------------------------------------------------------------------- benchmark (built from comparison runs)
+@app.get("/api/benchmark")
+def benchmark_get():
+    return benchmark.aggregate()
+
+
+@app.delete("/api/benchmark/runs/{run_id}")
+def benchmark_delete(run_id: str):
+    return {"deleted": benchmark.delete(run_id)}
+
+
+@app.delete("/api/benchmark")
+def benchmark_clear():
+    benchmark.clear()
+    return {"deleted": "all"}
+
+
+# ----------------------------------------------------------------------------- smart extract (best parser per part)
+@app.post("/api/extract/upload")
+async def extract_upload(
+    file: UploadFile = File(...),
+    options: str = Form("{}"),
+    include_paid: bool = Form(False),
+    mode: str = Form("document"),
+):
+    """mode "document": one parser (the scorecard's pick for this type of document) reads the whole file.
+    mode "part": cuts the document into parts (headings, text, tables, figures, scanned pages) and reads each with the best parser for it."""
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    name = Path(file.filename or "upload.bin").name
+    try:
+        return await run_in_threadpool(extract_document, data, name, _opts(options).to_options(), include_paid, None, mode)
+    except Exception as e:
+        raise _http(e)
+
+
+@app.post("/api/extract/upload/stream")
+async def extract_upload_stream(
+    file: UploadFile = File(...),
+    options: str = Form("{}"),
+    include_paid: bool = Form(False),
+    mode: str = Form("document"),
+):
+    """Same as /api/extract/upload, but streams one JSON line per step and ends with {"event":"done","result":...}."""
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file")
+    name = Path(file.filename or "upload.bin").name
+    opts = _opts(options).to_options()
+    loop = asyncio.get_running_loop()
+    q: asyncio.Queue = asyncio.Queue()
+
+    def push(item):
+        loop.call_soon_threadsafe(q.put_nowait, item)
+
+    def work():
+        try:
+            push({"event": "done", "result": extract_document(data, name, opts, include_paid, progress=push, mode=mode)})
+        except Exception as e:  # noqa: BLE001
+            push({"event": "error", "detail": f"{type(e).__name__}: {e}"})
+        push(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    async def gen():
+        while True:
+            item = await q.get()
+            if item is None:
+                break
+            yield json.dumps(item, default=str) + chr(10)
+
+    return StreamingResponse(gen(), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 # ----------------------------------------------------------------------------- sync: payload (blob URL / path)
@@ -161,6 +291,7 @@ def compare_payload(req: CompareRequest):
         data = read_document(req.file_path)
         cmp = compare_parsers(data, req.file_name, req.options.to_options(), req.reference_text, req.parsers, req.include_paid)
         cmp["report_markdown"] = report_markdown(cmp)
+        _remember(cmp)
         return cmp
     except Exception as e:
         raise _http(e)

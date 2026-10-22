@@ -1,0 +1,13 @@
+Type: flowchart
+
+Boxes/entities:
+- Guests Ask for Suggestion?
+- Make Suggestion
+- User Select
+- Wait
+
+Connections:
+- Guests Ask for Suggestion? (Yes) -> Make Suggestion
+- Guests Ask for Suggestion? (No) -> Wait
+- Make Suggestion -> User Select
+- User Select -> Wait

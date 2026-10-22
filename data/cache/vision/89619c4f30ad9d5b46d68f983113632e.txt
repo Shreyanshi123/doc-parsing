@@ -1,0 +1,3 @@
+Type: Screenshot
+
+Description: This is a screenshot of a web-based Finance and Operations application showing the navigation menu on the left with modules and the "Employee Portal" selected, displaying a list of main forms related to employee services on the right.

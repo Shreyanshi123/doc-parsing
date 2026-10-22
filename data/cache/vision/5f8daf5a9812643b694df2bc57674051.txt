@@ -1,0 +1,3 @@
+Type: Screenshot
+
+Description: A screenshot of the Evalueserve intranet portal showing the navigation menu under "Employee Services" with "Payroll Services" highlighted, and a section titled "Pallab's Perspective" featuring a photo and introduction of Pallab Kumar Deb.

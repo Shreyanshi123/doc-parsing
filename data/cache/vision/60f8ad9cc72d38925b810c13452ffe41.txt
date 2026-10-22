@@ -1,0 +1,32 @@
+Type: architecture diagram
+
+Entities:
+- Scheduler
+- Controller Manager
+- API Server
+- Master
+- Kubelet
+- Node
+- Service
+- User
+- etcd
+- UI
+- API
+- CLI
+- Control Plane
+
+Connections:
+- Scheduler -> Master
+- Controller Manager -> Master
+- API Server -> Master
+- Master -> Kubelet
+- Kubelet -> Node
+- Node -> Service
+- Service -> User
+- etcd -> Control Plane
+- Scheduler -> Control Plane
+- Controller Manager -> Control Plane
+- API SERVER -> Control Plane
+- UI -> API SERVER
+- API -> API SERVER
+- CLI -> API SERVER

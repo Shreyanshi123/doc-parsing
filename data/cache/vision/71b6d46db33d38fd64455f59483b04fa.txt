@@ -1,0 +1,30 @@
+Type: table image
+
+Chart:
+Title: Income Tax Computation Statement
+Axis labels: None
+
+| Particulars                        | Actual     | Projected  | Total amount | Taxable amount |
+|-------------------------------------|------------|------------|--------------|---------------|
+| Basic Salary                       | 191,141.00 | 201,318.00 | 392,459.00   | 392,459.00    |
+| Bonus Payment                      | 0.00       | 0.00       | 0.00         | 0.00          |
+| Ex-Gratia/Allowance                 | 0.00       | 76,500.00  | 76,500.00    | 76,500.00     |
+| Food Allowance                     | 0.00       | 0.00       | 0.00         | 0.00          |
+| House rent allowance               | 19,927.00  | 0.00       | 19,927.00    | 19,927.00     |
+| Incentive                          | 95,571.00  | 100,652.00 | 196,223.00   | 196,223.00    |
+| Leave - Referral Scheme            | 0.00       | 0.00       | 0.00         | 0.00          |
+| Leave Encashment                    | 0.00       | 0.00       | 0.00         | 0.00          |
+| Leave Travel Allowance             | 0.00       | 0.00       | 0.00         | 0.00          |
+| Medical Allowance                  | 0.00       | 0.00       | 0.00         | 0.00          |
+| NPS                                | 0.00       | 0.00       | 0.00         | 0.00          |
+| Non Cash Incentives                | 0.00       | 0.00       | 0.00         | 0.00          |
+| Other Taxable Reimbursement        | 0.00       | 0.00       | 0.00         | 0.00          |
+| Overtime                           | 0.00       | 0.00       | 0.00         | 0.00          |
+| Special Allowance                  | 75,644.00  | 0.00       | 75,644.00    | 75,644.00     |
+| Perquisites                        | 0.00       | 0.00       | 0.00         | 0.00          |
+| Other Taxable Income               | 0.00       | 0.00       | 0.00         | 0.00          |
+| Advance salary                     | 0.00       | 0.00       | 0.00         | 0.00          |
+| Gross Salary                       |            |            | 760763.00    | 760763.00     |
+| Professional tax                   |            |            | 0.00         | 0.00          |
+| Standard deduction                 |            |            | 75000.00     | 75000.00      |
+| Net Salary                         |            |            | 685763.00    | 685763.00     |
