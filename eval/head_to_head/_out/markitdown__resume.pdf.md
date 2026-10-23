@@ -1,0 +1,1 @@
+Contactpriya.nair@example.com+91 98765 43210BengaluruSkillsPythonSQLPower BIDockerPriya NairData EngineerExperienceSenior Data Engineer, Acme Analytics 2022 to present. Built batch pipelinesprocessing 2 TB daily.Data Engineer, Globex 2019 to 2022. Migrated reporting to a cloudwarehouse.EducationB.Tech Computer Science, 2019

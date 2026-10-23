@@ -1,0 +1,1 @@
+Check PUmp P-4 bearing woise Replace filter before Friday Call vedor about delayed Valves Shift handover at 6 Pm

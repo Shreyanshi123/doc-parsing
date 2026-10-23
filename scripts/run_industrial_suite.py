@@ -26,7 +26,8 @@ OUTDIR = CORPUS / "_out"
 TIMEOUT = 900
 
 HTTP_ONLY = {"config.json", "report.html", "data.xml", "message.eml", "legacy_report.doc", "legacy_sheet.xls", "protected.pdf", "corrupted.pdf", "blank.pdf"}
-WITH_C = {"chart_report.pdf", "slides.pdf"}
+WITH_C = {"chart_report.pdf", "slides.pdf", "annual_report_page.pdf", "scanned_report_page.pdf", "product_brochure.pdf", "flowchart_doc.pdf",
+          "infographic.pdf", "datasheet_with_photo.pdf", "01_corporate_annual_report.pdf", "04_scientific_research_paper.pdf", "10_mixed_parser_killer.pdf"}
 
 
 def jobs() -> list[tuple[str, str]]:

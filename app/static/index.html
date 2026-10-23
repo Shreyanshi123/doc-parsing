@@ -1072,7 +1072,7 @@ function routingCard(rt) {
     return `<div class="rblock"><h4>${esc(b.label)} <small>ranked by ${esc(b.metric)}</small></h4>${rows}</div>`;
   };
     return `<section class="card flat" style="margin-bottom:16px"><h2>Scorecard behind these choices</h2>
-    <p class="note" style="margin:0 0 12px">This document was classified as <b>${esc(rt.group)}</b>. The parser marked ★ is the one used: it is what the test reports (REPORT.md, BENCHMARK_REPORT.md) recommend for this kind of document. The bars are the measured scores out of 5 for the best parsers on documents like this, so you can see how the choice compares. Scores come from the truth-scored test run plus any Compare runs you scored with your own reference text.</p>
+    <p class="note" style="margin:0 0 12px">This document was classified as <b>${esc(rt.group)}</b>. The parser marked ★ is the one used: the one that scored best on documents like this in our head-to-head test (every parser run on every test document and scored against a hand-written answer). The bars are those measured scores out of 5, so you can see how the choice compares. Scores also include any Compare runs you scored with your own reference text.</p>
     <div class="rgrid">${block(rt.document)}${block(rt.tables)}${block(rt.scanned)}</div></section>`;
 }
 function renderExtract(r) {

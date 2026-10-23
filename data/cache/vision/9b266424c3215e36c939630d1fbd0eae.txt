@@ -1,0 +1,17 @@
+Type: line chart
+
+Chart:
+Title: Quality trend
+Axis labels: 
+- X-axis: Months (May, Jun, Jul, Aug, Sep, Oct)
+- Left Y-axis: Accuracy (%) 
+- Right Y-axis: Latency (s)
+
+| Month | Accuracy (%) | Latency (s) |
+|-------|--------------|-------------|
+| May   | ~78          | ~96         |
+| Jun   | ~82          | ~92         |
+| Jul   | ~85          | ~88         |
+| Aug   | ~87          | ~85         |
+| Sep   | ~90          | ~82         |
+| Oct   | ~93          | ~79         |

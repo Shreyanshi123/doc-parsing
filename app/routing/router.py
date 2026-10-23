@@ -38,40 +38,25 @@ class NoParserAvailable(Exception):
     pass
 
 
-# Parsers the reports say not to use as a first choice for PDFs (eval/REPORT.md "Avoid", BENCHMARK_REPORT.md "Not worth keeping")
-AVOID_PDF = {"pdfminer", "pdfplumber", "markitdown", "langchain_loader", "llamaindex_reader", "haystack_converter", "opendataloader", "unstructured"}
-
-
-def _scorecard_backups(profile: DocProfile, options: ParseOptions, already: list[str]) -> list[tuple[str, str]]:
-    """Extra backups taken from the scorecard (routing/learned.py) AFTER the report's own picks. Never an 'avoid' parser."""
-    group = learned.group_for(profile.to_dict(), profile.file_type)
-    out = []
-    for e in learned.rank([group], file_type=profile.file_type, prefer_quality=options.prefer_quality):
-        if e["parser"] in already or e["parser"] in AVOID_PDF:
-            continue
-        out.append((e["parser"], f"backup, scorecard: {learned.evidence(e, group)}"))
-    return out[:3]
-
-
 def smart_pdf_ok(include_paid: bool) -> bool:
     """smart_pdf is only worth choosing when a vision model can actually read the figures: a free local one,
     or Azure OpenAI (which costs money, so only when paid parsers are allowed)."""
-    from app.vision import pick_backend
-
-    backend = pick_backend()
-    return backend is not None and (include_paid or backend == "ollama") and learned._usable("smart_pdf", "pdf", True)
+    return learned._usable("smart_pdf", "pdf", include_paid)
 
 
 def _rules(profile: DocProfile, options: ParseOptions, include_paid: bool = False) -> list[tuple[str, str]]:
-    """The reports' recommendation per document type first, scorecard backups after it."""
-    r = _report_rules(profile, options, include_paid)
-    if profile.file_type == "pdf":
-        r += _scorecard_backups(profile, options, [n for n, _ in r])
-    return r
+    """The parsers that scored best on documents like this in our head-to-head test come first (best score; within a tie the
+    fastest). The hand-written rules below are only the tail of the chain, used if the measured ones all fail or there is no data."""
+    group = learned.group_for(profile.to_dict(), profile.file_type)
+    measured = []
+    for i, e in enumerate(learned.rank([group], file_type=profile.file_type, include_paid=include_paid, prefer_quality=options.prefer_quality)[:5]):
+        how = ("fastest of the parsers tied for best" if e.get("tied") else "highest score") if i == 0 else "next best"
+        measured.append((e["parser"], f"{how} for a '{group}' document: {learned.evidence(e, group)}"))
+    return measured + _report_rules(profile, options, include_paid)
 
 
 def _report_rules(profile: DocProfile, options: ParseOptions, include_paid: bool = False) -> list[tuple[str, str]]:
-    """eval/REPORT.md 'Recommendation per document type' and eval/BENCHMARK_REPORT.md 'Which parser for which document'."""
+    """FALLBACK ONLY: the older hand-written recommendation, used when the measured table has no usable parser for this document."""
     ft, cls = profile.file_type, profile.classification
     q = options.prefer_quality
 

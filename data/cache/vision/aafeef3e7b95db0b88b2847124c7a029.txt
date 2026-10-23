@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart:
+Title: Synthetic regional revenue
+Axis labels: 
+- X-axis: Region
+- Y-axis: Revenue (USD M)
+
+| Region | Revenue (USD M) |
+|--------|-----------------|
+| North  | ~12.5           |
+| South  | ~9.8            |
+| East   | ~14.2           |
+| West   | ~11.1           |

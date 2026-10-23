@@ -1,0 +1,12 @@
+Type: table image
+
+Title: Section D - Two-column action register
+
+Axis labels: None
+
+Markdown table with all data values:
+| Owner  | Due         |
+|--------|-------------|
+| Alpha  | 30 Oct 2026 |
+| Beta   | 5 Nov 2026  |
+| Gamma  | 12 Nov 2026 |

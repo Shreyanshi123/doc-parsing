@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart:
+Title: [No title visible]
+Axis labels: 
+- X-axis: [Region] (North, South, East, West)
+- Y-axis: Revenue (USD M)
+
+| Region | Revenue (USD M) |
+|--------|-----------------|
+| North  | ~12.5           |
+| South  | ~9.8            |
+| East   | ~14.2           |
+| West   | ~11.3           |

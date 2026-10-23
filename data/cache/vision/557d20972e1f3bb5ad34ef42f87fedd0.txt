@@ -1,0 +1,14 @@
+Type: line chart
+
+Chart:
+Title: Profit by year (USD m)
+Axis labels: 
+- X-axis: Year
+- Y-axis: Profit (USD m)
+
+| Year   | Profit (USD m) |
+|--------|---------------|
+| 2021.0 | 12            |
+| 2022.0 | 18            |
+| 2023.0 | 30            |
+| 2024.0 | 52            |

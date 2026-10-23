@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart: Performance by document type
+Axis labels: 
+- X-axis: Document type
+- Y-axis: Extraction score (%) 
+
+| Document type   | Fast pipeline (%) | Quality pipeline (%) |
+|-----------------|------------------|----------------------|
+| Digital text    | ~96              | ~90                  |
+| Tables          | ~92              | ~94                  |
+| Mixed layout    | ~85              | ~92                  |
+| Scanned         | ~72              | ~88                  |
+| Figures         | ~65              | ~90                  |

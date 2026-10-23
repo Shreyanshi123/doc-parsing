@@ -1,0 +1,135 @@
+Generative AI
+
+Generative artificial intelligence (GenAI) is a subfield of artificial intelligence (AI) that uses generative models to generate text, images, videos, audio, computer code or other forms of digital data.[1] These models learn the underlying patterns and structures of their training data, and use them to generate new data[2] in response to input, which often takes the form of natural language prompts.[3][4]
+
+The prevalence of generative AI tools has increased significantly since the AI boom of the early 2020s. This boom was made possible by improvements in deep neural networks, particularly large language models (LLMs), which are based on the transformer architecture. Generative AI applications include chatbots such as ChatGPT, Claude, Microsoft Copilot, DeepSeek, Doubao, Google Gemini, Grok, Kimi and Qwen; text-to-image models such as DALL-E, Adobe Firefly, Stable Diffusion, and Midjourney; text-to-speech models such as 15.ai and ElevenLabs; text-to-music models such as Suno and Udio; translation models such as Google Translate and DeepL; and text-to-video models such as Veo, LTX and Sora.[5][6][7]
+
+Théâtre D'opéra Spatial (Space Opera Theater, 2022), an image made with Midjourney that won its creator, Jason M. Allen, an award at the Colorado State Fair's fine art competition
+
+Companies in a variety of sectors have used or proposed the use of generative AI, including those in and marketing,[11] software development, healthcare,[8] screenwriting,[12] and product design.[13]
+
+entertainment,[10]
+
+finance,[9]
+
+sales
+
+Generative AI has been used for cybercrime, and to deceive and manipulate people through fake news and deepfakes.[14][15] Generative AI models have been trained on copyrighted works without the rightholders' permission.[16] Many generative AI systems are reliant on large-scale data centers, whose environmental impacts include electronic waste, consumption of fresh water for cooling, and high energy consumption that is estimated to be growing steadily.[17]
+
+History
+
+Early history
+
+The origins of algorithmically generated media can be traced to the development of the Markov chain, which has been used to model natural language since the early 20th century. Russian mathematician Andrey Markov introduced the concept in 1906,[18][19] including an analysis of vowel and consonant patterns in Eugene Onegin. Once trained on a text corpus, a Markov chain can generate probabilistic text.[20][21]
+
+By the early 1970s, artists began using computers to extend generative techniques beyond Markov models. Harold Cohen developed and exhibited works produced by AARON, a pioneering computer program designed to autonomously create paintings.[22] The terms generative AI planning or generative planning were used in the 1980s and 1990s to refer to AI planning systems, especially computer-aided process planning, used to generate sequences of actions to reach a specified goal.[23][24] Generative AI planning systems used symbolic AI methods such as state space search and constraint satisfaction and were a "relatively mature" technology by the early 1990s. They were used to generate crisis action plans for military use,[25] process plans for manufacturing[23] and decision plans such as in prototype autonomous spacecraft.[26]
+
+Generative neural networks (since the late 2000s)
+
+Machine learning uses both discriminative models and generative models to predict or generate data. Beginning in the late 2000s and early 2010s, advances in deep learning led to major improvements in image classification, speech recognition, and natural language processing.[27] Neural networks trained as discriminative models due to the relative difficulty of training generative models.[28]
+
+this period were
+
+typically
+
+in
+
+In 2014, the introduction of models such as the variational autoencoder (VAE) and generative adversarial network (GAN) enabled effective deep generative modeling of complex data such as images.[29][30] In 2017, the paper "Attention Is All You Need" proposed that transformer architecture could enable further advances in generative modeling compared to earlier long short-term memory (LSTM) networks.[31] This led to the development of generative pre-trained transformer (GPT) models, beginning with GPT-1 in 2018.
+
+Above: An image classifier, an example of a neural network trained with a discriminative objective. Below: A text- to-image model, an example of a network trained with a generative objective.
+
+Generative AI adoption
+
+In March 2020, the release of 15.ai, a free web application created by an anonymous MIT researcher that could generate convincing character voices using minimal training data, was one of the earliest publicly available uses for generative AI.[32] The platform is credited as the first mainstream service for audio deepfakes.[33][34]
+
+In 2021, DALL-E, a closed-source transformer-based generative model developed by OpenAI, drew widespread attention to text-to-image generation.[35]
+
+Other projects, including open-source approaches such as VQGAN+CLIP and DALL·E Mini (later renamed Craiyon), made similar systems more accessible to the public.[36]
+
+Dream by Wombo was released at the end of 2021,[37] followed by the releases of Midjourney and Stable Diffusion in 2022.[38][39]
+
+In November 2022, ChatGPT was released to the public. By 2023, it popularized generative AI for general-purpose text- based tasks.[40][41][42]
+
+In a 2024 survey by marketing research firm Ipsos, Asia– Pacific countries were significantly more optimistic than Western societies about generative AI and show higher adoption rates. Despite expressing concerns about privacy and the pace of change, 68% of Asia-Pacific respondents believed that AI was having a positive impact on the world, compared to 57% globally.[43] According to a survey by SAS and Coleman Parkes Research, as of 2023, 83% of Chinese respondents were using the technology, exceeding both the global average of 54% and the U.S. rate of 65%. A UN report indicated that Chinese entities filed over 38,000 generative AI patents from 2014 to 2023, more than any other country.[44] A 2024 survey by the Just So Soul social media app reported that 18% of respondents born after 2000 used generative AI "almost every day", and that over 60% of respondents like or love AI-generated content (AIGC), while less than 3% dislike or hate it.[45]
+
+By mid-2025, companies were increasingly abandoning generative AI pilot projects as they had difficulties with integration, data quality and unmet returns, leading analysts at Gartner and The Economist to characterize the period as entering the Gartner hype cycle's "trough of disillusionment" phase.[46][47]
+
+AI generated images have become much more advanced.
+
+Private investment in AI (pink) and generative AI (green)
+
+In an October 2025 survey by the Federal Reserve, one in four U.S. workers reported using generative AI at work during the previous month.[48]
+
+Applications
+
+Generative artificial intelligence has been applied across multiple industries for content creation and automation. In healthcare, generative models are used for drug discovery and the generation of synthetic medical data to train diagnostic systems.[49] In finance, they are used for report drafting, data generation, and customer service automation.[50] Media and entertainment industries use generative systems for tasks such as music composition, script development, and image or video generation.[51] Researchers and policymakers have raised concerns regarding accuracy, misuse, and impacts on academic and professional work.[50]
+
+Text and software code
+
+Large language models (LLMs) are trained on tokenized text from large corpora and are capable of natural language processing, machine translation, and natural language generation.[52]
+
+LLMs can be used as foundation models for a variety of downstream tasks.[50] They can also be trained on source code to generate programs from prompts.[53]
+
+Many applications combine large language models with external knowledge sources using retrieval- augmented generation (RAG), a technique in which relevant documents are retrieved at inference time and incorporated into the model's response.
+
+Generative AI has been integrated into content management and website publishing platforms, where large language models are used to generate text, assist with page composition, and automate website creation from natural language prompts.[54] WordPress.com is one example of this application, incorporating generative AI into its website authoring workflow.[55]
+
+Audio
+
+In 2016, DeepMind's WaveNet demonstrated that deep neural networks can generate raw audio waveforms.[56] This enabled more realistic speech synthesis compared to earlier approaches. Subsequent systems such as Tacotron 2 demonstrated end-to-end neural text-to-speech generation.[57]
+
+Images Generative AI can be used to create visual art.[51] Such systems are trained on image–text pairs. Examples include Stable Diffusion, DALL-E, and Midjourney.[58] Generative AI has also been applied to low-bitrate image compression, enabling the reconstruction of perceptually realistic images from compressed data.[59][60] Recent approaches have explored controllable compression at multiple bitrates using a single model.[61][62]
+
+Video
+
+Generative AI can be used to produce photorealistic videos. Systems such as Runway have demonstrated text-to-video generation capabilities.[63]
+
+Robotics Generative models can be used for motion planning and robot control by learning from prior data.[64]
+
+3D modeling
+
+Generative models can assist in automating 3D modeling tasks, including generating 3D assets from text or images.
+
+AI-assisted mathematical discovery
+
+Generative AI systems have been used in mathematics and computer science to generate candidate computer programs, proofs, constructions, or algorithms.
+
+In 2023, Google DeepMind introduced FunSearch, a method for creating computer programs that solve mathematical and algorithmic problems. FunSearch was used to discover new mathematical constructions in the cap set problem and the bin packing problem.[65][66][67]
+
+In 2023, Google DeepMind introduced AlphaDev, which was used to discover small sorting algorithms that outperformed previously known human benchmarks and have been integrated into the LLVM standard C++ sorting library.[68][69] In 2025, Google DeepMind introduced AlphaEvolve, an AI system for general-purpose algorithm discovery and optimization. AlphaEvolve uses LLMs to propose code changes, automated evaluators to assess each candidate, and an evolutionary process to iteratively improve algorithms.[70]
+
+In 2026, in response to the increasing use of generative AI in mathematical discovery, a group of mathematicians issued the Leiden Declaration on Artificial Intelligence and Mathematics, which recommends disclosing the use of AI in research papers, ensuring that AI-assisted papers are peer- reviewed, and providing legal resources and public funding so that academia and for-profit companies can compete on equal terms.[71]
+
+Materials science
+
+In 2023, Google DeepMind introduced GNoME, a method to propose candidate inorganic crystal structures for computational screening and experimental synthesis in material science.[72] Other material science methods include MatterGen,[73] CDVAE,[74] and CrystalFlow.[75][76]
+
+Generative engine optimization
+
+Generative engine optimization (GEO) is the practice of structuring digital content and managing online presence to improve visibility in responses generated by generative AI systems. The practice influences the way large language models (LLMs) retrieve, summarize, and present information in response to user queries.[77] Related terms include answer engine optimization (AEO)[77] and artificial intelligence optimization (AIO).[78]
+
+Software and hardware
+
+Generative AI models are used by chatbots such as ChatGPT, programming tools such as GitHub Copilot,[79] text-to-image programs such as Midjourney, and text-to-video programs such as Runway Gen-2.[80] Generative AI features have been added to existing commercially available services such as Microsoft Office (Microsoft Copilot),[81] Google Photos,[82] and the Adobe Suite (Adobe Firefly).[83] Many generative AI models are also available as open-source software, including Stable Diffusion and the LLaMA[84] language model.
+
+Architecture of a generative AI agent
+
+Smaller generative AI models with up to a few billion parameters can run on smartphones, embedded devices, and personal computers. For example, LLaMA- 7B (a version with 7 billion parameters) can run on a Raspberry Pi 4[85] and one version of Stable Diffusion can run on an iPhone 11.[86]
+
+Larger models with tens of billions of parameters can run on laptop or desktop computers. To achieve an acceptable speed, models of this size may require accelerators such as the GPU chips produced by NVIDIA and AMD or the Neural Engine included in Apple silicon products. For example, the 65 billion parameter version of LLaMA can be configured to run on a desktop PC.[87]
+
+The advantages of running generative AI locally include protection of privacy and intellectual property, and avoidance of rate limiting and censorship. The subreddit r/LocalLLaMA in particular focuses on using consumer-grade gaming graphics cards[88] through such techniques as compression.
+
+Language models with hundreds of billions of parameters, such as GPT-4 or PaLM, typically run on datacenter computers equipped with arrays of GPUs (such as NVIDIA's H100) or AI accelerator chips (such as Google's TPU). These very large models are typically accessed as cloud services over the Internet.
+
+In 2022, the United States New Export Controls on Advanced Computing and Semiconductors to China imposed restrictions on exports to China of GPU and AI accelerator chips used for generative AI.[89] Chips such as the NVIDIA A800[90] and the Biren Technology BR104[91] were developed to meet the requirements of the sanctions.
+
+There is free software on the market which attempts to recognizing text generated by generative artificial intelligence (such as GPTZero), as well as images, audio or video coming from it.[92] Potential mitigation strategies for detecting generative AI content include digital watermarking, content authentication, information retrieval, and machine learning classifier models.[93] Despite claims of accuracy, both free and paid AI text detectors have frequently produced false positives, mistakenly accusing students of submitting AI-generated work.[94][95]
+
+Generative models and training techniques
+
+Generative adversarial networks
+
+Generative adversarial networks (GANs) are a generative modeling technique which consist of two neural networks— the generator and the discriminator—trained simultaneously in a competitive setting. The generator creates synthetic data by transforming random noise into samples that resemble the training dataset. The discriminator is trained to distinguish the authentic data from synthetic data produced by the generator. The two models engage in a minimax game: the generator aims to create increasingly realistic data to "fool" the discriminator, while the discriminator improves its ability to distinguish real from fake data. This continuous training setup enables the generator to produce high-quality and realistic outputs.[96]
+
+Workflow for the training of a generative adversarial network

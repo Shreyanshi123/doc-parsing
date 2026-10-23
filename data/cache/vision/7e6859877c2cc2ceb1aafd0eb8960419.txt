@@ -1,0 +1,16 @@
+Type: flowchart
+
+Boxes/entities:
+- Receive order
+- Check stock
+- Pack items
+- Reorder stock
+- Ship
+- Send invoice
+
+Connections:
+- Receive order -> Check stock
+- Check stock -> Pack items
+- Check stock -> Reorder stock
+- Pack items -> Ship
+- Ship -> Send invoice

@@ -1,10 +1,11 @@
 """
-Evidence-based routing: which parser is best for which kind of document, taken from the scorecard.
+Evidence-based routing: which parser is best for which kind of document, taken from a fresh head-to-head test.
 
 Two sources, merged per (document group, parser):
-  - seed_scores.json   the truth-scored test run in eval/BENCHMARK_REPORT.md (hand-written answer keys)
-  - live runs          every "Compare parsers" run in the UI that was scored against YOUR reference text
-                       (runs scored against Azure DI are ignored: they measure imitation, not correctness)
+  - measured_scores.json  built by scripts/build_routing_table.py from eval/head_to_head/results.jsonl: every parser run on every
+                          test document with a hand-written answer file. Nothing from older reports is used.
+  - live runs             every "Compare parsers" run in the UI that was scored against YOUR reference text
+                          (runs scored against Azure DI are ignored: they measure imitation, not correctness)
 So the table gets better every time you compare a document with a reference. Nothing here is hard-coded per parser.
 
 Choice rule: highest score wins; parsers within TIE points of the best are treated as tied and the FASTEST of
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 import time
 from pathlib import Path
 from typing import Optional
@@ -28,11 +30,12 @@ METRICS = benchmark.METRICS
 # our own pipelines glued from the other engines (PyMuPDF + OCR [+ vision model]); they compete like any other parser
 COMBOS = {"smart_pdf", "hybrid_pdf"}
 
-_SEED = Path(__file__).with_name("seed_scores.json")
+_SEED = Path(__file__).with_name("measured_scores.json")
 
 
 def group_for(profile: dict, file_type: str) -> str:
-    return benchmark.group_of(profile, file_type)
+    """PDFs are grouped by what is inside them (digital, tables, mixed, scanned, figures); other files by their type."""
+    return benchmark.group_of(profile, file_type) if file_type == "pdf" else file_type
 
 
 def _seed() -> dict:
@@ -74,7 +77,7 @@ def table() -> dict:
         for p in set(sg["parsers"]) | set(live.get(g, {})):
             parts = []     # (metrics, seconds, weight)
             if p in sg["parsers"]:
-                parts.append((sg["parsers"][p]["m"], sg["parsers"][p]["s"], sg["docs"]))
+                parts.append((sg["parsers"][p]["m"], sg["parsers"][p]["s"], sg["parsers"][p].get("n", sg["docs"])))
             lv = live.get(g, {}).get(p)
             if lv:
                 n = len(lv["ms"])
@@ -94,7 +97,12 @@ def _score(m: list, metric: Optional[str]) -> Optional[float]:
     return sum(vals) / len(vals) if vals else None
 
 
-_SLOW_IMPORT = {"easyocr": "easyocr", "unstructured": "unstructured"}   # their is_available() imports torch: minutes on a cold start
+# is_available() of most parsers imports the whole library (torch, langchain, llama_index, haystack...): minutes on a cold start.
+# For ranking it is enough to know the library is installed; if it then fails on a document the chain moves to the next parser.
+_FAST_SPEC = {"pymupdf": "fitz", "pymupdf4llm": "pymupdf4llm", "docling": "docling", "easyocr": "easyocr", "unstructured": "unstructured",
+              "markitdown": "markitdown", "pdfplumber": "pdfplumber", "pdfminer": "pdfminer", "langchain_loader": "langchain_community",
+              "llamaindex_reader": "llama_index", "haystack_converter": "haystack", "hybrid_pdf": "fitz", "smart_pdf": "fitz",
+              "docx": "docx", "pptx": "pptx", "spreadsheet": "openpyxl"}
 _avail_cache: dict[str, tuple[float, bool]] = {}
 
 
@@ -105,20 +113,24 @@ def _usable(name: str, file_type: str, include_paid: bool) -> bool:
         return False
     if file_type not in cls.supported_types:
         return False
-    if not (include_paid or cls.cost not in ("paid", "cloud")):
-        # smart_pdf is labelled "paid" only because its vision step MAY call a paid API: with a free local vision model
-        # (Ollama) it costs nothing, and with no vision model at all it cannot read charts, so it must not be ranked for them
-        if name != "smart_pdf":
-            return False
+    if name == "smart_pdf":
+        # labelled "paid" only because its vision step MAY call a paid API: a free local model (Ollama) costs nothing, Azure OpenAI
+        # needs paid parsers to be allowed, and with no vision model at all it cannot read charts, so it must not be ranked
         from app.vision import pick_backend
-        if pick_backend() != "ollama":
+
+        backend = pick_backend()
+        if backend is None or not (include_paid or backend == "ollama"):
             return False
+    elif not (include_paid or cls.cost not in ("paid", "cloud")):
+        return False
     now = time.time()
     hit = _avail_cache.get(name)
     if hit and now - hit[0] < 300:
         return hit[1]
-    if name in _SLOW_IMPORT:
-        ok = importlib.util.find_spec(_SLOW_IMPORT[name]) is not None   # installed? without importing it
+    if name in _FAST_SPEC:
+        ok = importlib.util.find_spec(_FAST_SPEC[name]) is not None   # installed? without importing it
+    elif name == "opendataloader":
+        ok = bool(shutil.which("java")) and importlib.util.find_spec("langchain_opendataloader_pdf") is not None
     else:
         ok = cls.is_available()[0]
     _avail_cache[name] = (now, ok)
@@ -155,4 +167,4 @@ def rank(groups: list[str], metric: Optional[str] = None, *, file_type: str = "p
 def evidence(entry: dict, group: str, metric: Optional[str] = None) -> str:
     what = metric.lower() if metric else "overall score"
     src = f", {entry['live']} from your own comparisons" if entry.get("live") else ""
-    return f"{entry['score']:.1f}/5 {what} on {entry['docs']} '{group}' test document(s){src}, {entry['secs']:.1f}s"
+    return f"{entry['score']:.2f}/5 {what} on {entry['docs']} '{group}' test document(s) in our head-to-head test{src}, {entry['secs']:.1f}s"

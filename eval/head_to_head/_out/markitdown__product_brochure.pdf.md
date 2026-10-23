@@ -1,0 +1,1 @@
+HP-220 Hydraulic PumpBuilt for continuous duty in demanding plants.Figure 1. HP-220 pump, front view.Features• Low noise operation• Sealed bearings• Two year warrantySpeciﬁcationsParameterValueFlow rate220 l/minMax pressure16 barMotor power5.5 kWWeight42 kgContactsales@northwind.example+91 20 5555 0101

@@ -1,0 +1,1 @@
+Rotated page 1: inspection checklist item 1 passed.

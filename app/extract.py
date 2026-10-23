@@ -78,13 +78,10 @@ def _run(name: str, data: bytes, file_type: str, options: ParseOptions) -> str:
 
 
 def _usable(names: list[str], file_type: str) -> list[str]:
+    """The parsers in `names` that support this file type and are installed (a quick check: no heavy library is imported here)."""
     out = []
     for n in names:
-        try:
-            cls = get_parser_class(n)
-        except KeyError:
-            continue
-        if file_type in cls.supported_types and cls.is_available()[0] and n not in out:
+        if n not in out and learned._usable(n, file_type, True):
             out.append(n)
     return out
 
@@ -108,40 +105,38 @@ def _chain(chain: list[str], data: bytes, file_type: str, options: ParseOptions,
 
 
 # --------------------------------------------------------------------------- the policy
-# Which parser reads which kind of part comes from the reports (eval/REPORT.md, eval/BENCHMARK_REPORT.md). The scorecard
-# (routing/learned.py) is appended to each reason as the measured evidence and shown in the UI next to the choice.
-TABLE_GROUPS = [learned.ALL]   # table reconstruction averaged over every test document that has a table
+# Which parser reads which kind of part comes from our head-to-head test (routing/learned.py + routing/measured_scores.json):
+# for tables the parser with the best "table reconstruction" score on documents that contain tables, for scanned pages the best
+# overall score on scanned documents, for pictures the best score on image files. Best score wins; within a tie the fastest.
+# The hand-written lists below are only the tail of each chain, used when the measured ones fail or there is no data.
+TABLE_GROUPS = ["digital + tables", "mixed", "digital + charts/images"]   # test documents that contain tables
+SCANNED_GROUPS = ["scanned"]
 
 
-def _evidence(name: str, groups: list[str], metric: Optional[str], file_type: str = "pdf") -> str:
-    for e in learned.rank(groups, metric, file_type=file_type, include_paid=True):
-        if e["parser"] == name:
-            return " Scorecard: " + learned.evidence(e, groups[0], metric) + "."
-    return ""
+def _measured_chain(label: str, groups: list[str], metric: Optional[str], file_type: str, options: ParseOptions, include_paid: bool,
+                    backup: list[str]) -> tuple[list[str], str]:
+    ranked = learned.rank(groups, metric, file_type=file_type, include_paid=include_paid, prefer_quality=options.prefer_quality)
+    names = [r["parser"] for r in ranked[:4]] + backup
+    if include_paid:
+        names.insert(0, "azure_di")   # you ticked "Include paid parsers": Azure DI goes first, as before
+    chain = _usable(names, file_type)
+    if not ranked or not chain:
+        return chain, f"{label}: no measured scores for the available parsers, so the hand-written order is used."
+    if chain[0] == "azure_di":
+        return chain, f"{label}: Azure Document Intelligence (paid) first because you ticked 'Include paid parsers'; the best free parsers follow."
+    top = next((r for r in ranked if r["parser"] == chain[0]), None)
+    if top is None:
+        return chain, f"{label}: {chain[0]} (hand-written fallback, it was not in the measured ranking)."
+    how = "fastest of the parsers tied for best" if top.get("tied") else "best score"
+    return chain, f"{label}: {chain[0]} - {how}; {learned.evidence(top, groups[0] if len(groups) == 1 else 'table-bearing', metric)}."
 
 
 def table_chain(file_type: str, options: ParseOptions, include_paid: bool) -> tuple[list[str], str]:
-    names = ["pymupdf4llm"] if not options.prefer_quality else ["docling", "pymupdf4llm"]
-    if include_paid:
-        names.insert(0, "azure_di")
-    chain = _usable(names, file_type)
-    lead = chain[0] if chain else "pymupdf"
-    why = ("Tables: pymupdf4llm kept 80% of table cells in the 15-page paper (plain pymupdf only 12%)" if lead == "pymupdf4llm" else
-           "Tables: docling is the most accurate on tables (93-95% of cells) but slow; pymupdf4llm is the backup" if lead == "docling" else
-           "Tables: Azure Document Intelligence (paid) first because you ticked 'Include paid parsers'; pymupdf4llm is the free backup")
-    return chain, why + "." + _evidence(lead, TABLE_GROUPS, "Table Reconstruction", file_type)
+    return _measured_chain("Tables", TABLE_GROUPS, "Table Reconstruction", file_type, options, include_paid, ["pymupdf4llm"])
 
 
 def scanned_chain(file_type: str, options: ParseOptions, include_paid: bool) -> tuple[list[str], str]:
-    names = ["pymupdf4llm", "ocr", "easyocr", "vlm"] if not options.prefer_quality else ["docling", "pymupdf4llm", "ocr", "easyocr", "vlm"]
-    if include_paid:
-        names.insert(0, "azure_di")
-    chain = _usable(names, file_type)
-    lead = chain[0] if chain else "ocr"
-    why = ("Scanned page (a picture, no text layer): pymupdf4llm scored 93% on the clean scan (24.2 vs Azure DI 24.9); OCR is the backup (words only, no headings)" if lead == "pymupdf4llm" else
-           "Scanned page: docling is the most accurate free parser on scans (98%) but slower; pymupdf4llm and OCR are the backups" if lead == "docling" else
-           "Scanned page: Azure Document Intelligence (paid) first because you ticked 'Include paid parsers'; pymupdf4llm / docling are the free backups")
-    return chain, why + "." + _evidence(lead, ["scanned"], None, file_type)
+    return _measured_chain("Scanned page", SCANNED_GROUPS, None, file_type, options, include_paid, ["pymupdf4llm", "ocr", "easyocr", "vlm"])
 
 
 def routing_evidence(profile: dict, file_type: str, options: ParseOptions, include_paid: bool, mode: str = "part", chosen: Optional[str] = None) -> dict:
@@ -447,7 +442,7 @@ def _extract_pdf_whole(data: bytes, file_name: str, profile, options: ParseOptio
     if doc is None:
         raise RuntimeError(f"no parser produced any content: {tried}")
 
-    why = f"{chosen}: {reasons.get(chosen, 'next parser in the chain')}." + _evidence(chosen, [group], None)
+    why = f"{chosen}: {reasons.get(chosen, 'next parser in the chain')}."
     if len(tried) > 1:
         why += " Tried before it: " + ", ".join(f"{t['parser']} ({t['status']})" for t in tried[:-1]) + "."
 
@@ -485,12 +480,11 @@ def _extract_other(data: bytes, file_name: str, file_type: str, options: ParseOp
     from app.pipeline import parse_bytes
 
     if file_type == "image":
-        names = ["vlm", "easyocr", "ocr"] if options.prefer_quality else ["easyocr", "ocr"]
-        chain = _usable(names, "image")
+        chain, img_why = _measured_chain("Image file", ["image"], None, "image", options, False, ["vlm", "easyocr", "ocr"] if options.prefer_quality else ["easyocr", "ocr"])
         emit({"event": "working", "page": 1, "kind": "image", "parser": (chain or ["none"])[0]})
         t = time.perf_counter()
         name, md, tried = _chain(chain, data, "image", options, lambda m: bool(m.strip()))
-        seg = _seg(1, 1, "image", [], name or "none", "Image file: easyocr read UI text most cleanly in our tests; tesseract is the faster backup", md, tried, int((time.perf_counter() - t) * 1000))
+        seg = _seg(1, 1, "image", [], name or "none", img_why, md, tried, int((time.perf_counter() - t) * 1000))
         emit({"event": "segment", "segment": seg, "has_image": False})
         return [seg], [{"page": 1}], [], {}
 

@@ -1,0 +1,143 @@
+Warehouse Inventory
+
+| SKU | Description | Stock | Location |
+|---|---|---|---|
+| SKU-2000 | Item 0 bracket | 489 | Rack C3 |
+| SKU-2001 | Item 1 bracket | 113 | Rack A8 |
+| SKU-2002 | Item 2 bracket | 241 | Rack B11 |
+| SKU-2003 | Item 3 bracket | 105 | Rack D20 |
+| SKU-2004 | Item 4 bracket | 461 | Rack E1 |
+| SKU-2005 | Item 5 bracket | 246 | Rack F12 |
+| SKU-2006 | Item 6 bracket | 410 | Rack F3 |
+| SKU-2007 | Item 7 bracket | 428 | Rack F4 |
+| SKU-2008 | Item 8 bracket | 466 | Rack D7 |
+| SKU-2009 | Item 9 bracket | 245 | Rack B14 |
+| SKU-2010 | Item 10 bracket | 405 | Rack F11 |
+| SKU-2011 | Item 11 bracket | 45 | Rack F13 |
+| SKU-2012 | Item 12 bracket | 238 | Rack D3 |
+| SKU-2013 | Item 13 bracket | 372 | Rack B6 |
+| SKU-2014 | Item 14 bracket | 66 | Rack A5 |
+| SKU-2015 | Item 15 bracket | 303 | Rack D5 |
+| SKU-2016 | Item 16 bracket | 314 | Rack E16 |
+| SKU-2017 | Item 17 bracket | 337 | Rack C5 |
+| SKU-2018 | Item 18 bracket | 281 | Rack E5 |
+| SKU-2019 | Item 19 bracket | 11 | Rack A4 |
+| SKU-2020 | Item 20 bracket | 270 | Rack F5 |
+| SKU-2021 | Item 21 bracket | 223 | Rack B7 |
+| SKU-2022 | Item 22 bracket | 15 | Rack C7 |
+| SKU-2023 | Item 23 bracket | 150 | Rack E8 |
+| SKU-2024 | Item 24 bracket | 392 | Rack E11 |
+| SKU-2025 | Item 25 bracket | 133 | Rack E14 |
+| SKU-2026 | Item 26 bracket | 428 | Rack B2 |
+| SKU-2027 | Item 27 bracket | 466 | Rack F12 |
+| SKU-2028 | Item 28 bracket | 460 | Rack D19 |
+| SKU-2029 | Item 29 bracket | 418 | Rack E14 |
+| SKU-2030 | Item 30 bracket | 424 | Rack E5 |
+| SKU-2031 | Item 31 bracket | 273 | Rack B17 |
+| SKU-2032 | Item 32 bracket | 262 | Rack A15 |
+| SKU-2033 | Item 33 bracket | 398 | Rack B20 |
+| SKU-2034 | Item 34 bracket | 3 | Rack B6 |
+| SKU-2035 | Item 35 bracket | 73 | Rack D20 |
+| SKU-2036 | Item 36 bracket | 372 | Rack A18 |
+| SKU-2037 | Item 37 bracket | 32 | Rack C17 |
+
+SKU-2038 Item 38 bracket 272 Rack E16
+
+| SKU-2039 | Item 39 bracket | 402 | Rack A18 |
+|---|---|---|---|
+| SKU-2040 | Item 40 bracket | 30 | Rack B7 |
+| SKU-2041 | Item 41 bracket | 142 | Rack A4 |
+| SKU-2042 | Item 42 bracket | 260 | Rack D18 |
+| SKU-2043 | Item 43 bracket | 15 | Rack A15 |
+| SKU-2044 | Item 44 bracket | 167 | Rack E17 |
+| SKU-2045 | Item 45 bracket | 311 | Rack E7 |
+| SKU-2046 | Item 46 bracket | 355 | Rack C15 |
+| SKU-2047 | Item 47 bracket | 261 | Rack E16 |
+| SKU-2048 | Item 48 bracket | 260 | Rack B17 |
+| SKU-2049 | Item 49 bracket | 449 | Rack C18 |
+| SKU-2050 | Item 50 bracket | 458 | Rack B15 |
+| SKU-2051 | Item 51 bracket | 71 | Rack D4 |
+| SKU-2052 | Item 52 bracket | 201 | Rack D11 |
+| SKU-2053 | Item 53 bracket | 38 | Rack F8 |
+| SKU-2054 | Item 54 bracket | 220 | Rack A7 |
+| SKU-2055 | Item 55 bracket | 343 | Rack C4 |
+| SKU-2056 | Item 56 bracket | 460 | Rack B12 |
+| SKU-2057 | Item 57 bracket | 74 | Rack C5 |
+| SKU-2058 | Item 58 bracket | 496 | Rack D8 |
+| SKU-2059 | Item 59 bracket | 383 | Rack A13 |
+| SKU-2060 | Item 60 bracket | 454 | Rack D6 |
+| SKU-2061 | Item 61 bracket | 342 | Rack B6 |
+| SKU-2062 | Item 62 bracket | 362 | Rack D17 |
+| SKU-2063 | Item 63 bracket | 207 | Rack C14 |
+| SKU-2064 | Item 64 bracket | 101 | Rack C11 |
+| SKU-2065 | Item 65 bracket | 48 | Rack F12 |
+| SKU-2066 | Item 66 bracket | 10 | Rack C18 |
+| SKU-2067 | Item 67 bracket | 235 | Rack D1 |
+| SKU-2068 | Item 68 bracket | 197 | Rack C17 |
+| SKU-2069 | Item 69 bracket | 320 | Rack C17 |
+| SKU-2070 | Item 70 bracket | 492 | Rack A4 |
+| SKU-2071 | Item 71 bracket | 471 | Rack B4 |
+| SKU-2072 | Item 72 bracket | 44 | Rack C9 |
+| SKU-2073 | Item 73 bracket | 21 | Rack B9 |
+| SKU-2074 | Item 74 bracket | 387 | Rack B14 |
+| SKU-2075 | Item 75 bracket | 435 | Rack F9 |
+| SKU-2076 | Item 76 bracket | 208 | Rack B18 |
+| SKU-2077 | Item 77 bracket | 471 | Rack E19 |
+| SKU-2078 | Item 78 bracket | 254 | Rack F11 |
+| SKU-2079 | Item 79 bracket | 46 | Rack C2 |
+
+SKU-2080 Item 80 bracket 410 Rack F6
+
+| SKU-2081 | Item 81 bracket | 218 | Rack A9 |
+|---|---|---|---|
+| SKU-2082 | Item 82 bracket | 481 | Rack A3 |
+| SKU-2083 | Item 83 bracket | 411 | Rack C3 |
+| SKU-2084 | Item 84 bracket | 312 | Rack B3 |
+| SKU-2085 | Item 85 bracket | 136 | Rack A15 |
+| SKU-2086 | Item 86 bracket | 6 | Rack C18 |
+| SKU-2087 | Item 87 bracket | 214 | Rack C20 |
+| SKU-2088 | Item 88 bracket | 67 | Rack A17 |
+| SKU-2089 | Item 89 bracket | 364 | Rack B4 |
+| SKU-2090 | Item 90 bracket | 497 | Rack B9 |
+| SKU-2091 | Item 91 bracket | 26 | Rack B7 |
+| SKU-2092 | Item 92 bracket | 478 | Rack C10 |
+| SKU-2093 | Item 93 bracket | 272 | Rack B10 |
+| SKU-2094 | Item 94 bracket | 229 | Rack E6 |
+| SKU-2095 | Item 95 bracket | 139 | Rack C1 |
+| SKU-2096 | Item 96 bracket | 129 | Rack A1 |
+| SKU-2097 | Item 97 bracket | 10 | Rack F17 |
+| SKU-2098 | Item 98 bracket | 283 | Rack B17 |
+| SKU-2099 | Item 99 bracket | 244 | Rack B15 |
+| SKU-2100 | Item 100 bracket | 55 | Rack F14 |
+| SKU-2101 | Item 101 bracket | 337 | Rack D18 |
+| SKU-2102 | Item 102 bracket | 428 | Rack D17 |
+| SKU-2103 | Item 103 bracket | 158 | Rack F7 |
+| SKU-2104 | Item 104 bracket | 118 | Rack C7 |
+| SKU-2105 | Item 105 bracket | 427 | Rack F5 |
+| SKU-2106 | Item 106 bracket | 208 | Rack C2 |
+| SKU-2107 | Item 107 bracket | 429 | Rack B1 |
+| SKU-2108 | Item 108 bracket | 37 | Rack F9 |
+| SKU-2109 | Item 109 bracket | 221 | Rack B2 |
+| SKU-2110 | Item 110 bracket | 44 | Rack F13 |
+| SKU-2111 | Item 111 bracket | 446 | Rack E10 |
+| SKU-2112 | Item 112 bracket | 307 | Rack B10 |
+| SKU-2113 | Item 113 bracket | 24 | Rack D6 |
+| SKU-2114 | Item 114 bracket | 81 | Rack C15 |
+| SKU-2115 | Item 115 bracket | 2 | Rack C12 |
+| SKU-2116 | Item 116 bracket | 493 | Rack C18 |
+| SKU-2117 | Item 117 bracket | 166 | Rack B2 |
+| SKU-2118 | Item 118 bracket | 495 | Rack C7 |
+| SKU-2119 | Item 119 bracket | 183 | Rack B1 |
+| SKU-2120 | Item 120 bracket | 172 | Rack D3 |
+| SKU-2121 | Item 121 bracket | 244 | Rack C17 |
+
+SKU-2122 Item 122 bracket 336 Rack B8
+
+| SKU-2123 | Item 123 bracket | 259 | Rack A3 |
+|---|---|---|---|
+| SKU-2124 | Item 124 bracket | 136 | Rack A5 |
+| SKU-2125 | Item 125 bracket | 205 | Rack E2 |
+| SKU-2126 | Item 126 bracket | 202 | Rack A10 |
+| SKU-2127 | Item 127 bracket | 156 | Rack F8 |
+| SKU-2128 | Item 128 bracket | 44 | Rack E17 |
+| SKU-2129 | Item 129 bracket | 437 | Rack B20 |

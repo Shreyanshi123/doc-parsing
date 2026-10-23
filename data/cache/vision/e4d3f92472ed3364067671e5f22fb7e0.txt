@@ -1,0 +1,16 @@
+Type: line chart
+
+Chart:
+Title: Weighted quality index
+Axis labels: 
+- X-axis: Quarter (Q1 25, Q2 25, Q3 25, Q4 25, Q1 26, Q2 26)
+- Y-axis: Index
+
+| Quarter | Index |
+|---------|-------|
+| Q1 25   | ~43   |
+| Q2 25   | ~56   |
+| Q3 25   | ~51   |
+| Q4 25   | ~67   |
+| Q1 26   | ~74   |
+| Q2 26   | ~82   |

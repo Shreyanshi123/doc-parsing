@@ -1,0 +1,23 @@
+Bearing Fault Diagnosis with Combined Features A. Rao and S. Iyer
+
+1. Introduction
+
+2. Method and results
+
+Condition monitoring of rotating machinery relies on The third feature set combines both with envelope vibration signals. In this study we compare three feature analysis: A random forest classifier achieved the best sets on a bearing fault data set: The first feature set accuracy on the held out test set Results are uses time domain statistics such as root mean square summarised in Table 1. We conclude that combined and kurtosis The second uses spectral band energies features give the most robust diagnosis across operating speeds
+
+Table 1. Accuracy by feature set (percent)
+
+Feature set
+
+Accuracy
+
+Time domain
+
+88.2
+
+Spectral Combined
+
+91.5
+
+96.3
