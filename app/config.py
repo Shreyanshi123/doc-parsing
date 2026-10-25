@@ -51,6 +51,8 @@ class Settings:
     azure_openai_deployment: str = os.getenv("AZURE_OPENAI_DEPLOYMENT", "")
     azure_openai_api_version: str = os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21")
     max_figures: int = int(os.getenv("MAX_FIGURES", "8"))   # per document - caps vision calls (cost)
+    # the vlm PARSER sends every page of a document to the vision LLM (one API call per page): off unless you switch it on on purpose
+    vlm_parser_enabled: bool = os.getenv("VLM_PARSER_ENABLED", "false").lower() in ("1", "true", "yes")
 
     # Paid engines (optional)
     azure_di_endpoint: str = os.getenv("AZURE_DI_ENDPOINT", "")

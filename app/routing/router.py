@@ -49,8 +49,8 @@ def _rules(profile: DocProfile, options: ParseOptions, include_paid: bool = Fals
     fastest). The hand-written rules below are only the tail of the chain, used if the measured ones all fail or there is no data."""
     group = learned.group_for(profile.to_dict(), profile.file_type)
     measured = []
-    for i, e in enumerate(learned.rank([group], file_type=profile.file_type, include_paid=include_paid, prefer_quality=options.prefer_quality)[:5]):
-        how = ("fastest of the parsers tied for best" if e.get("tied") else "highest score") if i == 0 else "next best"
+    for i, e in enumerate(learned.within_range(learned.prefer_native(learned.rank([group], file_type=profile.file_type, include_paid=include_paid, prefer_quality=options.prefer_quality), profile.file_type))[:5]):
+        how = ("the built-in parser for this file type: within 0.5 of the best score and loads no heavy library" if e.get("native_first") else "fastest of the parsers tied for best" if e.get("tied") else "highest score") if i == 0 else "next best"
         measured.append((e["parser"], f"{how} for a '{group}' document: {learned.evidence(e, group)}"))
     return measured + _report_rules(profile, options, include_paid)
 
@@ -118,11 +118,15 @@ def route(profile: DocProfile, options: ParseOptions, override: str | None = Non
     chosen: list[tuple[str, str]] = []
     skipped: dict[str, str] = {}
     for name, why in _rules(profile, options, include_paid):
+        if name in learned.NEVER_ROUTE:   # e.g. vlm: one API call per page, so it is never picked automatically
+            continue
         try:
             cls = get_parser_class(name)
         except KeyError:
             continue
-        ok, reason = cls.is_available()
+        # a quick "is it installed" check: cls.is_available() imports the whole library (unstructured, docling...), which takes minutes cold
+        ok = learned._usable(name, profile.file_type, True)
+        reason = "" if ok else "not installed, not supported for this file type, or switched off"
         if ok and profile.file_type in cls.supported_types and name not in [c for c, _ in chosen]:
             chosen.append((name, why))
         elif not ok:

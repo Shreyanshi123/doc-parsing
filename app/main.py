@@ -113,7 +113,7 @@ def health():
 
 @app.get("/api/providers")
 def providers():
-    return list_parsers()
+    return list_parsers(fast=True)   # a quick "is it installed" check: the full check imports torch / unstructured and can take minutes when cold
 
 
 # ----------------------------------------------------------------------------- sync: upload
@@ -201,8 +201,13 @@ async def compare_upload_stream(
 
 # ----------------------------------------------------------------------------- benchmark (built from comparison runs)
 @app.get("/api/benchmark")
-def benchmark_get():
-    return benchmark.aggregate()
+def benchmark_get(source: str = "head_to_head"):
+    """source=head_to_head: the fresh test of every parser on every test document. source=runs: your own Compare runs."""
+    if source == "head_to_head":
+        data = benchmark.head_to_head()
+        if data:
+            return data
+    return {**benchmark.aggregate(), "source": "runs"}
 
 
 @app.delete("/api/benchmark/runs/{run_id}")
@@ -354,4 +359,5 @@ app.mount("/static", StaticFiles(directory=_static), name="static")
 
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(_static / "index.html")
+    # no-cache: the browser must ask again every time, so an updated page is never replaced by an old copy kept from an earlier visit
+    return FileResponse(_static / "index.html", headers={"Cache-Control": "no-cache"})

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -20,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "eval" / "head_to_head"
 RESULTS = OUT / "results.jsonl"
-TIMEOUT = 400
+TIMEOUT = int(os.environ.get("H2H_TIMEOUT", 400))
 SKIP = {"azure_di", "llamaparse"}
 ORDER = ["text", "spreadsheet", "docx", "pptx", "pdfminer", "pdfplumber", "pymupdf", "markitdown", "haystack_converter", "langchain_loader",
          "llamaindex_reader", "opendataloader", "pymupdf4llm", "hybrid_pdf", "ocr", "unstructured", "docling", "easyocr", "vlm", "smart_pdf"]
@@ -61,6 +62,15 @@ DOCS = {
     "07_logistics_shipping_manifest.pdf": ("copilot: manifest, rotated label", IN), "08_software_incident_report.pdf": ("copilot: incident report with logs", IN),
     "09_scanned_maintenance_order.pdf": ("copilot: scanned page", IN), "10_mixed_parser_killer.pdf": ("copilot: mixed content, formula, code", IN),
 }
+
+
+if os.environ.get("H2H_SET") in ("enterprise", "realistic", "long"):     # extra document sets: separate results, the routing table is not changed
+    _SET = os.environ["H2H_SET"]
+    OUT = ROOT / "eval" / f"{_SET}_results"
+    RESULTS = OUT / "results.jsonl"
+    _ENT = ROOT / "eval" / _SET
+    DOCS = {p.name: (f"{_SET}: " + p.stem.replace("_", " "), _ENT) for p in sorted(_ENT.iterdir())
+            if p.is_file() and not p.name.endswith(".truth.md") and (_ENT / (p.name + ".truth.md")).exists()}
 
 
 def doc_path(name: str) -> Path:

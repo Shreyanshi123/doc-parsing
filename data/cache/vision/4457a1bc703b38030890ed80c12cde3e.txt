@@ -1,0 +1,16 @@
+Type: bar chart
+
+Chart:
+Title: Monthly consumption (kWh)
+Axis labels: 
+- X-axis: Month
+- Y-axis: Consumption (kWh)
+
+| Month | Consumption (kWh) |
+|-------|-------------------|
+| Jan   | 410               |
+| Feb   | 385               |
+| Mar   | 430               |
+| Apr   | 520               |
+| May   | 610               |
+| Jun   | 575               |

@@ -40,10 +40,17 @@ class VlmParser(BaseParser):
 
     @classmethod
     def is_available(cls):
+        if not settings.vlm_parser_enabled:
+            return False, "disabled: this parser sends every page of the document to the vision LLM (one API call per page). Set VLM_PARSER_ENABLED=true to allow it."
         from app.vision import azure_ready
 
         if azure_ready():
             return True, ""
+        return cls.ollama_ready()
+
+    @classmethod
+    def ollama_ready(cls):
+        """Is the local Ollama vision model reachable? (used by app/vision.py to read single figures; not a switch for this parser)"""
         if time.time() - _cache["t"] < 15:  # don't hit the network on every call
             return _cache["ok"], _cache["reason"]
         try:

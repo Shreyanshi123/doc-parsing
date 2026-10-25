@@ -19,10 +19,16 @@ def get_parser_class(name: str) -> Type[BaseParser]:
     return _REGISTRY[name]
 
 
-def list_parsers() -> list[dict]:
+def list_parsers(fast: bool = False) -> list[dict]:
+    """Every parser and whether it can run. fast=True only checks that the library is installed (no heavy import): used by the engines list."""
     out = []
     for name, cls in sorted(_REGISTRY.items()):
-        ok, reason = cls.is_available()
+        if fast:
+            from app.routing.learned import fast_available
+
+            ok, reason = fast_available(name, cls)
+        else:
+            ok, reason = cls.is_available()
         out.append(
             {
                 "name": name,

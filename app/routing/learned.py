@@ -24,18 +24,31 @@ from app import benchmark
 from app.parsers import get_parser_class
 
 TIE = 0.1             # score points (0-5 scale) inside which two parsers count as tied
+FALLBACK_RANGE = 1.0   # a parser more than this far (0-5 scale) below the best is not even used as a fallback: it only adds time and noise
 REFERENCE_KIND = "your reference text"
 ALL = "all documents"   # pool over every test document: used for the parameters that only some documents can test (tables)
 METRICS = benchmark.METRICS
 # our own pipelines glued from the other engines (PyMuPDF + OCR [+ vision model]); they compete like any other parser
 COMBOS = {"smart_pdf", "hybrid_pdf"}
+COMBO_DESC = {"hybrid_pdf": "PyMuPDF + Tesseract OCR", "smart_pdf": "PyMuPDF + Tesseract OCR + vision model for charts and figures"}
+
+
+def label(name: str) -> str:
+    """A parser name, with what it is made of when it is one of our own combinations."""
+    return f"{name} ({COMBO_DESC[name]})" if name in COMBO_DESC else name
+# Parsers Smart Extract never picks on its own: vlm sends EVERY page to the Azure OpenAI model (one API call per page), which means
+# a very large number of API hits. It is still measured and shown in the Benchmark; it can only be run by choosing it by hand.
+NEVER_ROUTE = {"vlm"}
 
 _SEED = Path(__file__).with_name("measured_scores.json")
 
 
 def group_for(profile: dict, file_type: str) -> str:
-    """PDFs are grouped by what is inside them (digital, tables, mixed, scanned, figures); other files by their type."""
-    return benchmark.group_of(profile, file_type) if file_type == "pdf" else file_type
+    """PDFs are grouped by what is inside them (digital, tables, mixed, scanned, figures); other files by their type, and Word, PowerPoint
+    and Excel files that contain real chart objects are a group of their own (e.g. "pptx + charts")."""
+    if file_type == "pdf":
+        return benchmark.group_of(profile, file_type)
+    return f"{file_type} + charts" if "charts" in (profile.get("traits") or []) else file_type
 
 
 def _seed() -> dict:
@@ -106,12 +119,23 @@ _FAST_SPEC = {"pymupdf": "fitz", "pymupdf4llm": "pymupdf4llm", "docling": "docli
 _avail_cache: dict[str, tuple[float, bool]] = {}
 
 
+def fast_available(name: str, cls) -> tuple[bool, str]:
+    """(available, reason) without importing the library: used for the engines list, which must not wait for torch / unstructured to load."""
+    if name in _FAST_SPEC:
+        ok = importlib.util.find_spec(_FAST_SPEC[name]) is not None
+        return ok, "" if ok else f"library not installed ({_FAST_SPEC[name]})"
+    if name == "opendataloader":
+        ok = bool(shutil.which("java")) and importlib.util.find_spec("langchain_opendataloader_pdf") is not None
+        return ok, "" if ok else "Java or langchain-opendataloader-pdf is not installed"
+    return cls.is_available()
+
+
 def _usable(name: str, file_type: str, include_paid: bool) -> bool:
     try:
         cls = get_parser_class(name)
     except KeyError:
         return False
-    if file_type not in cls.supported_types:
+    if file_type not in cls.supported_types or name in NEVER_ROUTE:
         return False
     if name == "smart_pdf":
         # labelled "paid" only because its vision step MAY call a paid API: a free local model (Ollama) costs nothing, Azure OpenAI
@@ -150,18 +174,49 @@ def rank(groups: list[str], metric: Optional[str] = None, *, file_type: str = "p
                 pooled.setdefault(p, []).append((sc, e["s"], e["docs"], e["live"]))
     rows = []
     for p, v in pooled.items():
-        rows.append({"parser": p, "score": round(_avg([(a, d) for a, _, d, _ in v]), 2),
+        exact = _avg([(a, d) for a, _, d, _ in v])
+        rows.append({"parser": p, "score": round(exact, 2), "exact": exact,
                      "secs": round(_avg([(s, d) for _, s, d, _ in v]) or 0.0, 1),
                      "docs": sum(d for *_, d, _ in v), "live": sum(x for *_, x in v)})
     if not rows:
         return []
-    best = max(r["score"] for r in rows)
+    # the tie test uses the exact scores, not the rounded ones shown to the user (4.10 against 4.20 can really be a 0.094 gap)
+    best = max(r["exact"] for r in rows)
     tol = 0.0 if prefer_quality else TIE
-    pool = sorted((r for r in rows if r["score"] >= best - tol), key=lambda r: (r["secs"], -r["score"]))
-    rest = sorted((r for r in rows if r["score"] < best - tol), key=lambda r: (-r["score"], r["secs"]))
+    cutoff = best - tol - 1e-9
+    pool = sorted((r for r in rows if r["exact"] >= cutoff), key=lambda r: (r["secs"], -r["exact"]))
+    rest = sorted((r for r in rows if r["exact"] < cutoff), key=lambda r: (-r["exact"], r["secs"]))
     for r in pool:
         r["tied"] = len(pool) > 1
     return pool + rest
+
+
+def within_range(ranked: list[dict]) -> list[dict]:
+    """The ranked parsers that are good enough to be tried at all (not more than FALLBACK_RANGE below the best one)."""
+    if not ranked:
+        return []
+    best = max(r["exact"] for r in ranked)
+    return [r for r in ranked if r["exact"] >= best - FALLBACK_RANGE]
+
+
+# Word, PowerPoint, Excel, CSV and plain text have a built-in parser that is instant and loads no heavy library. A heavy parser (unstructured,
+# docling) only goes first when it is CLEARLY better, not when it is ahead by noise on two or three test files.
+NATIVE = {"docx": "docx", "pptx": "pptx", "xlsx": "spreadsheet", "csv": "spreadsheet", "text": "text"}
+NATIVE_MARGIN = 0.5
+
+
+def prefer_native(ranked: list[dict], file_type: str) -> list[dict]:
+    """Put the built-in parser of this file type first unless another parser beats it by more than NATIVE_MARGIN."""
+    native = NATIVE.get(file_type)
+    if not native or not ranked:
+        return ranked
+    best = max(r["exact"] for r in ranked)
+    for i, r in enumerate(ranked):
+        if r["parser"] == native:
+            if i == 0 or best - r["exact"] > NATIVE_MARGIN:
+                return ranked
+            return [{**r, "native_first": True}] + ranked[:i] + ranked[i + 1:]
+    return ranked
 
 
 def evidence(entry: dict, group: str, metric: Optional[str] = None) -> str:

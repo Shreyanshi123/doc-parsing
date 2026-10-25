@@ -381,6 +381,7 @@
   .rrow .rt { height:8px; border-radius:99px; background:var(--line); overflow:hidden; } .rrow .rt i { display:block; height:100%; border-radius:99px; background:color-mix(in srgb, var(--accent) 55%, transparent); }
   .rrow.win .rt i { background:var(--grad); } .rrow.win .rn { color:var(--accent); }
   .rrow .rv { font:600 12px "JetBrains Mono", monospace; text-align:right; } .rrow .rs { font:11.5px "JetBrains Mono", monospace; color:var(--muted); text-align:right; }
+  .combo { margin-left:6px; font:500 .72em/1.3 Inter, system-ui, sans-serif; color:var(--muted); letter-spacing:0; }
   @media (prefers-reduced-motion: reduce) { body::before, .empty h2 { animation:none; } }
 </style>
 </head>
@@ -436,7 +437,7 @@
         <label class="switch" data-modes="parse"><input type="checkbox" id="extract_images"><span class="tg"></span><span><b>Extract embedded images</b><small>Return picture bytes found in the file</small></span></label>
         <label class="switch"><input type="checkbox" id="prefer_quality"><span class="tg"></span><span><b>Prefer quality</b><small>Slower, more accurate engines first (docling, vision LLM)</small></span></label>
         <label class="switch" data-modes="parse"><input type="checkbox" id="include_images"><span class="tg"></span><span><b>Include image bytes in response</b></span></label>
-        <label class="switch" data-modes="extract compare"><input type="checkbox" id="include_paid"><span class="tg"></span><span><b>Include paid parsers</b><small>Azure Document Intelligence · costs per page</small></span></label>
+        <label class="switch" data-modes="extract compare"><input type="checkbox" id="include_paid"><span class="tg"></span><span><b>Include paid parsers</b><small>Also runs Azure Document Intelligence for comparison (costs per page) and lets paid parsers, like the vision model, compete</small></span></label>
       </div>
 
       <div data-modes="compare">
@@ -503,6 +504,8 @@
           <div><h2>Parser benchmark</h2><p class="muted" id="b-intro" style="margin:0;max-width:70ch"></p></div>
           <div class="bstats" id="b-stats"></div>
         </div>
+          <div class="note" style="margin:14px 0 0;max-width:92ch"><b>Head-to-head test</b> is our own fixed test: every parser was run on the same test documents and each result was checked against an answer written by hand. Smart Extract uses this table to choose a parser.<br><b>My Compare runs</b> are the documents you compared yourself: each time you run Compare parsers on a document with your own reference text (or with Azure DI as the reference), the result is saved here. It starts empty and grows with every document you add. Runs scored against your own reference text are also added to what Smart Extract knows.</div>
+          <div class="sbctl" id="b-source" style="margin:10px 0 0"><button class="chip" data-src="head_to_head">Head-to-head test</button><button class="chip" data-src="runs">My Compare runs</button><span class="hint" id="b-source-hint"></span></div>
         <details class="adv" id="b-builder" open style="margin-top:14px">
           <summary>Add documents to the benchmark</summary>
           <div class="drop mini" id="b-drop" tabindex="0" role="button" style="margin-top:6px">
@@ -542,10 +545,12 @@
         <div id="cmp-live" class="hidden"></div>
         <div id="summary"></div>
         <div class="tabs" id="result-tabs">
+          <div class="tab" data-view="doc" data-modes="parse">Extracted document</div>
           <div class="tab active" data-view="markdown">Markdown</div>
           <div class="tab" data-view="json">JSON</div>
           <div class="tab" data-view="compare">Comparison</div>
         </div>
+        <div id="view-doc" class="hidden view"><div style="margin-bottom:10px"><label class="switch" style="margin:0"><input type="checkbox" id="out-annot" checked><span class="tg"></span><span><b>Show which parser read each part</b></span></label></div><div class="doc annot" id="out-doc"><span class="muted">Nothing yet.</span></div></div>
         <div id="view-markdown" class="view"><pre id="out-md">Nothing yet.</pre></div>
         <div id="view-json" class="hidden view"><pre id="out-json"></pre></div>
         <div id="view-compare" class="hidden view"><div id="out-compare" class="muted">Run "Compare all parsers".</div></div>
@@ -587,7 +592,7 @@ function setMode(m) {
   $("layout").classList.toggle("solo", m === "bench"); if (m === "bench") loadBench();
   $("cmp-live").classList.toggle("hidden", m !== "compare" || !$("cmp-live").innerHTML);
   if (m === "extract" && srcMode !== "upload") setSrc("upload");
-  if (m !== "extract") { $("classic-title").textContent = m === "compare" ? "Parser comparison" : "Parse result"; if (m === "compare" && $("out-compare").dataset.ready) showView("compare"); }
+  if (m !== "extract") { $("classic-title").textContent = m === "compare" ? "Parser comparison" : "Parse result"; if (m === "compare" && $("out-compare").dataset.ready) showView("compare"); if (m === "parse") showView($("out-doc").dataset.ready ? "doc" : "markdown"); }
   history.replaceState(null, "", "#" + m);
 }
 document.querySelectorAll("#modes button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
@@ -599,9 +604,10 @@ function setSrc(s) {
 document.querySelectorAll("[data-src]").forEach(t => t.onclick = () => setSrc(t.dataset.src));
 function showView(v) {
   document.querySelectorAll("[data-view]").forEach(x => x.classList.toggle("active", x.dataset.view === v));
-  ["markdown", "json", "compare"].forEach(n => $("view-" + n).classList.toggle("hidden", n !== v));
+  ["doc", "markdown", "json", "compare"].forEach(n => { const el = $("view-" + n); if (el) el.classList.toggle("hidden", n !== v); });
 }
 document.querySelectorAll("[data-view]").forEach(t => t.onclick = () => showView(t.dataset.view));
+$("out-annot").onchange = e => $("out-doc").classList.toggle("annot", e.target.checked);
 
 /* ============================== file drop zone ============================== */
 const drop = $("drop");
@@ -623,7 +629,7 @@ window.addEventListener("dragover", e => e.preventDefault()); window.addEventLis
 /* ============================== engines ============================== */
 fetch("/api/providers").then(r => r.json()).then(list => {
   $("providers").classList.remove("muted");
-  $("providers").innerHTML = list.map(p => `<span class="eng ${p.available ? "" : "off"}"><i></i>${esc(p.name)}<span class="tip"><b>${esc(p.name)}</b> · ${esc(p.cost)}<br>${esc(p.description || "")}<br><span style="opacity:.75">${esc(p.supported_types.join(", "))}${p.available ? "" : " · unavailable: " + esc(p.unavailable_reason)}</span></span></span>`).join("");
+  $("providers").innerHTML = list.map(p => `<span class="eng ${p.available ? "" : "off"}"><i></i>${pn(p.name)}<span class="tip"><b>${esc(p.name)}</b> · ${esc(p.cost)}<br>${esc(p.description || "")}<br><span style="opacity:.75">${esc(p.supported_types.join(", "))}${p.available ? "" : " · unavailable: " + esc(p.unavailable_reason)}</span></span></span>`).join("");
   list.filter(p => p.available).forEach(p => { const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; $("parser").appendChild(o); });
 }).catch(() => { $("providers").textContent = "Could not load engines."; });
 
@@ -649,11 +655,14 @@ const PARAMS = [
   { k: "Completeness", label: "Completeness", ic: "◔", what: "How much of the correct text was captured? Nothing dropped.", na: "always tested" },
   { k: "Hallucination Penalty", label: "No invented text", ic: "✓", what: "Is everything in the output really in the document? 5 means nothing was made up.", na: "always tested" }
 ];
-const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract", smart_pdf: "PyMuPDF + Tesseract + vision model" };
+const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision model for charts and figures" };
+const COMBO_SHORT = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision" };
+/* a parser name; for our two combinations also what they are made of, wherever the name is shown */
+const pn = name => esc(name) + (COMBO_SHORT[name] ? `<span class="combo" title="Our own combination: ${escA(COMBO[name])}">${esc(COMBO_SHORT[name])}</span>` : "");
 const heat = v => v == null ? "" : `background:var(--h${v >= 4.5 ? 4 : v >= 3.5 ? 3 : v >= 2.5 ? 2 : v >= 1.2 ? 1 : 0})`;
 const ovr = m => { const v = m.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
 const isPaid = r => ["paid", "cloud"].includes(r.cost);
-const nameCell = r => `${esc(r.p)}${COMBO[r.p] ? `<span class="ctag" title="${escA(COMBO[r.p])}">our combo</span>` : ""}${r.ref ? '<span class="ctag">reference</span>' : ""}${r.cost ? `<span class="ctag ${isPaid(r) ? "paid" : "free"}">${isPaid(r) ? "paid" : "free"}</span>` : ""}${r.note ? `<span class="ctag" title="${escA(r.noteTitle || "")}">${esc(r.note)}</span>` : ""}`;
+const nameCell = r => `${esc(r.p)}${COMBO[r.p] ? `<span class="ctag" title="${escA(COMBO[r.p])}">our combo: ${esc(COMBO[r.p])}</span>` : ""}${r.ref ? '<span class="ctag">reference</span>' : ""}${r.cost ? `<span class="ctag ${isPaid(r) ? "paid" : "free"}">${isPaid(r) ? "paid" : "free"}</span>` : ""}${r.note ? `<span class="ctag" title="${escA(r.noteTitle || "")}">${esc(r.note)}</span>` : ""}`;
 const cellHtml = (v, k) => v == null ? `<span class="cell na" title="${escA(PARAMS[k].label)}: not tested here (${escA(PARAMS[k].na)})">n/a</span>` : `<span class="cell" style="${heat(v)}" title="${escA(PARAMS[k].label)}: ${v.toFixed(1)} out of 5. ${escA(PARAMS[k].what)}">${v.toFixed(1)}</span>`;
 const ovColor = o => o >= 4.5 ? "var(--ok)" : o >= 3.5 ? "var(--accent2)" : o >= 2.5 ? "var(--warn)" : "var(--bad)";
 let lastSC = [];
@@ -703,7 +712,7 @@ function scoreboard(el, cfg) {
       <p>Overall = the average of the ${nTested} parameter${nTested > 1 ? "s" : ""} this document set can test, each scored 0 to 5. ${cfg.context ? esc(cfg.context) : ""}</p></div></div>
     <div class="verdict">${also.map((a, i) => `<div class="vcard" style="animation-delay:${i * 70}ms"><div class="k">${a[0]}</div><div class="v">${a[1]}</div><div class="d">${a[2]}</div></div>`).join("")}</div>
     <div><h4>What is being measured</h4><p class="sub">Each parser gets a score from 0 to 5 on up to eight parameters. Click a parameter to sort the table by it. “n/a” means this document set has nothing to test that parameter with.</p>
-      <div class="params">${PARAMS.map((p, i) => { const w = winner(i); return `<div class="pc ${w ? "" : "na"}" data-k="${i}" style="animation-delay:${i * 40}ms"><div class="ic">${p.ic}</div><div><b>${p.label}</b><div class="w">${p.what}</div><div class="best">${w ? `Best: ${esc(w.p)} · ${w.m[i].toFixed(1)}` : `Not tested (${p.na})`}</div></div></div>`; }).join("")}</div></div>
+      <div class="params">${PARAMS.map((p, i) => { const w = winner(i); return `<div class="pc ${w ? "" : "na"}" data-k="${i}" style="animation-delay:${i * 40}ms"><div class="ic">${p.ic}</div><div><b>${p.label}</b><div class="w">${p.what}</div><div class="best">${w ? `Best: ${pn(w.p)} · ${w.m[i].toFixed(1)}` : `Not tested (${p.na})`}</div></div></div>`; }).join("")}</div></div>
     <div><h4>Ranking</h4><div class="sbctl"><button class="chip" data-free>Free parsers only</button><span class="hint">Click a column to sort · click a row for the full profile</span></div><div class="sbt-wrap"><table class="sbt"></table></div></div>
     <div class="scat"><h4>Quality against speed</h4><p class="sub">The best parser is not always the right one: the top-left corner is both accurate and fast. Click a dot for details.</p>${scatterSvg(rows, best.p)}</div></div>`;
 
@@ -733,8 +742,9 @@ function scoreboard(el, cfg) {
 }
 /* ============================== Benchmark mode (computed from your Compare runs) ============================== */
 let B = null, bGroup = "Overall";
-const B_LABEL = { "Overall": "All documents", "digital": "Digital", "digital + tables": "With tables", "mixed": "Mixed", "scanned": "Scanned", "digital + charts/images": "Charts and images", "other": "Other formats" };
-const B_ORDER = ["Overall", "digital", "digital + tables", "mixed", "scanned", "digital + charts/images", "other"];
+const B_LABEL = { "Overall": "All documents", "digital": "Digital", "digital + tables": "With tables", "mixed": "Mixed", "scanned": "Scanned", "digital + charts/images": "Charts and images", "other": "Other formats", "image": "Image files", "docx": "Word", "docx + charts": "Word with charts", "pptx": "PowerPoint", "pptx + charts": "PowerPoint with charts", "xlsx": "Excel", "xlsx + charts": "Excel with charts", "csv": "CSV", "text": "Plain text" };
+const B_ORDER = ["Overall", "digital", "digital + tables", "mixed", "scanned", "digital + charts/images", "image", "docx", "docx + charts", "pptx", "pptx + charts", "xlsx", "xlsx + charts", "csv", "text", "other"];
+let bSource = "head_to_head";
 const bFmt = v => v == null ? "–" : v.toFixed(1);
 const bRows = g => g.rows.map(r => ({ p: r.p, cost: r.cost, m: r.m, t: r.t, s: r.s, ref: r.ref, note: r.failed ? `${r.failed} failed` : (r.n < g.docs ? `${r.n}/${g.docs} docs` : ""), noteTitle: r.failed ? "Crashed or timed out on this many documents: counted as 0" : "Tried on fewer documents than the others" }));
 function benchShow(k) {
@@ -746,14 +756,14 @@ function benchShow(k) {
 function benchPick() {
   return B_ORDER.slice(1).filter(k => B.groups[k]).map((k, i) => {
     const rows = bRows(B.groups[k]).map(r => ({ ...r, o: ovr(r.m) })).filter(r => r.o != null).sort((a, b) => b.o - a.o); if (!rows.length) return "";
-    const top = rows[0], pick = rows.filter(r => !r.ref && r.o >= top.o - .2).sort((a, b) => a.s - b.s)[0] || top, adi = rows.find(r => r.ref);
+    const top = rows[0], pick = rows.filter(r => !r.ref && r.o >= top.o - .1).sort((a, b) => a.s - b.s)[0] || top, adi = rows.find(r => r.ref);
     const alt = rows.filter(r => !r.ref && !isPaid(r) && r.p !== pick.p).sort((a, b) => b.o - a.o)[0];
-    return `<div class="pk" style="animation-delay:${i * 60}ms"><div class="k">${B_LABEL[k]} · ${B.groups[k].docs} doc${B.groups[k].docs > 1 ? "s" : ""}</div><div class="big">${esc(pick.p)}</div><div>${nameCell({ p: "", cost: pick.cost, ref: false }).replace(/^/, "")}</div><div class="d"><b>${pick.o.toFixed(1)} / 5</b> in ${pick.s.toFixed(1)} s${adi ? ` · Azure DI ${adi.o.toFixed(1)}` : ""}.<br>Pick = the fastest parser within 0.2 of the best score.${alt ? `<br>Free alternative: <b>${esc(alt.p)}</b> (${alt.o.toFixed(1)}, ${alt.s.toFixed(1)} s).` : ""}</div></div>`;
+    return `<div class="pk" style="animation-delay:${i * 60}ms"><div class="k">${B_LABEL[k]} · ${B.groups[k].docs} doc${B.groups[k].docs > 1 ? "s" : ""}</div><div class="big">${pn(pick.p)}</div><div>${nameCell({ p: "", cost: pick.cost, ref: false }).replace(/^/, "")}</div><div class="d"><b>${pick.o.toFixed(1)} / 5</b> in ${pick.s.toFixed(1)} s${adi ? ` · Azure DI ${adi.o.toFixed(1)}` : ""}.<br>Pick = the fastest parser within 0.2 of the best score.${alt ? `<br>Free alternative: <b>${esc(alt.p)}</b> (${alt.o.toFixed(1)}, ${alt.s.toFixed(1)} s).` : ""}</div></div>`;
   }).join("");
 }
 function benchLimits() {
   const G = B.groups, n = G.Overall.docs, li = [];
-  li.push(`The set is ${n < 10 ? "small" : "modest"}: ${n} document${n > 1 ? "s" : ""} (${B_ORDER.slice(1).filter(k => G[k]).map(k => `${G[k].docs} ${B_LABEL[k].toLowerCase()}`).join(", ")}). Treat gaps under about 0.2 points as ties.`);
+  li.push(`The set is ${n < 10 ? "small" : "modest"}: ${n} document${n > 1 ? "s" : ""} (${B_ORDER.slice(1).filter(k => G[k]).map(k => `${G[k].docs} ${B_LABEL[k].toLowerCase()}`).join(", ")}). Gaps under 0.1 points count as ties, and the fastest of the tied parsers is picked: the same rule Smart Extract uses.`);
   const thin = B_ORDER.slice(1).filter(k => G[k] && G[k].docs < 3).map(k => B_LABEL[k].toLowerCase());
   if (thin.length) li.push(`Fewer than 3 documents for: ${thin.join(", ")}. Those results are a first look, not a finding.`);
   const rk = Object.entries(B.reference_kinds).map(([k, v]) => `${v} against ${k}`).join(", ");
@@ -768,11 +778,13 @@ function benchLimits() {
   return li.map(x => `<li>${esc(x)}</li>`).join("");
 }
 function renderBench() {
-  const has = B.groups.Overall && B.groups.Overall.docs > 0, ov = has && B.groups.Overall;
+  const has = !!(B.groups.Overall && B.groups.Overall.docs > 0), ov = has && B.groups.Overall;
   $("b-empty").classList.toggle("hidden", has); $("b-body").classList.toggle("hidden", !has);
-  $("b-intro").textContent = has ? "Every row is computed from your own comparison runs, so the more documents you add, the more reliable it gets. Rows tagged “our combo” are written in this repo from existing pieces." : "Build a benchmark from your own documents: add files below, or run “Compare parsers” on a document with a reference.";
+  $("b-intro").textContent = has ? (B.source === "head_to_head" ? "The fresh head-to-head test: every parser was run on every test document and scored against a hand-written answer. Smart Extract uses exactly this table to choose a parser. Rows tagged “our combo” are written in this repo from existing pieces." : "Every row is computed from your own comparison runs, so the more documents you add, the more reliable it gets. Rows tagged “our combo” are written in this repo from existing pieces.") : "Build a benchmark from your own documents: add files below, or run “Compare parsers” on a document with a reference.";
   $("b-stats").innerHTML = has ? [[ov.docs, "documents"], [B.pages, "pages"], [ov.rows.length, "parsers"]].map(s => `<div class="bs"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("") : "";
-  $("b-builder").open = !has;
+  document.querySelectorAll("#b-source .chip").forEach(c => c.classList.toggle("on", c.dataset.src === (B.source || bSource)));
+  $("b-source-hint").textContent = B.source === "head_to_head" ? "the documents Smart Extract uses to choose a parser" : (has ? "documents you compared yourself" : "nothing here yet: run Compare parsers, or switch to the head-to-head test");
+  $("b-builder").open = !has && B.source !== "head_to_head";
   if (!has) return;
   $("b-tabs").innerHTML = B_ORDER.filter(k => B.groups[k]).map(k => `<div class="tab" data-k="${k}">${B_LABEL[k]} · ${B.groups[k].docs}</div>`).join("");
   document.querySelectorAll("#b-tabs .tab").forEach(t => t.onclick = () => benchShow(t.dataset.k));
@@ -781,12 +793,14 @@ function renderBench() {
   const tg = r => nameCell({ p: r.p, ref: r.ref, cost: r.cost }), maxS = Math.max(...B.speed.map(r => r.s_page || 0), .01);
   $("b-big").innerHTML = `<tr><th>Parser</th><th class="n">Docs</th><th>Seconds per page</th><th class="n">Per document</th></tr>` + B.speed.map(r => `<tr class="${r.ref ? "ref" : ""}"><td>${tg(r)}</td><td class="n">${r.n}</td><td><span class="mini"><i style="width:${Math.max(3, (r.s_page || 0) / maxS * 100)}%"></i></span><b class="tmv">${r.s_page == null ? "–" : r.s_page.toFixed(2)}</b></td><td class="n">${bFmt(r.s_doc)}</td></tr>`).join("");
   $("b-tfq").innerHTML = `<tr><th>Parser</th><th class="n">Tables / doc</th><th>Table cell match</th><th class="n">Figures / doc</th></tr>` + B.tables_figures.map(r => `<tr class="${r.ref ? "ref" : ""}"><td>${tg(r)}</td><td class="n">${bFmt(r.tables)}</td><td>${r.cell_match == null ? "–" : `<span class="mini"><i style="width:${Math.round(r.cell_match * 100)}%"></i></span><b class="tmv">${Math.round(r.cell_match * 100)}%</b>`}</td><td class="n">${bFmt(r.figures)}</td></tr>`).join("");
-  $("b-runs").innerHTML = `<tr><th>Document</th><th>Type</th><th class="n">Pages</th><th>Scored against</th><th class="n">Parsers</th><th></th></tr>` + B.runs.map(r => `<tr><td>${esc(r.file_name)}</td><td>${esc(B_LABEL[r.group] || r.group)}</td><td class="n">${r.pages}</td><td>${esc(r.reference_kind)}</td><td class="n">${r.parsers}</td><td><button class="btn secondary small" data-del="${r.id}">Remove</button></td></tr>`).join("");
+  $("b-runs").innerHTML = `<tr><th>Document</th><th>Type</th><th class="n">Pages</th><th>Scored against</th><th class="n">Parsers</th><th></th></tr>` + B.runs.map(r => `<tr><td>${esc(r.file_name)}</td><td>${esc(B_LABEL[r.group] || r.group)}</td><td class="n">${r.pages}</td><td>${esc(r.reference_kind)}</td><td class="n">${r.parsers}</td><td>${r.id ? `<button class="btn secondary small" data-del="${r.id}">Remove</button>` : ""}</td></tr>`).join("");
   document.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { await fetch("/api/benchmark/runs/" + b.dataset.del, { method: "DELETE" }); loadBench(); });
   $("b-limits").innerHTML = benchLimits();
 }
+document.addEventListener("click", e => { const c = e.target.closest("#b-source .chip"); if (c && c.dataset.src !== bSource) { bSource = c.dataset.src; loadBench(); } });
 async function loadBench() {
-  try { B = await (await fetch("/api/benchmark")).json(); } catch { toast("Could not load the benchmark", "err"); return; }
+  try { B = await (await fetch("/api/benchmark?source=" + bSource)).json(); } catch { toast("Could not load the benchmark", "err"); return; }
+  B_LABEL.Overall = B.source === "head_to_head" ? "All PDFs" : "All documents";
   renderBench();
 }/* batch runner: every file is compared with all parsers; the server saves each scored run */
 const bq = (name, st, cls) => { const d = document.createElement("div"); d.className = "it"; d.innerHTML = `<span class="pchip">${esc(name)}</span><span class="${cls || ""}">${esc(st)}</span><span class="t"></span>`; $("b-queue").prepend(d); return d; };
@@ -907,7 +921,13 @@ function renderParse(j) {
   </div>`;
   $("out-md").textContent = j.content || "(empty)";
   $("out-json").textContent = JSON.stringify(j, null, 2);
-  showView("markdown");
+  /* the same "Extracted document" view as Smart Extract: every part in its own colour, the parser named on hover */
+  const kindOf = e => e.content_type === "table" ? "table" : e.content_type === "image" ? "figure" : ((e.content || "").trim().startsWith("#") && !(e.content || "").trim().includes(String.fromCharCode(10)) ? "heading" : "text");
+  const multi = (j.pages || []).length > 1;
+  $("out-doc").innerHTML = (j.pages || []).map(pg => (multi ? `<div class="muted" style="font-weight:700;font-size:12px;margin:14px 0 4px">Page ${pg.page_number}</div>` : "") +
+    (pg.elements || []).filter(e => (e.content || "").trim()).map(e => { const k = kindOf(e); return `<div class="seg" data-k="${k}"><span class="tag kind" data-k="${k}">${KIND_LABEL[k]} · ${pn((e.metadata && e.metadata.engine) || m.engine)}</span><div class="md">${md2html(e.content)}</div></div>`; }).join("")).join("") || '<span class="muted">(nothing was read)</span>';
+  $("out-doc").dataset.ready = "1";
+  showView("doc");
 }
 function leaderboard(c) {
   const byName = Object.fromEntries(c.results.map(r => [r.parser, r]));
@@ -1042,7 +1062,7 @@ async function runExtract() {
       if (ev.event === "start") { total = Math.max(ev.profile.page_count || 1, 1); $("x-now").textContent = `${ev.file_type.toUpperCase()} · ${ev.profile.classification} · ${ev.profile.page_count || 1} page(s) — dissecting…`; }
       else if (ev.event === "page") { total = ev.pages || total; $("x-bar").style.width = Math.max(6, Math.round((ev.page - 1) / total * 100)) + "%"; $("x-now").textContent = `Page ${ev.page} of ${total} — finding headings, text, tables and figures…`; }
       else if (ev.event === "working") { $("x-now").textContent = ev.kind === "document" ? `Reading the whole document with ${ev.parser}…` : `Page ${ev.page} — reading a ${KIND_LABEL[ev.kind] || ev.kind} with ${ev.parser}…`; }
-      else if (ev.event === "segment") { const s = ev.segment; nSeg++; const d = document.createElement("div"); d.className = "it"; d.innerHTML = `<span class="kind" data-k="${s.kind}">${KIND_LABEL[s.kind] || s.kind}</span><span>p${s.page}</span><span class="pchip">${esc(s.parser)}</span><span class="t">${s.ms ? (s.ms / 1000).toFixed(1) + "s" : ""}</span>`; $("x-feed").prepend(d); }
+      else if (ev.event === "segment") { const s = ev.segment; nSeg++; const d = document.createElement("div"); d.className = "it"; d.innerHTML = `<span class="kind" data-k="${s.kind}">${KIND_LABEL[s.kind] || s.kind}</span><span>p${s.page}</span><span class="pchip">${pn(s.parser)}</span><span class="t">${s.ms ? (s.ms / 1000).toFixed(1) + "s" : ""}</span>`; $("x-feed").prepend(d); }
       else if (ev.event === "error") throw new Error(ev.detail);
       else if (ev.event === "done") result = ev.result;
     };
@@ -1068,19 +1088,19 @@ function routingCard(rt) {
   if (!rt) return "";
   const block = b => {
     if (!b || !b.ranking.length) return `<div class="rblock"><h4>${esc(b ? b.label : "")}</h4><p class="muted">No scorecard data for the parsers available here yet. Run Compare parsers with a reference text to add some.</p></div>`;
-    const rows = b.ranking.map((e, i) => `<div class="rrow${e.parser === b.chosen ? " win" : ""}"><span class="rn">${e.parser === b.chosen ? "★ " : ""}${esc(e.parser)}${e.live ? `<em class="ctag free">+${e.live} yours</em>` : ""}</span><span class="rt"><i style="width:${Math.max(2, e.score / 5 * 100)}%"></i></span><span class="rv">${e.score.toFixed(1)}</span><span class="rs">${e.secs}s</span></div>`).join("");
+    const rows = b.ranking.map((e, i) => `<div class="rrow${e.parser === b.chosen ? " win" : ""}"><span class="rn">${e.parser === b.chosen ? "★ " : ""}${pn(e.parser)}${e.tied ? `<em class="ctag" title="Within the tie range of the best score: the fastest of these goes first">tie</em>` : ""}${e.live ? `<em class="ctag free">+${e.live} yours</em>` : ""}</span><span class="rt"><i style="width:${Math.max(2, e.score / 5 * 100)}%"></i></span><span class="rv">${e.score.toFixed(1)}</span><span class="rs">${e.secs}s</span></div>`).join("") + (b.chosen && !b.ranking.some(e => e.parser === b.chosen) ? `<p class="note" style="margin:8px 0 0">★ Used: <b>${esc(b.chosen)}</b>. It was not part of our test; it goes first because you ticked "Include paid parsers".</p>` : "");
     return `<div class="rblock"><h4>${esc(b.label)} <small>ranked by ${esc(b.metric)}</small></h4>${rows}</div>`;
   };
     return `<section class="card flat" style="margin-bottom:16px"><h2>Scorecard behind these choices</h2>
-    <p class="note" style="margin:0 0 12px">This document was classified as <b>${esc(rt.group)}</b>. The parser marked ★ is the one used: the one that scored best on documents like this in our head-to-head test (every parser run on every test document and scored against a hand-written answer). The bars are those measured scores out of 5, so you can see how the choice compares. Scores also include any Compare runs you scored with your own reference text.</p>
-    <div class="rgrid">${block(rt.document)}${block(rt.tables)}${block(rt.scanned)}</div></section>`;
+    <p class="note" style="margin:0 0 12px">This document was classified as <b>${esc(rt.group)}</b>. The parser marked ★ is the one used. The list is in the same order the app used to choose: highest score first, ${rt.tie_points ? `but parsers within ${rt.tie_points} points of the best are tied (marked "tie") and the fastest of them goes first` : "and because Prefer quality is on there is no tie rule: the highest score always goes first"}. Scores are out of 5, from our head-to-head test: every parser run on every test document and scored against a hand-written answer. Paid parsers are listed only when "Include paid parsers" is ticked.</p>
+    <div class="rgrid">${[rt.document, rt.tables, rt.scanned].filter(Boolean).map(block).join("")}</div></section>`;
 }
 function renderExtract(r) {
   const sm = r.summary, kinds = Object.keys(sm.by_kind), hasMap = r.pages.some(p => p.preview);
   const stat = (n, label, i) => `<div class="stat" style="animation-delay:${i * 70}ms"><b data-n="${n}">0</b><span>${label}</span></div>`;
   const routeRows = kinds.sort((a, b) => KIND_ORDER(a) - KIND_ORDER(b)).map((k, i) => {
     const first = r.segments.find(s => s.kind === k);
-    const chips = Object.entries(sm.by_kind[k].parsers).map(([p, c]) => `<span class="pchip">${esc(p)}<em>×${c}</em></span>`).join('<span class="arrow">+</span>');
+    const chips = Object.entries(sm.by_kind[k].parsers).map(([p, c]) => `<span class="pchip">${pn(p)}<em>×${c}</em></span>`).join('<span class="arrow">+</span>');
     return `<div class="r" style="animation-delay:${i * 80}ms"><span class="kind" data-k="${k}">${KIND_PLURAL[k] || k} · ${sm.by_kind[k].count}</span><div class="to"><span class="arrow">→</span>${chips}</div><div class="why">${esc(first.why)}</div></div>`;
   }).join("");
   const legend = kinds.map(k => `<button class="kind" data-k="${k}" data-toggle="${k}" title="Show / hide ${KIND_PLURAL[k]}">${KIND_PLURAL[k]}</button>`).join("");
@@ -1089,11 +1109,11 @@ function renderExtract(r) {
   const map = hasMap ? `<div class="map" id="x-map">${r.pages.map(p => `<div class="pg" data-page="${p.page}">${p.preview ? `<span class="pn">Page ${p.page}</span><img src="${escA(p.preview)}" alt="page ${p.page}" loading="lazy">` : `<div class="nopic">Page ${p.page}: preview not rendered (first 15 pages only)</div>`}${r.segments.filter(s => s.page === p.page && p.width).flatMap(s => s.bboxes.map(b => `<div class="bx" data-k="${s.kind}" data-id="${s.id}" style="left:${b[0] / p.width * 100}%;top:${b[1] / p.height * 100}%;width:${(b[2] - b[0]) / p.width * 100}%;height:${(b[3] - b[1]) / p.height * 100}%"><span class="tg2">${KIND_LABEL[s.kind]} · ${esc(s.parser)}</span></div>`)).join("")}</div>`).join("")}</div>` : "";
   const parts = r.segments.map((s, i) => `<article class="part" data-k="${s.kind}" data-id="${s.id}" style="animation-delay:${Math.min(i, 14) * 45}ms">
       <div class="hd"><span class="kind" data-k="${s.kind}">${KIND_LABEL[s.kind]}${s.figure_kind ? " · " + esc(s.figure_kind) : ""}</span><span class="muted">${r.pages.length > 1 || r.file_type === "pdf" ? "Page " + s.page : ""}</span>
-        <span class="pchip" title="Read by this parser">${esc(s.parser)}</span><span class="sp">${s.words} words${s.ms ? " · " + (s.ms / 1000).toFixed(1) + "s" : ""}</span></div>
+        <span class="pchip" title="Read by this parser">${pn(s.parser)}</span><span class="sp">${s.words} words${s.ms ? " · " + (s.ms / 1000).toFixed(1) + "s" : ""}</span></div>
       <div class="body">${bodyHtml(s)}</div>
       <button class="more" data-more>Show more</button> <button class="more" data-why style="margin-left:14px">Why ${esc(s.parser)}?</button>
       <div class="whybox hidden"></div></article>`).join("");
-  const docAnnot = r.segments.map(s => `<div class="seg" data-k="${s.kind}" data-id="${s.id}"><span class="tag kind" data-k="${s.kind}">${KIND_LABEL[s.kind]} · ${esc(s.parser)}</span>${bodyHtml(s)}</div>`).join("");
+  const docAnnot = r.segments.map(s => `<div class="seg" data-k="${s.kind}" data-id="${s.id}"><span class="tag kind" data-k="${s.kind}">${KIND_LABEL[s.kind]} · ${pn(s.parser)}</span>${bodyHtml(s)}</div>`).join("");
   const j = JSON.stringify(r, (k, v) => k === "preview" || k === "image" ? "…" : v, 2);
   $("x-result").innerHTML = `
     <div class="stats">${stat(sm.segments, "parts found", 0)}${stat(r.pages.length, "page(s)", 1)}${stat(sm.words, "words extracted", 2)}${stat(Object.keys(sm.parsers_used).length, "parsers used", 3)}${stat(+(sm.total_ms / 1000).toFixed(1), "seconds", 4)}</div>
@@ -1101,7 +1121,7 @@ function renderExtract(r) {
     <section class="card flat" style="margin-bottom:16px"><h2>Who read what</h2><div class="route">${routeRows}</div></section>
     ${routingCard(sm.routing)}
     <section class="card flat"><div class="toolbar">
-        <div class="tabs" style="margin:0" id="x-tabs"><div class="tab active" data-xv="parts">Parts</div><div class="tab" data-xv="doc">Extracted document</div><div class="tab" data-xv="md">Markdown</div><div class="tab" data-xv="json">JSON</div></div>
+        <div class="tabs" style="margin:0" id="x-tabs"><div class="tab active" data-xv="parts">Parts</div><div class="tab" data-xv="doc">Extracted document</div><div class="tab" data-xv="md">Markdown</div><div class="tab" data-xv="json">JSON</div>${r.azure_di ? '<div class="tab" data-xv="adi">Azure DI (comparison)</div>' : ""}</div>
         <div class="grow"><button class="btn small secondary" id="x-copy">Copy Markdown</button><button class="btn small" id="x-dl">Download .md</button></div></div>
       <div class="legend" id="x-legend">${legend}</div>
       <div class="xwrap ${hasMap ? "" : "nomap"}" id="x-wrap">${map}<div>
@@ -1109,9 +1129,10 @@ function renderExtract(r) {
         <div id="xv-doc" class="view hidden"><div style="margin-bottom:10px"><label class="switch" style="margin:0"><input type="checkbox" id="x-annot" checked><span class="tg"></span><span><b>Show who read each part</b></span></label></div><div class="doc annot" id="x-doc">${docAnnot}</div></div>
         <div id="xv-md" class="view hidden"><pre id="x-md"></pre></div>
         <div id="xv-json" class="view hidden"><pre id="x-json"></pre></div>
+        ${r.azure_di ? `<div id="xv-adi" class="view hidden">${r.azure_di.error ? `<div class="warn"><b>Azure Document Intelligence failed.</b> ${esc(r.azure_di.error)}</div>` : `<p class="note" style="margin:0 0 10px">Azure Document Intelligence also read this file (paid) so you can compare: ${r.azure_di.words} words in ${r.azure_di.secs} s. The result shown in the other tabs comes from the parser that scored best in our test.</p><pre id="x-adi"></pre>`}</div>` : ""}
       </div></div></section>`;
-  $("x-md").textContent = r.markdown || "(empty)"; $("x-json").textContent = j;
-  r.segments.forEach(s => { const b = document.querySelector(`.part[data-id="${s.id}"] .whybox`); if (b) b.innerHTML = `<div class="why"><b>${esc(s.parser)}</b> — ${esc(s.why)}<div class="tried">${s.tried.map(t => `<span class="pchip ${t.status === "ok" ? "" : t.status === "error" ? "err" : "empty"}" title="${escA(t.error || t.note || "")}">${esc(t.parser)} <em>${t.status}${t.ms ? " · " + (t.ms / 1000).toFixed(1) + "s" : ""}</em></span>`).join("")}</div></div>`; });
+  $("x-md").textContent = r.markdown || "(empty)"; $("x-json").textContent = j; if ($("x-adi")) $("x-adi").textContent = (r.azure_di && r.azure_di.markdown) || "(empty)";
+  r.segments.forEach(s => { const b = document.querySelector(`.part[data-id="${s.id}"] .whybox`); if (b) b.innerHTML = `<div class="why"><b>${pn(s.parser)}</b> — ${esc(s.why)}<div class="tried">${s.tried.map(t => `<span class="pchip ${t.status === "ok" ? "" : t.status === "error" ? "err" : "empty"}" title="${escA(t.error || t.note || "")}">${esc(t.parser)} <em>${t.status}${t.ms ? " · " + (t.ms / 1000).toFixed(1) + "s" : ""}</em></span>`).join("")}</div></div>`; });
   document.querySelectorAll(".part .body").forEach(b => { if (b.scrollHeight > 235) b.classList.add("fade"); else b.parentElement.querySelector("[data-more]").classList.add("hidden"); });
   document.querySelectorAll("#x-result [data-n]").forEach((el, i) => setTimeout(() => countUp(el, parseFloat(el.dataset.n)), i * 80));
   wireExtract();
@@ -1122,7 +1143,7 @@ function wireExtract() {
   const root = $("x-result");
   root.querySelectorAll("[data-xv]").forEach(t => t.onclick = () => {
     root.querySelectorAll("[data-xv]").forEach(x => x.classList.toggle("active", x === t));
-    ["parts", "doc", "md", "json"].forEach(n => $("xv-" + n).classList.toggle("hidden", n !== t.dataset.xv));
+    ["parts", "doc", "md", "json", "adi"].forEach(n => { const el = $("xv-" + n); if (el) el.classList.toggle("hidden", n !== t.dataset.xv); });
   });
   root.querySelectorAll("[data-toggle]").forEach(b => b.onclick = () => { b.classList.toggle("off"); $("x-wrap").classList.toggle("hide-" + b.dataset.toggle, b.classList.contains("off")); $("x-doc").classList.toggle("hide-" + b.dataset.toggle, b.classList.contains("off")); });
   root.querySelectorAll("[data-more]").forEach(b => b.onclick = () => { const p = b.closest(".part"); p.classList.toggle("open"); b.textContent = p.classList.contains("open") ? "Show less" : "Show more"; });

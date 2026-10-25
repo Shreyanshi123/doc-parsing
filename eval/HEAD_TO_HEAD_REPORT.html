@@ -1,0 +1,234 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Which parser is best for which document: a fresh head-to-head test</title><style>
+:root { --bg:#f6f8fc; --card:#fff; --fg:#1d2330; --muted:#5a6578; --line:#d9dfec; --accent:#14307a; --head:#e8edfb; --code:#eef1f7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0e1118; --card:#161b26; --fg:#e6eaf3; --muted:#9aa5ba; --line:#2a3245; --accent:#8fb0ff; --head:#1f2a44; --code:#1c2333; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 Inter, "Segoe UI", system-ui, sans-serif; }
+main { max-width:1040px; margin:0 auto; padding:28px 16px 64px; }
+h1 { font-size:2rem; color:var(--accent); margin:0 0 .4em; letter-spacing:-.02em; }
+h2 { font-size:1.3rem; color:var(--accent); margin:1.8em 0 .4em; padding-top:.4em; border-top:1px solid var(--line); }
+p, li { margin:.35em 0; }
+ul, ol { padding-left:1.4em; }
+.tablewrap { overflow-x:auto; margin:.8em 0; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+table { border-collapse:collapse; width:100%; font-size:.88rem; }
+th, td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { background:var(--head); font-weight:650; white-space:nowrap; }
+tr:last-child td { border-bottom:0; }
+code { font-family:"JetBrains Mono", Consolas, monospace; font-size:.85em; background:var(--code); padding:1px 5px; border-radius:5px; }
+@media (max-width:600px) { body { font-size:14px; } h1 { font-size:1.55rem; } }
+</style></head><body><main><h1>Which parser is best for which document: a fresh head-to-head test</h1>
+<p>Date: 2026-10-23. 62 test documents, 786 runs. Nothing from older reports or scorecards was used: every parser was run on every document it supports and scored against a hand-written answer file.</p>
+<h2>The answer in one table</h2>
+<p>What Smart Extract (By document mode) now uses for each kind of document. Rule: the highest score wins; parsers within 0.1 points of the best are tied and the fastest of them goes first. Paid parsers are only used when "Include paid parsers" is ticked. <b>vlm is switched off everywhere in the app</b> (Smart Extract, Compare, Benchmark runs and Single parse): it sends every page to the Azure OpenAI model (one API call per page), which would mean a huge number of API hits. It is still measured below, and it scored well on scans, but nothing runs it unless VLM_PARSER_ENABLED is set to true.</p>
+<div class="tablewrap"><table><tr><th>Document type</th><th>Documents tested</th><th>Free mode: first parser</th><th>Score</th><th>Paid allowed: first parser</th><th>Score</th></tr>
+<tr><td>Digital text PDF</td><td>6</td><td>pymupdf</td><td>4.94</td><td>pymupdf</td><td>4.94</td></tr>
+<tr><td>Digital PDF with tables</td><td>15</td><td>opendataloader</td><td>4.45</td><td>opendataloader</td><td>4.45</td></tr>
+<tr><td>PDF with charts, figures or images</td><td>13</td><td>pymupdf4llm</td><td>3.29</td><td>smart_pdf</td><td>3.86</td></tr>
+<tr><td>Mixed PDF (text pages and scanned pages)</td><td>3</td><td>pymupdf4llm</td><td>4.42</td><td>pymupdf4llm</td><td>4.42</td></tr>
+<tr><td>Scanned PDF</td><td>8</td><td>docling</td><td>3.47</td><td>docling</td><td>3.47</td></tr>
+<tr><td>Image files</td><td>4</td><td>docling</td><td>4.85</td><td>docling</td><td>4.85</td></tr>
+<tr><td>Word</td><td>3</td><td>docx</td><td>4.10</td><td>docx</td><td>4.10</td></tr>
+<tr><td>PowerPoint</td><td>2</td><td>pptx</td><td>4.86</td><td>pptx</td><td>4.86</td></tr>
+<tr><td>PowerPoint with charts (real chart objects)</td><td>1</td><td>docling</td><td>4.79</td><td>docling</td><td>4.79</td></tr>
+<tr><td>Excel</td><td>2</td><td>spreadsheet</td><td>4.33</td><td>spreadsheet</td><td>4.33</td></tr>
+<tr><td>Excel with charts (real chart objects)</td><td>1</td><td>spreadsheet</td><td>5.00</td><td>spreadsheet</td><td>5.00</td></tr>
+<tr><td>CSV</td><td>2</td><td>spreadsheet</td><td>5.00</td><td>spreadsheet</td><td>5.00</td></tr>
+<tr><td>Plain text</td><td>2</td><td>text</td><td>5.00</td><td>text</td><td>5.00</td></tr>
+</table></div>
+<p>Scores are 0 to 5 (average of the parameters a document can test). By part mode uses the same data per part: tables go to the parser with the best table-reconstruction score, scanned pages to the best scanned score, pictures to the best image score; charts and figures are read by the vision model; text and headings come from the first PyMuPDF pass.</p>
+<h2>Parser against parser, per document type</h2>
+<p>Higher is better. A crash or a timeout counts as 0 on every parameter the document can test. Seconds are the median per document.</p>
+<h2>Digital text PDF (6 documents)</h2>
+<p>Documents: AI_agent_p1-3, contract, form_fields, multilingual, resume, rotated_pages.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>pymupdf</td><td>4.94</td><td>4.97</td><td>-</td><td>-</td><td>4.77</td><td>0.0</td><td>0</td><td>6</td></tr>
+<tr><td>hybrid_pdf (PyMuPDF + Tesseract OCR)</td><td>4.94</td><td>4.97</td><td>-</td><td>-</td><td>4.77</td><td>0.1</td><td>0</td><td>6</td></tr>
+<tr><td>smart_pdf (PyMuPDF + Tesseract OCR + a vision model for charts and figures) (paid)</td><td>4.94</td><td>4.97</td><td>-</td><td>-</td><td>4.77</td><td>0.1</td><td>0</td><td>6</td></tr>
+<tr><td>opendataloader</td><td>4.75</td><td>4.80</td><td>-</td><td>-</td><td>4.48</td><td>2.7</td><td>0</td><td>6</td></tr>
+<tr><td>haystack_converter</td><td>4.63</td><td>4.97</td><td>-</td><td>-</td><td>3.22</td><td>0.1</td><td>0</td><td>6</td></tr>
+<tr><td>langchain_loader</td><td>4.63</td><td>4.97</td><td>-</td><td>-</td><td>3.22</td><td>0.3</td><td>0</td><td>6</td></tr>
+<tr><td>llamaindex_reader</td><td>4.63</td><td>4.97</td><td>-</td><td>-</td><td>3.22</td><td>0.4</td><td>0</td><td>6</td></tr>
+<tr><td>pymupdf4llm</td><td>4.60</td><td>4.58</td><td>-</td><td>-</td><td>4.42</td><td>1.5</td><td>0</td><td>6</td></tr>
+<tr><td>pdfplumber</td><td>4.47</td><td>4.80</td><td>-</td><td>-</td><td>2.97</td><td>0.1</td><td>0</td><td>6</td></tr>
+<tr><td>... 6 more parsers scored lower</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h2>Digital PDF with tables (15 documents)</h2>
+<p>Documents: 02_invoice_purchase_order, 03_legal_contract, 05_healthcare_discharge_summary, 06_insurance_claim_form, 07_logistics_shipping_manifest, 08_software_incident_report, balance_sheet, bank_statement, datasheet, digital, invoice, lab_report, multipage_table, purchase_order, two_column_paper.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>docling</td><td>4.50</td><td>4.45</td><td>4.99</td><td>-</td><td>4.22</td><td>27.5</td><td>0</td><td>15</td></tr>
+<tr><td>opendataloader</td><td>4.45</td><td>4.37</td><td>4.97</td><td>-</td><td>4.15</td><td>2.7</td><td>0</td><td>15</td></tr>
+<tr><td>pymupdf4llm</td><td>4.44</td><td>4.37</td><td>4.96</td><td>-</td><td>4.17</td><td>2.8</td><td>0</td><td>15</td></tr>
+<tr><td>pymupdf</td><td>4.31</td><td>4.23</td><td>4.77</td><td>-</td><td>3.98</td><td>0.2</td><td>0</td><td>15</td></tr>
+<tr><td>hybrid_pdf (PyMuPDF + Tesseract OCR)</td><td>4.31</td><td>4.23</td><td>4.77</td><td>-</td><td>3.98</td><td>0.4</td><td>0</td><td>15</td></tr>
+<tr><td>smart_pdf (PyMuPDF + Tesseract OCR + a vision model for charts and figures) (paid)</td><td>4.31</td><td>4.23</td><td>4.77</td><td>-</td><td>3.98</td><td>0.3</td><td>0</td><td>15</td></tr>
+<tr><td>pdfplumber</td><td>4.10</td><td>4.35</td><td>4.84</td><td>-</td><td>2.30</td><td>0.2</td><td>0</td><td>15</td></tr>
+<tr><td>markitdown</td><td>3.76</td><td>4.29</td><td>2.56</td><td>-</td><td>2.68</td><td>0.5</td><td>0</td><td>15</td></tr>
+<tr><td>haystack_converter</td><td>3.37</td><td>4.36</td><td>0.00</td><td>-</td><td>2.73</td><td>0.1</td><td>0</td><td>15</td></tr>
+<tr><td>... 6 more parsers scored lower</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h2>PDF with charts, figures or images (13 documents)</h2>
+<p>Documents: 01_corporate_annual_report, 04_scientific_research_paper, 10_mixed_parser_killer, Generative_AI_p1-6, Overview of Amazon Web Services - Overview of Amazon Web Services, PIB_home_p1-6, annual_report_page, chart_report, chart_sample, datasheet_with_photo, flowchart_doc, product_brochure, slides.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>smart_pdf (PyMuPDF + Tesseract OCR + a vision model for charts and figures) (paid)</td><td>3.88</td><td>3.26</td><td>4.54</td><td>4.83</td><td>2.72</td><td>0.5</td><td>0</td><td>13</td></tr>
+<tr><td>pymupdf4llm</td><td>3.32</td><td>3.92</td><td>3.94</td><td>1.07</td><td>3.33</td><td>7.4</td><td>0</td><td>13</td></tr>
+<tr><td>opendataloader</td><td>3.17</td><td>3.83</td><td>3.94</td><td>0.60</td><td>3.24</td><td>3.4</td><td>0</td><td>13</td></tr>
+<tr><td>pymupdf</td><td>3.02</td><td>3.63</td><td>3.80</td><td>0.60</td><td>3.02</td><td>0.3</td><td>0</td><td>13</td></tr>
+<tr><td>hybrid_pdf (PyMuPDF + Tesseract OCR)</td><td>3.02</td><td>3.63</td><td>3.80</td><td>0.60</td><td>3.02</td><td>0.3</td><td>0</td><td>13</td></tr>
+<tr><td>pdfplumber</td><td>3.01</td><td>3.84</td><td>3.96</td><td>0.60</td><td>1.98</td><td>0.3</td><td>0</td><td>13</td></tr>
+<tr><td>docling</td><td>2.92</td><td>3.65</td><td>3.94</td><td>0.60</td><td>3.41</td><td>28.7</td><td>0</td><td>13</td></tr>
+<tr><td>markitdown</td><td>2.53</td><td>3.67</td><td>1.10</td><td>0.00</td><td>2.04</td><td>0.7</td><td>0</td><td>13</td></tr>
+<tr><td>haystack_converter</td><td>2.52</td><td>3.78</td><td>0.00</td><td>0.60</td><td>2.12</td><td>0.2</td><td>0</td><td>13</td></tr>
+<tr><td>... 6 more parsers scored lower</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h2>Mixed PDF (text pages and scanned pages) (3 documents)</h2>
+<p>Documents: AI_agent_mixed, mixed, mixed_digital_scanned.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>docling</td><td>4.51</td><td>4.30</td><td>5.00</td><td>-</td><td>4.00</td><td>42.5</td><td>0</td><td>3</td></tr>
+<tr><td>pymupdf4llm</td><td>4.42</td><td>4.30</td><td>4.55</td><td>-</td><td>4.00</td><td>8.0</td><td>0</td><td>3</td></tr>
+<tr><td>hybrid_pdf (PyMuPDF + Tesseract OCR)</td><td>3.83</td><td>4.20</td><td>2.50</td><td>-</td><td>3.33</td><td>4.3</td><td>0</td><td>3</td></tr>
+<tr><td>smart_pdf (PyMuPDF + Tesseract OCR + a vision model for charts and figures) (paid)</td><td>3.83</td><td>4.20</td><td>2.50</td><td>-</td><td>3.33</td><td>9.6</td><td>0</td><td>3</td></tr>
+<tr><td>easyocr</td><td>3.32</td><td>4.30</td><td>0.00</td><td>-</td><td>2.07</td><td>64.1</td><td>0</td><td>3</td></tr>
+<tr><td>ocr</td><td>3.11</td><td>4.13</td><td>0.00</td><td>-</td><td>2.07</td><td>8.4</td><td>0</td><td>3</td></tr>
+<tr><td>pymupdf</td><td>2.99</td><td>3.03</td><td>2.50</td><td>-</td><td>2.77</td><td>0.1</td><td>0</td><td>3</td></tr>
+<tr><td>opendataloader</td><td>2.98</td><td>3.03</td><td>2.50</td><td>-</td><td>2.70</td><td>2.7</td><td>0</td><td>3</td></tr>
+<tr><td>pdfplumber</td><td>2.79</td><td>3.07</td><td>2.50</td><td>-</td><td>1.53</td><td>0.1</td><td>0</td><td>3</td></tr>
+<tr><td>... 6 more parsers scored lower</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h2>Scanned PDF (8 documents)</h2>
+<p>Documents: 09_scanned_maintenance_order, AI_agent_scanned_clean, AI_agent_scanned_noisy, infographic, scanned_invoice_clean, scanned_invoice_low_quality, scanned_invoice_skewed_noisy, scanned_report_page.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>docling</td><td>3.47</td><td>4.21</td><td>3.10</td><td>0.00</td><td>3.80</td><td>37.6</td><td>0</td><td>8</td></tr>
+<tr><td>pymupdf4llm</td><td>3.25</td><td>4.24</td><td>2.05</td><td>0.00</td><td>3.76</td><td>10.2</td><td>0</td><td>8</td></tr>
+<tr><td>unstructured</td><td>2.88</td><td>4.04</td><td>0.00</td><td>1.20</td><td>3.44</td><td>15.5</td><td>0</td><td>8</td></tr>
+<tr><td>easyocr</td><td>2.70</td><td>4.19</td><td>0.00</td><td>0.00</td><td>2.48</td><td>68.4</td><td>0</td><td>8</td></tr>
+<tr><td>hybrid_pdf (PyMuPDF + Tesseract OCR)</td><td>2.53</td><td>3.90</td><td>0.00</td><td>0.00</td><td>2.56</td><td>3.0</td><td>0</td><td>8</td></tr>
+<tr><td>ocr</td><td>2.53</td><td>3.90</td><td>0.00</td><td>0.00</td><td>2.56</td><td>3.2</td><td>0</td><td>8</td></tr>
+<tr><td>smart_pdf (PyMuPDF + Tesseract OCR + a vision model for charts and figures) (paid)</td><td>2.53</td><td>3.90</td><td>0.00</td><td>0.00</td><td>2.56</td><td>7.5</td><td>0</td><td>8</td></tr>
+<tr><td>pymupdf</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.0</td><td>0</td><td>8</td></tr>
+<tr><td>pdfminer</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.0</td><td>0</td><td>8</td></tr>
+<tr><td>... 6 more parsers scored lower</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h2>Image files (4 documents)</h2>
+<p>Documents: handwritten_note.png, id_card.png, receipt_photo.jpg, screenshot.png.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>docling</td><td>4.85</td><td>4.85</td><td>-</td><td>-</td><td>4.90</td><td>12.6</td><td>0</td><td>4</td></tr>
+<tr><td>easyocr</td><td>4.68</td><td>4.75</td><td>-</td><td>-</td><td>4.55</td><td>8.2</td><td>0</td><td>4</td></tr>
+<tr><td>ocr</td><td>4.51</td><td>4.50</td><td>-</td><td>-</td><td>4.75</td><td>0.6</td><td>0</td><td>4</td></tr>
+<tr><td>unstructured</td><td>4.44</td><td>4.47</td><td>-</td><td>-</td><td>4.60</td><td>3.7</td><td>0</td><td>4</td></tr>
+</table></div>
+<h2>Word (3 documents)</h2>
+<p>Documents: procedure.docx, report.docx, report_with_figures.docx.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>unstructured</td><td>4.20</td><td>4.60</td><td>4.10</td><td>2.50</td><td>4.53</td><td>0.4</td><td>0</td><td>3</td></tr>
+<tr><td>docling</td><td>4.17</td><td>4.60</td><td>3.90</td><td>2.50</td><td>4.53</td><td>0.8</td><td>0</td><td>3</td></tr>
+<tr><td>docx</td><td>4.10</td><td>4.53</td><td>3.90</td><td>2.50</td><td>4.53</td><td>0.1</td><td>0</td><td>3</td></tr>
+<tr><td>markitdown</td><td>3.96</td><td>4.47</td><td>4.10</td><td>2.50</td><td>3.53</td><td>0.6</td><td>0</td><td>3</td></tr>
+</table></div>
+<h2>PowerPoint (2 documents)</h2>
+<p>Documents: deck.pptx, slides.pptx.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>pptx</td><td>4.86</td><td>4.75</td><td>5.00</td><td>-</td><td>4.85</td><td>0.0</td><td>0</td><td>2</td></tr>
+<tr><td>docling</td><td>4.62</td><td>4.30</td><td>5.00</td><td>-</td><td>4.65</td><td>0.3</td><td>0</td><td>2</td></tr>
+<tr><td>unstructured</td><td>4.56</td><td>4.30</td><td>5.00</td><td>-</td><td>4.25</td><td>0.2</td><td>0</td><td>2</td></tr>
+<tr><td>markitdown</td><td>4.51</td><td>4.75</td><td>5.00</td><td>-</td><td>4.35</td><td>0.2</td><td>0</td><td>2</td></tr>
+</table></div>
+<h2>PowerPoint with charts (real chart objects) (1 documents)</h2>
+<p>Documents: dashboard.pptx.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>docling</td><td>4.79</td><td>4.80</td><td>4.80</td><td>5.00</td><td>4.30</td><td>1.3</td><td>0</td><td>1</td></tr>
+<tr><td>markitdown</td><td>3.84</td><td>4.00</td><td>3.40</td><td>5.00</td><td>3.70</td><td>0.7</td><td>0</td><td>1</td></tr>
+<tr><td>pptx</td><td>2.76</td><td>3.30</td><td>2.70</td><td>0.00</td><td>3.70</td><td>0.0</td><td>0</td><td>1</td></tr>
+<tr><td>unstructured</td><td>2.76</td><td>3.30</td><td>2.70</td><td>0.00</td><td>3.70</td><td>0.4</td><td>0</td><td>1</td></tr>
+</table></div>
+<h2>Excel (2 documents)</h2>
+<p>Documents: multi_sheet.xlsx, sales.xlsx.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>unstructured</td><td>4.45</td><td>4.50</td><td>4.65</td><td>-</td><td>4.15</td><td>1.4</td><td>0</td><td>2</td></tr>
+<tr><td>spreadsheet</td><td>4.33</td><td>4.40</td><td>4.40</td><td>-</td><td>4.20</td><td>0.0</td><td>0</td><td>2</td></tr>
+<tr><td>markitdown</td><td>4.33</td><td>4.35</td><td>4.50</td><td>-</td><td>4.15</td><td>0.2</td><td>0</td><td>2</td></tr>
+<tr><td>docling</td><td>4.26</td><td>4.45</td><td>4.45</td><td>-</td><td>3.50</td><td>0.4</td><td>0</td><td>2</td></tr>
+</table></div>
+<h2>Excel with charts (real chart objects) (1 documents)</h2>
+<p>Documents: sales_with_chart.xlsx.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>spreadsheet</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>0.1</td><td>0</td><td>1</td></tr>
+<tr><td>markitdown</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>0.5</td><td>0</td><td>1</td></tr>
+<tr><td>unstructured</td><td>4.43</td><td>4.80</td><td>5.00</td><td>-</td><td>2.30</td><td>2.4</td><td>0</td><td>1</td></tr>
+<tr><td>docling</td><td>3.05</td><td>3.10</td><td>3.40</td><td>-</td><td>1.60</td><td>1.0</td><td>0</td><td>1</td></tr>
+</table></div>
+<h2>CSV (2 documents)</h2>
+<p>Documents: parts.csv, sales.csv.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>spreadsheet</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>0.8</td><td>0</td><td>2</td></tr>
+<tr><td>markitdown</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>1.8</td><td>0</td><td>2</td></tr>
+<tr><td>unstructured</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>2.2</td><td>0</td><td>2</td></tr>
+</table></div>
+<h2>Plain text (2 documents)</h2>
+<p>Documents: runbook.md, shift_notes.txt.</p>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Overall</th><th>Text</th><th>Tables</th><th>Charts</th><th>Structure</th><th>Seconds</th><th>Failed</th><th>Runs</th></tr>
+<tr><td>text</td><td>5.00</td><td>5.00</td><td>5.00</td><td>-</td><td>5.00</td><td>0.0</td><td>0</td><td>2</td></tr>
+<tr><td>unstructured</td><td>2.08</td><td>2.50</td><td>0.00</td><td>-</td><td>2.50</td><td>0.1</td><td>1</td><td>2</td></tr>
+</table></div>
+<h2>What our two combinations are made of</h2>
+<ul>
+<li><b>hybrid_pdf</b> = PyMuPDF reads the pages that have text, <b>Tesseract OCR</b> reads the pages that are only a picture.</li>
+<li><b>smart_pdf</b> = the same as hybrid_pdf, plus a <b>vision model</b> that reads charts, diagrams and pictures (at most 8 figures per document). Tables are read by PyMuPDF's table finder, never by the vision model; scanned pages are read by Tesseract OCR, not by the vision model.</li>
+</ul>
+<h2>Tables in documents that also have charts or photos</h2>
+<p>Table-reconstruction score (0 to 5) per document, for the documents of the group "PDF with charts, figures or images" that contain a table. Where the table is a normal text table (datasheet_with_photo, flowchart_doc, product_brochure, slides) every parser reads it, and smart_pdf ties with the others, except on slides. Where smart_pdf is clearly ahead (annual_report_page, chart_report, chart_sample) the answer file also lists the values read from the chart as a table, which only a vision model can supply. So smart_pdf's higher table average in this group comes from chart values, not from better normal tables.</p>
+<div class="tablewrap"><table><tr><th>Document</th><th>smart_pdf</th><th>pymupdf4llm</th><th>docling</th><th>opendataloader</th><th>pymupdf</th></tr>
+<tr><td>annual_report_page</td><td>4.1</td><td>3.0</td><td>3.0</td><td>3.0</td><td>3.0</td></tr>
+<tr><td>chart_report</td><td>4.6</td><td>2.1</td><td>2.1</td><td>2.1</td><td>2.1</td></tr>
+<tr><td>chart_sample</td><td>4.6</td><td>2.5</td><td>2.5</td><td>2.5</td><td>1.5</td></tr>
+<tr><td>datasheet_with_photo</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td></tr>
+<tr><td>flowchart_doc</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td></tr>
+<tr><td>product_brochure</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td></tr>
+<tr><td>slides</td><td>3.5</td><td>5.0</td><td>5.0</td><td>5.0</td><td>5.0</td></tr>
+</table></div>
+<h2>Failures, timeouts and what they mean</h2>
+<div class="tablewrap"><table><tr><th>Parser</th><th>Problem</th><th>Documents</th></tr>
+<tr><td>docling</td><td>error</td><td>1</td></tr>
+<tr><td>easyocr</td><td>timeout</td><td>8</td></tr>
+<tr><td>unstructured</td><td>error</td><td>1</td></tr>
+</table></div>
+<p>Timeouts mean one document took longer than 400 seconds. easyocr is the slow one (about a minute per document on this CPU-only laptop).</p>
+<h2>Smart Extract on documents that mix text, tables, charts, photos and diagrams</h2>
+<p>These were run through the real app (By document with paid parsers allowed, By part with paid parsers allowed, and By document with free parsers only), with the final routing table. Azure Document Intelligence was blocked in this test. Score is 0 to 5 against the hand-written answer.</p>
+<div class="tablewrap"><table><tr><th>Document</th><th>By document (paid allowed)</th><th>By part (paid allowed)</th><th>By document (free only)</th></tr>
+<tr><td>01_corporate_annual_report.pdf</td><td>2.53 (smart_pdf)</td><td>2.54 (pymupdf, vision:azure_openai, smart_pdf)</td><td>2.45 (pymupdf4llm)</td></tr>
+<tr><td>02_invoice_purchase_order.pdf</td><td>3.75 (opendataloader)</td><td>3.75 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>03_legal_contract.pdf</td><td>3.63 (opendataloader)</td><td>3.47 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>04_scientific_research_paper.pdf</td><td>2.84 (smart_pdf)</td><td>2.84 (pymupdf, smart_pdf, vision:azure_openai)</td><td>3.19 (pymupdf4llm)</td></tr>
+<tr><td>05_healthcare_discharge_summary.pdf</td><td>3.22 (opendataloader)</td><td>3.22 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>06_insurance_claim_form.pdf</td><td>3.19 (opendataloader)</td><td>3.19 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>07_logistics_shipping_manifest.pdf</td><td>3.57 (opendataloader)</td><td>3.33 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>08_software_incident_report.pdf</td><td>3.18 (opendataloader)</td><td>3.18 (pymupdf, smart_pdf)</td><td>-</td></tr>
+<tr><td>09_scanned_maintenance_order.pdf</td><td>5.00 (docling)</td><td>5.00 (docling)</td><td>-</td></tr>
+<tr><td>10_mixed_parser_killer.pdf</td><td>2.23 (smart_pdf)</td><td>1.99 (pymupdf, vision:azure_openai, smart_pdf)</td><td>2.72 (pymupdf4llm)</td></tr>
+<tr><td>annual_report_page.pdf</td><td>3.84 (smart_pdf)</td><td>3.84 (pymupdf, vision:azure_openai, smart_pdf)</td><td>3.25 (pymupdf4llm)</td></tr>
+<tr><td>dashboard.pptx</td><td>4.80 (docling)</td><td>-</td><td>-</td></tr>
+<tr><td>datasheet_with_photo.pdf</td><td>3.87 (smart_pdf)</td><td>3.87 (pymupdf, vision:azure_openai, smart_pdf)</td><td>4.94 (pymupdf4llm)</td></tr>
+<tr><td>flowchart_doc.pdf</td><td>4.12 (smart_pdf)</td><td>4.12 (pymupdf, vision:azure_openai, smart_pdf)</td><td>4.40 (pymupdf4llm)</td></tr>
+<tr><td>infographic.pdf</td><td>4.78 (docling)</td><td>4.78 (docling)</td><td>4.78 (docling)</td></tr>
+<tr><td>product_brochure.pdf</td><td>4.11 (smart_pdf)</td><td>4.11 (pymupdf, vision:azure_openai, smart_pdf)</td><td>4.92 (pymupdf4llm)</td></tr>
+<tr><td>report_with_figures.docx</td><td>3.44 (unstructured)</td><td>-</td><td>-</td></tr>
+<tr><td>sales_with_chart.xlsx</td><td>5.00 (spreadsheet)</td><td>-</td><td>-</td></tr>
+<tr><td>scanned_report_page.pdf</td><td>3.16 (docling)</td><td>3.16 (docling)</td><td>3.16 (docling)</td></tr>
+</table></div>
+<p>Average score over these documents: By document: 3.70 (19 documents), By part: 3.52 (16 documents), By document, free only: 3.76 (9 documents).</p>
+<p><b>What this shows.</b> On the 9 documents that were run both ways, the free parsers scored higher on 5 (04_scientific_research_paper, 10_mixed_parser_killer, datasheet_with_photo, flowchart_doc, product_brochure) and the paid vision path on 2 (01_corporate_annual_report, annual_report_page). The vision model clearly helps when the values only exist inside a chart, and it costs points when the document is mostly text with photos or diagrams, because the model adds descriptions that are not in the answer. The "charts and figures" routing group mixes both kinds, so its first pick (smart_pdf when paid parsers are allowed) is right on average but not on every document.</p>
+<p><b>Reading the scores.</b> The ten Copilot documents (names starting 01 to 10) score lower for every parser, because their answer files are summaries and not the full text. Compare parsers on the same document, not documents with each other.</p>
+<h2>Cost, honestly</h2>
+<ul>
+<li><b>vlm</b> sends every page to Azure OpenAI (GPT-4.1): one API call per page. It ran on all test documents, so the Azure bill shows those calls. <b>The vlm parser is now off in the whole app</b> (setting VLM_PARSER_ENABLED, default off), to keep API hits low.</li>
+<li><b>smart_pdf</b> sends every figure it finds to the vision model (up to 8 per document). Smart Extract only uses it when "Include paid parsers" is ticked, and By part mode also reads figures with the vision model.</li>
+<li>Azure Document Intelligence was <b>not</b> run, so it is not in any ranking here.</li>
+</ul>
+<h2>Limits of this test</h2>
+<ul>
+<li>The documents are synthetic (generated, plus the ten from the Copilot set). They are cleaner than most real files. Scans are simulated with skew, noise and blur.</li>
+<li>One run per parser and document. Differences under about 0.1 are noise, which is why such parsers are treated as tied.</li>
+<li>The answer files were written by hand. The Copilot answer files are summaries: they leave out headers and footers and include chart values that exist only inside the picture, so they under-score correct output a little and reward parsers that read charts.</li>
+<li>The "tables" group means clean digital PDFs with simple tables. Merged cells, tilted tables and tables inside photos are not covered.</li>
+<li>Timings are not exact: models load on first use, the laptop slept during part of the run and the disk was nearly full. Use them only to break ties.</li>
+<li>Not tested: Azure Document Intelligence, LlamaParse (no API key), MinerU, Marker, documents of 100 pages or more, real client files.</li>
+</ul></main></body></html>

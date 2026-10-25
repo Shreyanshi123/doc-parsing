@@ -47,7 +47,10 @@ def doc_groups(names: list[str]) -> dict[str, str]:
         for n in todo:
             data = find(n).read_bytes()
             ft = resolve_file_type(data, n)
-            cache[n] = benchmark.group_of(analyze(data, ft, ParseOptions()).to_dict(), ft) if ft == "pdf" else ft
+            from app.routing import learned
+
+            prof = analyze(data, ft, ParseOptions()).to_dict()
+            cache[n] = benchmark.group_of(prof, ft) if ft == "pdf" else learned.group_for(prof, ft)
             GROUP_CACHE.write_text(json.dumps(cache, indent=1), encoding="utf-8")
             print(f"  grouped {n}: {cache[n]}", flush=True)
     return cache

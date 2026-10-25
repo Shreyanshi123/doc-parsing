@@ -46,9 +46,22 @@ def analyze(data: bytes, file_type: str, options: ParseOptions) -> DocProfile:
         p.classification, p.page_count = "image", 1
     elif file_type in ("docx", "pptx", "xlsx", "csv"):
         p.classification = "native_office"
+        if file_type != "csv" and _has_chart_objects(data):
+            p.traits.append("charts")
     else:
         p.classification = "text"
     return p
+
+
+def _has_chart_objects(data: bytes) -> bool:
+    """True when a Word / PowerPoint / Excel file contains real chart objects (their data is stored as XML, not as a picture)."""
+    import io
+    import zipfile
+
+    try:
+        return any("/charts/chart" in n for n in zipfile.ZipFile(io.BytesIO(data)).namelist())
+    except zipfile.BadZipFile:
+        return False
 
 
 def _analyze_pdf(data: bytes, p: DocProfile, options: ParseOptions) -> None:

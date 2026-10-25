@@ -116,19 +116,24 @@ SCANNED_GROUPS = ["scanned"]
 def _measured_chain(label: str, groups: list[str], metric: Optional[str], file_type: str, options: ParseOptions, include_paid: bool,
                     backup: list[str]) -> tuple[list[str], str]:
     ranked = learned.rank(groups, metric, file_type=file_type, include_paid=include_paid, prefer_quality=options.prefer_quality)
-    names = [r["parser"] for r in ranked[:4]] + backup
-    if include_paid:
-        names.insert(0, "azure_di")   # you ticked "Include paid parsers": Azure DI goes first, as before
+    names = [r["parser"] for r in learned.within_range(ranked)[:4]] + backup
     chain = _usable(names, file_type)
     if not ranked or not chain:
         return chain, f"{label}: no measured scores for the available parsers, so the hand-written order is used."
-    if chain[0] == "azure_di":
-        return chain, f"{label}: Azure Document Intelligence (paid) first because you ticked 'Include paid parsers'; the best free parsers follow."
     top = next((r for r in ranked if r["parser"] == chain[0]), None)
     if top is None:
         return chain, f"{label}: {chain[0]} (hand-written fallback, it was not in the measured ranking)."
     how = "fastest of the parsers tied for best" if top.get("tied") else "best score"
-    return chain, f"{label}: {chain[0]} - {how}; {learned.evidence(top, groups[0] if len(groups) == 1 else 'table-bearing', metric)}."
+    return chain, f"{label}: {learned.label(chain[0])} - {how}; {learned.evidence(top, groups[0] if len(groups) == 1 else 'table-bearing', metric)}."
+
+
+def _text_why() -> str:
+    """Why headings and text come from PyMuPDF in By part mode: they are taken from the first pass, with the measured score as evidence."""
+    base = "Headings and text: read in the first pass by PyMuPDF, not re-read by another parser."
+    for e in learned.rank(["digital"], file_type="pdf", include_paid=True):
+        if e["parser"] == "pymupdf":
+            return f"{base} {learned.evidence(e, 'digital')}" + (" (tied for best)." if e.get("tied") else ".")
+    return base
 
 
 def table_chain(file_type: str, options: ParseOptions, include_paid: bool) -> tuple[list[str], str]:
@@ -142,11 +147,13 @@ def scanned_chain(file_type: str, options: ParseOptions, include_paid: bool) -> 
 def routing_evidence(profile: dict, file_type: str, options: ParseOptions, include_paid: bool, mode: str = "part", chosen: Optional[str] = None) -> dict:
     """What the UI shows under 'Scorecard behind these choices': the measured scores, with the parser actually used starred."""
     group = learned.group_for(profile, file_type)
-    kw = dict(file_type=file_type, include_paid=True, prefer_quality=True)
+    kw = dict(file_type=file_type, include_paid=include_paid, prefer_quality=options.prefer_quality)   # exactly what the real pick used
 
     def block(label, groups, metric, chosen):
         ranked = [dict(r) for r in learned.rank(groups, metric, **kw)]
-        top = ranked[:4]
+        if metric is None and len(groups) == 1:
+            ranked = learned.prefer_native(ranked, file_type)   # the same order the real pick used
+        top = ranked[:5]
         if chosen and chosen not in [r["parser"] for r in top]:
             top += [r for r in ranked if r["parser"] == chosen]
         return {"label": label, "metric": metric.lower() if metric else "overall score", "chosen": chosen, "ranking": top}
@@ -157,7 +164,8 @@ def routing_evidence(profile: dict, file_type: str, options: ParseOptions, inclu
         doc_pick = chosen or route(DocProfile(**{k: v for k, v in profile.items() if k in DocProfile.__dataclass_fields__}), options, include_paid=include_paid).selected
     except Exception:  # noqa: BLE001
         doc_pick = None
-    out = {"group": group, "document": block(f"Whole document ({group})", [group], None, doc_pick)}
+    out = {"group": group, "tie_points": 0 if options.prefer_quality else learned.TIE,
+           "document": block(f"Whole document ({group})", [group], None, doc_pick)}
     if file_type == "pdf" and mode == "part":
         tc, sc = table_chain("pdf", options, include_paid)[0], scanned_chain("pdf", options, include_paid)[0]
         out["tables"] = block("Tables", TABLE_GROUPS, "Table Reconstruction", tc[0] if tc else None)
@@ -366,7 +374,7 @@ def _extract_pdf(data: bytes, file_name: str, options: ParseOptions, include_pai
                 md = "\n\n".join(e.content for e in run)
                 parts.append((run[0].metadata["y"], _seg(n, 0, _text_kind(md) if len(run) == 1 else "text",
                                                           [e.metadata["bbox"] for e in run], "pymupdf",
-                                                          "Headings and text: pymupdf - 99-100% on digital text in 1-2 s, nothing else was more accurate", md, [{"parser": "pymupdf", "status": "ok", "ms": 0}])))
+                                                          _text_why(), md, [{"parser": "pymupdf", "status": "ok", "ms": 0}])))
                 run.clear()
 
         for e in sorted((e for e in els if e.content_type == TEXT and "bbox" in e.metadata), key=lambda e: e.metadata["y"]):
@@ -417,10 +425,9 @@ def _extract_pdf_whole(data: bytes, file_name: str, profile, options: ParseOptio
     from app.routing.router import _rules, route
 
     candidates = list(route(profile, options, include_paid=include_paid).candidates)
-    reasons = dict(_rules(profile, options, include_paid))
-    if include_paid and _usable(["azure_di"], "pdf") and "azure_di" not in candidates:
-        candidates.insert(0, "azure_di")
-        reasons["azure_di"] = "you ticked 'Include paid parsers': Azure Document Intelligence (paid) is tried first"
+    reasons: dict[str, str] = {}
+    for rule_name, rule_why in _rules(profile, options, include_paid):   # the measured reason comes first: keep it, never the older fallback text
+        reasons.setdefault(rule_name, rule_why)
     group = learned.group_for(profile.to_dict(), "pdf")
 
     tried, doc, chosen = [], None, None
@@ -442,7 +449,7 @@ def _extract_pdf_whole(data: bytes, file_name: str, profile, options: ParseOptio
     if doc is None:
         raise RuntimeError(f"no parser produced any content: {tried}")
 
-    why = f"{chosen}: {reasons.get(chosen, 'next parser in the chain')}."
+    why = f"{learned.label(chosen)}: {reasons.get(chosen, 'next parser in the chain')}."
     if len(tried) > 1:
         why += " Tried before it: " + ", ".join(f"{t['parser']} ({t['status']})" for t in tried[:-1]) + "."
 
@@ -523,6 +530,20 @@ def _extract_other(data: bytes, file_name: str, file_type: str, options: ParseOp
     return segments, pages, list(res.document.warnings), {"engine": engine}
 
 
+def _azure_comparison(data: bytes, file_name: str, file_type: str, options: ParseOptions, emit) -> Optional[dict]:
+    """With "Include paid parsers" ticked Azure Document Intelligence also reads the file, for comparison. The result Smart Extract
+    returns is still the parser that scored best in our test; this output is shown in its own tab."""
+    if not _usable(["azure_di"], file_type):
+        return None
+    emit({"event": "working", "page": 1, "kind": "document", "parser": "azure_di (paid, for comparison)"})
+    t = time.perf_counter()
+    try:
+        doc = normalize_document(get_parser_class("azure_di")().parse(data, file_name, file_type, options))
+        return {"markdown": doc.markdown, "words": len(doc.markdown.split()), "pages": len(doc.pages), "secs": round(time.perf_counter() - t, 1)}
+    except Exception as e:  # noqa: BLE001 - the comparison must never stop the real result
+        return {"error": f"{type(e).__name__}: {e}"[:300], "secs": round(time.perf_counter() - t, 1)}
+
+
 # --------------------------------------------------------------------------- entry point
 def extract_document(data: bytes, file_name: str, options: Optional[ParseOptions] = None,
                      include_paid: bool = False, progress: Optional[Callable[[dict], None]] = None, mode: str = "part") -> dict:
@@ -549,6 +570,9 @@ def extract_document(data: bytes, file_name: str, options: Optional[ParseOptions
         segments, pages, warnings, meta = _extract_other(data, file_name, file_type, options, include_paid, emit)
         meta = {**meta, "mode": "native"}
     warnings = warnings0 + warnings
+    azure = _azure_comparison(data, file_name, file_type, options, emit) if include_paid else None
+    if azure and azure.get("error"):
+        warnings.append(f"Azure Document Intelligence was asked to read the file for comparison and failed: {azure['error']}")
     try:
         routing = routing_evidence(profile.to_dict(), file_type, options, include_paid, mode, meta.get("engine") if mode == "document" else None)
     except Exception:  # noqa: BLE001 - the evidence panel is informational; it must never stop an extraction
@@ -577,7 +601,7 @@ def extract_document(data: bytes, file_name: str, options: Optional[ParseOptions
         warnings.append(f"{len(unread)} figure(s) were found but not read ({', '.join(unread)}). They are flagged, not written into the text.")
     return {
         "file_name": file_name, "file_type": file_type, "profile": profile.to_dict(),
-        "segments": segments, "pages": pages, "markdown": markdown, "warnings": warnings,
+        "segments": segments, "pages": pages, "markdown": markdown, "warnings": warnings, "azure_di": azure,
         "summary": {"segments": len(segments), "by_kind": by_kind, "parsers_used": dict(parsers_used),
                     "empty_segments": empty, "unread_figures": unread, "words": len(markdown.split()), "routing": routing,
                     "total_ms": int((time.perf_counter() - t0) * 1000), **meta},

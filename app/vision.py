@@ -63,7 +63,7 @@ def pick_backend() -> Optional[str]:
 def _ollama_ready() -> bool:
     from app.parsers.vlm_parser import VlmParser
 
-    return VlmParser.is_available()[0]
+    return VlmParser.ollama_ready()[0]
 
 
 def _cache_path(png: bytes, backend: str):
