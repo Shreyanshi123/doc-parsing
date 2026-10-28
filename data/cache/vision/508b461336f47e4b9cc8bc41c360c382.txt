@@ -1,0 +1,22 @@
+Type: line chart
+
+Chart: 
+Title: Service delivery performance
+Axis labels: 
+- X-axis: Months (Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec)
+- Y-axis: On-time delivery (%)
+
+| Month | Actual (%) | Target (%) |
+|-------|------------|------------|
+| Jan   | ~91        | 94         |
+| Feb   | ~92        | 94         |
+| Mar   | ~92        | 94         |
+| Apr   | ~93        | 94         |
+| May   | ~94        | 94         |
+| Jun   | ~94        | 94         |
+| Jul   | ~95        | 94         |
+| Aug   | ~95        | 94         |
+| Sep   | ~96        | 94         |
+| Oct   | ~96        | 94         |
+| Nov   | ~97        | 94         |
+| Dec   | ~97        | 94         |

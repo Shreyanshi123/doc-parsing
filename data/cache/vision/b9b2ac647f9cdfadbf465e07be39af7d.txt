@@ -1,0 +1,19 @@
+Type: bar chart and line chart
+
+Chart: Novo Nordisk Group Sales and Sales Growth: Bernstein vs Consensus vs EU Peers
+
+Axis labels:
+- Left Y-axis: Sales (Bn)
+- Right Y-axis: Sales Growth (%)
+- X-axis: Year (2026E, 2027E, 2028E, 2029E, 2030E, 2031E, 2032E, 2033E)
+
+| Year   | Bern Group Sales (Bn) | Cons Group Sales (Bn) | Bern Sales Growth (%) | Cons Sales Growth (%) | EU Peers Growth (%) |
+|--------|-----------------------|-----------------------|----------------------|----------------------|---------------------|
+| 2026E  | ~220                  | ~240                  | ~5                   | ~5                   | ~10                |
+| 2027E  | ~300                  | ~280                  | ~15                  | ~10                  | ~13                |
+| 2028E  | ~320                  | ~300                  | ~10                  | ~7                   | ~8                 |
+| 2029E  | ~340                  | ~320                  | ~7                   | ~5                   | ~6                 |
+| 2030E  | ~350                  | ~330                  | ~5                   | ~3                   | ~5                 |
+| 2031E  | ~360                  | ~340                  | ~3                   | ~2                   | ~2                 |
+| 2032E  | ~360                  | ~340                  | ~2                   | ~1                   | ~0                 |
+| 2033E  | ~340                  | ~320                  | ~0                   | ~0                   | ~-5                |

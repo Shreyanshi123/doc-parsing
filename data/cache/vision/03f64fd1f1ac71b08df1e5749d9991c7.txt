@@ -1,0 +1,18 @@
+Type: flowchart
+
+Boxes/entities:
+- Global MASH Treatment Market
+- L (Legal): Regulatory Approval Pathways And Conditional Authorizations
+- P (Political): Reimbursement Frameworks And Health Budget Allocation, Impact Of Trade War And Tariff
+- E (Environmental): Chemical Exposure And Metabolism Disrupting Agents
+- E (Economic): Impact Of Interest Rate Fluctuations, Impact Of Inflationary Pressures
+- T (Technology): AI-Driven Diagnostic And Pathology Tools, Advancement In Non-Invasive Therapeutic Technologies
+- S (Social): Impact of the COVID-19 Pandemic And Recovery, Low Awareness And Late Diagnosis
+
+Connections:
+- L -> Global MASH Treatment Market
+- P -> Global MASH Treatment Market
+- E (Environmental) -> Global MASH Treatment Market
+- E (Economic) -> Global MASH Treatment Market
+- T -> Global MASH Treatment Market
+- S -> Global MASH Treatment Market

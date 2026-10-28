@@ -1,0 +1,21 @@
+Type: bar chart
+
+Chart: Semaglutide (active ingredient in Ozempic, Rybelsus, Wegovy, Oral Sema, and CagriSema) is facing loss of exclusivity from 2026
+Axis labels: 
+- Y-axis: Value (Bn)
+- X-axis: Year (2025E, 2026E, 2027E, 2028E, 2029E, 2030E, 2031E, 2032E, 2033E, 2034E, 2035E, 2036E)
+
+| Year   | Pipeline (ex. CagriSema) | Other drugs | Facing generic competition (inc. CagriSema) |
+|--------|--------------------------|-------------|---------------------------------------------|
+| 2025E  | ~250                     | ~0          | ~0                                          |
+| 2026E  | ~60                      | ~100        | ~100                                        |
+| 2027E  | ~60                      | ~100        | ~100                                        |
+| 2028E  | ~70                      | ~100        | ~100                                        |
+| 2029E  | ~80                      | ~100        | ~100                                        |
+| 2030E  | ~90                      | ~100        | ~100                                        |
+| 2031E  | ~100                     | ~100        | ~100                                        |
+| 2032E  | ~110                     | ~100        | ~200                                        |
+| 2033E  | ~120                     | ~100        | ~150                                        |
+| 2034E  | ~120                     | ~100        | ~120                                        |
+| 2035E  | ~120                     | ~100        | ~100                                        |
+| 2036E  | ~120                     | ~100        | ~100                                        |

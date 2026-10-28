@@ -1,0 +1,28 @@
+Type: bar chart
+
+Chart 1: We forecast group sales to fall over the next five years (DKK)
+- Y-axis label: Sales (DKK, Bn)
+- X-axis labels: 2025, Ozempic, Wegovy, Oral Sema, CagriS (O), CagriS (D), Other, 2031e
+
+| Year/Product   | Sales (DKK, Bn) |
+|----------------|-----------------|
+| 2025           | ~310.0          |
+| Ozempic        | ~310.0          |
+| Wegovy         | ~230.0          |
+| Oral Sema      | ~240.0          |
+| CagriS (O)     | ~250.0          |
+| CagriS (D)     | ~270.0          |
+| Other          | ~290.0          |
+| 2031e          | ~290.0          |
+
+Chart 2: We project the Wegovy Pill (Oral Sema) to account for 40% of our group sales CAGR '27-31e
+- Y-axis label: Percentage (%)
+- X-axis labels: Oral Sema, CagriSema (D), Amycretin (O), CagriSema (O), Amycretin (D)
+
+| Product           | Percentage (%) |
+|-------------------|---------------|
+| Oral Sema         | ~40            |
+| CagriSema (D)     | ~35            |
+| Amycretin (O)     | ~20            |
+| CagriSema (O)     | ~20            |
+| Amycretin (D)     | ~10            |

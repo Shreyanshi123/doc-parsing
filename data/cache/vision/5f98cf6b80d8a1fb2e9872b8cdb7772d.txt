@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: A screenshot showing a reference to a report titled "NH Investment & Securities • 17 Apr • Bio sector to rebound in 2Q26" with a subtitle "Global MASH treatment pipeline comparison focusing on GLP-1 and combination therapies."

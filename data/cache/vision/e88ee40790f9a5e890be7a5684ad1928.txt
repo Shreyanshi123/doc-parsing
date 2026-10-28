@@ -1,0 +1,13 @@
+Type: line chart
+
+Chart: Change in Liver Fat Content among PNPLA3 I148M Homozygous Participants
+- X-axis: Weeks since Dose Administration
+- Y-axis: Percent Change from Baseline (%)
+
+| Weeks since Dose Administration | Placebo (N=10) | ARO-PNPLA3 75 mg (N=6) | ARO-PNPLA3 200 mg (N=6) | ARO-PNPLA3 400 mg (N=5) |
+|-------------------------------|----------------|------------------------|-------------------------|-------------------------|
+| 0                             | 0              | 0                      | 0                       | 0                       |
+| 6                             | ~-5            | ~-10                   | ~-20                    | ~-35                    |
+| 12                            | ~-5            | ~-10                   | ~-20                    | ~-35                    |
+| 18                            | ~-5            | ~-10                   | ~-20                    | ~-35                    |
+| 24                            | ~-5            | ~-10                   | ~-20                    | ~-35                    |

@@ -1,0 +1,19 @@
+Type: line chart
+
+Chart title: Not specified
+
+Axis labels:
+- X-axis: Date (MAY-25, SEP-25, JAN-26, MAY-26)
+- Left Y-axis: Vol. (mil)
+- Right Y-axis: Price
+
+Data values (approximate, read from chart):
+
+| Date    | Vol. (mil) | Price |
+|---------|------------|-------|
+| MAY-25  | ~0.5-1.5   | ~300-400 |
+| SEP-25  | ~0.5-1.5   | ~400-600 |
+| JAN-26  | ~0.5-1.5   | ~500-600 |
+| MAY-26  | ~0.5-1.5   | ~500-600 |
+
+(Note: Values are approximate, as exact numbers are not printed on the chart.)

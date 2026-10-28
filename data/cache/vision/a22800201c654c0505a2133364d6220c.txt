@@ -1,0 +1,15 @@
+Type: table image
+
+Chart: Enterprise risk matrix  
+Axis labels:  
+- Y-axis: Likelihood  
+- X-axis: Impact  
+- Color legend: Risk band (no units)
+
+| Likelihood       | Low | Minor | Moderate | Major | Severe |
+|------------------|-----|-------|----------|-------|--------|
+| Rare             | 2   | 3     | 4        | 2     | 1      |
+| Unlikely         | 3   | 4     | 5        | 3     | 2      |
+| Possible         | 2   | 3     | 4        | 4     | 2      |
+| Likely           | 1   | 2     | 3        | 4     | 3      |
+| Almost certain   | 1   | 2     | 2        | 3     | 4      |

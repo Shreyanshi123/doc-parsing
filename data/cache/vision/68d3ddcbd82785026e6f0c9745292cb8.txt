@@ -1,0 +1,10 @@
+Type: flowchart
+
+Boxes/entities:
+- MASH Treatment
+- Drug
+- Therapy
+
+Connections:
+- MASH Treatment -> Drug
+- MASH Treatment -> Therapy

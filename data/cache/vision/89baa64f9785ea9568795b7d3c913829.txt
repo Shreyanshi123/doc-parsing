@@ -1,0 +1,3 @@
+Type: other
+
+Description: A world map with regions labeled as North America, South America, Western Europe, Eastern Europe, The Middle East, Africa, and Asia Pacific.

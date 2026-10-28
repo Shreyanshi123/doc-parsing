@@ -1,0 +1,11 @@
+Type: pie chart
+
+Chart:
+Title: Sales mix, section 11
+Axis labels: None
+
+| Category | Value (%) |
+|----------|-----------|
+| Pumps    | 45        |
+| Valves   | 25        |
+| Seals    | 30        |

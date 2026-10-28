@@ -4,3 +4,4 @@ unstructured[pdf,docx,pptx,xlsx]>=0.15        # free, element-level partitioning
 easyocr>=1.7                                  # free deep-learning OCR (PyTorch)
 llama-parse>=0.5                              # LlamaParse CLOUD api (needs LLAMA_CLOUD_API_KEY; data leaves your network)
 azure-ai-documentintelligence>=1.0.0          # Azure Document Intelligence (PAID; needs endpoint + key)
+boto3>=1.34                                   # Amazon Textract (PAID; needs AWS credentials + AWS_REGION)

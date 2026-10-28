@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart: Transformation investment utilization  
+Axis labels:  
+- Y-axis: Portfolio (Cloud migration, Data platform, Cybersecurity, Automation, Workplace)  
+- X-axis: USD million
+
+| Portfolio        | Approved (USD million) | Consumed (USD million) |
+|------------------|-----------------------|------------------------|
+| Cloud migration  | ~27                   | ~20                    |
+| Data platform    | ~24                   | ~19                    |
+| Cybersecurity    | ~18                   | ~14                    |
+| Automation       | ~16                   | ~11                    |
+| Workplace        | ~12                   | ~9                     |

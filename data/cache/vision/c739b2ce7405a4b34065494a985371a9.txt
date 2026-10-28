@@ -1,0 +1,23 @@
+Type: line chart
+
+Chart:
+Title: Rating and Price Target History for: Madrigal Pharmaceuticals, Inc. (MDGL-US) as of 05-06-2026
+Axis labels: 
+- X-axis: Time (quarters and years)
+- Y-axis: Price (USD)
+
+Markdown table with all data values:
+
+| Date         | Rating/Price Target | Price (USD) |
+|--------------|--------------------|-------------|
+| 12/19/22     | BUY: $225.00       | ~225        |
+| 11/13/23     | BUY: $275.00       | ~275        |
+| 03/12/24     | BUY: $405.00       | ~405        |
+| 03/15/24     | BUY: $425.00       | ~425        |
+| 05/08/24     | BUY: $390.00       | ~390        |
+| 01/14/25     | BUY: $400.00       | ~400        |
+| 02/27/25     | BUY: $405.00       | ~405        |
+| 04/22/25     | UR: NA             | ~NA         |
+| 09/04/25     | BUY: $500.00       | ~500        |
+| 11/11/25     | BUY: $568.00       | ~568        |
+| 11/21/25     | BUY: $620.00       | ~620        |

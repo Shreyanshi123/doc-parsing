@@ -29,8 +29,9 @@ REFERENCE_KIND = "your reference text"
 ALL = "all documents"   # pool over every test document: used for the parameters that only some documents can test (tables)
 METRICS = benchmark.METRICS
 # our own pipelines glued from the other engines (PyMuPDF + OCR [+ vision model]); they compete like any other parser
-COMBOS = {"smart_pdf", "hybrid_pdf"}
-COMBO_DESC = {"hybrid_pdf": "PyMuPDF + Tesseract OCR", "smart_pdf": "PyMuPDF + Tesseract OCR + vision model for charts and figures"}
+COMBOS = {"smart_pdf", "hybrid_pdf", "adi_vision"}
+COMBO_DESC = {"hybrid_pdf": "PyMuPDF + Tesseract OCR", "smart_pdf": "PyMuPDF + Tesseract OCR + vision model for charts and figures",
+              "adi_vision": "Azure Document Intelligence for text and tables + vision model for charts and photos only"}
 
 
 def label(name: str) -> str:

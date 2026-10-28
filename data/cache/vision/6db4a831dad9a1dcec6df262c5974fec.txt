@@ -1,0 +1,17 @@
+Type: bar chart
+
+Chart: Novo Nordisk EPS and EPS Growth: Bernstein vs Consensus vs EU Peers
+- X-axis: Years (2026E, 2027E, 2028E, 2029E, 2030E, 2031E, 2032E, 2033E)
+- Left Y-axis: EPS (units not specified, range 15–31)
+- Right Y-axis: EPS Growth (%) (range -30% to 15%)
+
+| Year   | Bern EPS | Cons EPS | Bern EPS Growth | Cons EPS Growth | EU Peers EPS Growth |
+|--------|----------|----------|-----------------|-----------------|---------------------|
+| 2026E  | ~18      | ~16      | ~25%            | ~20%            | ~17%                |
+| 2027E  | ~27      | ~19      | ~29%            | ~19%            | ~25%                |
+| 2028E  | ~29      | ~21      | ~13%            | ~11%            | ~13%                |
+| 2029E  | ~28      | ~25      | ~7%             | ~19%            | ~7%                 |
+| 2030E  | ~28      | ~26      | ~6%             | ~5%             | ~6%                 |
+| 2031E  | ~27      | ~29      | ~2%             | ~11%            | ~2%                 |
+| 2032E  | ~26      | ~30      | ~-4%            | ~10%            | ~-4%                |
+| 2033E  | ~25      | ~29      | ~-5%            | ~7%             | ~-5%                |

@@ -1,0 +1,13 @@
+Type: line chart
+
+Chart: Share performance for domestic healthcare sector (2026 YTD)
+Axis labels: 
+- Y-axis: (%) 
+- X-axis: '26.1, '26.2, '26.3, '26.4
+
+| Period  | Kospi | Kospi Pharma | Kosdaq | Kosdaq Pharma |
+|---------|-------|--------------|--------|--------------|
+| '26.1   | 0     | 0            | 0      | 0            |
+| '26.2   | ~30   | ~10          | ~15    | ~-5          |
+| '26.3   | ~60   | ~20          | ~35    | ~-10         |
+| '26.4   | ~50   | ~10          | ~25    | ~-5          |

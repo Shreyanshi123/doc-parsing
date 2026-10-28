@@ -1,0 +1,11 @@
+Type: table image
+
+Chart:
+Title: Distribution of Ratings/IB Services - Piper Sandler
+Axis labels: None
+
+| Rating     | Count | Percent | IB Serv./Past 12 Mos. Count | IB Serv./Past 12 Mos. Percent |
+|------------|-------|---------|-----------------------------|-------------------------------|
+| BUY [OW]   | 496   | 63.51   | 144                         | 29.03                         |
+| HOLD [N]   | 276   | 35.34   | 40                          | 14.49                         |
+| SELL [UW]  | 9     | 1.15    | 2                           | 22.22                         |

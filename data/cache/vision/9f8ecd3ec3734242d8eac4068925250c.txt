@@ -1,0 +1,3 @@
+Type: other
+
+Description: Five labeled icons summarize major trends shaping the MASH treatment market, each with a brief text description.

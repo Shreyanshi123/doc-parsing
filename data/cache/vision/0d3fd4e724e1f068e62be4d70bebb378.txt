@@ -1,0 +1,43 @@
+Type: bar chart and line chart
+
+Chart: Novo Nordisk EPS and EPS growth: Bernstein vs Consensus
+- Title: Novo Nordisk EPS and EPS growth: Bernstein vs Consensus
+- X-axis label: Year (no units)
+- Y-axis label (left): EPS (no units)
+- Y-axis label (right): EPS Growth (%) 
+- Data:
+
+| Year   | Bern EPS | Cons EPS | Bern EPS Growth (%) | Cons EPS Growth (%) |
+|--------|----------|----------|---------------------|---------------------|
+| 2026E  | ~19      | ~17      | ~27%                | ~18%                |
+| 2027E  | ~31      | ~21      | ~10%                | ~20%                |
+| 2028E  | ~30      | ~23      | ~5%                 | ~10%                |
+| 2029E  | ~31      | ~25      | ~3%                 | ~8%                 |
+| 2030E  | ~32      | ~27      | ~2%                 | ~8%                 |
+| 2031E  | ~31      | ~28      | ~-2%                | ~4%                 |
+| 2032E  | ~29      | ~29      | ~-7%                | ~3%                 |
+| 2033E  | ~29      | ~29      | ~0%                 | ~0%                 |
+| 2034E  | ~33      | ~29      | ~12%                | ~0%                 |
+| 2035E  | ~31      | ~29      | ~-6%                | ~0%                 |
+| 2036E  | ~29      | ~29      | ~-7%                | ~0%                 |
+
+Chart: Novo Nordisk Operating Profit Margin: Bernstein vs Consensus
+- Title: Novo Nordisk Operating Profit Margin: Bernstein vs Consensus
+- X-axis label: Year (no units)
+- Y-axis label: Operating Profit Margin (%)
+- Data:
+
+| Year   | Novo (Bern) | Novo (Cons) |
+|--------|-------------|-------------|
+| 2025   | ~41%        | ~41%        |
+| 2026E  | ~41%        | ~38%        |
+| 2027E  | ~40%        | ~39%        |
+| 2028E  | ~39%        | ~38%        |
+| 2029E  | ~40%        | ~38%        |
+| 2030E  | ~41%        | ~38%        |
+| 2031E  | ~41%        | ~38%        |
+| 2032E  | ~41%        | ~36%        |
+| 2033E  | ~40%        | ~36%        |
+| 2034E  | ~41%        | ~34%        |
+| 2035E  | ~40%        | ~36%        |
+| 2036E  | ~40%        | ~36%        |

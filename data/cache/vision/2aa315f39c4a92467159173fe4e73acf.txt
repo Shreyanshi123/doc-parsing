@@ -1,0 +1,3 @@
+Type: photo
+
+Description: The image shows anatomical models of the human torso displaying internal organs such as the heart, lungs, liver, and intestines.

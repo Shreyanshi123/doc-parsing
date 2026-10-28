@@ -1,0 +1,16 @@
+Type: flowchart
+
+Boxes/entities:
+- Intake
+- Validate
+- Classify
+- Process
+- Review
+- Publish
+
+Connections:
+- Intake -> Validate
+- Validate -> Classify
+- Classify -> Process
+- Process -> Review
+- Review -> Publish

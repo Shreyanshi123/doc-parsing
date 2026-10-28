@@ -1,0 +1,34 @@
+Type: bar chart and line chart
+
+Chart: Bernstein's Novo Nordisk Bull-Bear: EBIT Margin  
+Axis labels: 
+- X-axis: Years (2025e, 2026e, 2027e, 2028e, 2029e, 2030e, 2031e, 2032e, 2033e, 2034e, 2035e)
+- Y-axis: EBIT Margin (%)
+
+| Year   | Core (%) | Bull (%) | Bear (%) |
+|--------|----------|----------|----------|
+| 2025e  | ~42      | ~42      | ~37      |
+| 2026e  | ~35      | ~38      | ~33      |
+| 2027e  | ~36      | ~39      | ~31      |
+| 2028e  | ~36      | ~40      | ~29      |
+| 2029e  | ~36      | ~41      | ~27      |
+| 2030e  | ~36      | ~41      | ~25      |
+| 2031e  | ~36      | ~41      | ~23      |
+| 2032e  | ~36      | ~41      | ~21      |
+| 2033e  | ~36      | ~41      | ~20      |
+| 2034e  | ~36      | ~41      | ~20      |
+| 2035e  | ~35      | ~41      | ~20      |
+
+Type: bar chart
+
+Chart: Bernstein's Novo Nordisk Sales and EBIT scenario analysis: Sources of Bull-Bear  
+Axis labels: 
+- X-axis: Scenario (Approved Portfolio Bull, Approved Portfolio Bear, Approved Pipeline Bull, Approved Pipeline Bear)
+- Y-axis: Percentage (%)
+
+| Scenario                | Sales (%) | EBIT (%) |
+|-------------------------|-----------|----------|
+| Approved Portfolio Bull | ~8        | ~12      |
+| Approved Portfolio Bear | ~-18      | ~-35     |
+| Approved Pipeline Bull  | ~22       | ~32      |
+| Approved Pipeline Bear  | ~-18      | ~-25     |

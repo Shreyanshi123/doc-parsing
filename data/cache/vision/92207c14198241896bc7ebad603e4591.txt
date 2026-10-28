@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart:
+Title: Output index, section 15
+Axis labels: 
+- X-axis: Quarter (Q1, Q2, Q3, Q4)
+- Y-axis: Output index (no units specified)
+
+| Quarter | Output index |
+|---------|--------------|
+| Q1      | 199          |
+| Q2      | 216          |
+| Q3      | 248          |
+| Q4      | 219          |

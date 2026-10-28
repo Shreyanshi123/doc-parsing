@@ -1,0 +1,13 @@
+Type: pie chart
+
+Chart: 
+Title: Revenue mix by region
+Axis labels: None
+
+| Region         | Percentage |
+|----------------|------------|
+| North America  | 31%        |
+| Europe         | 26%        |
+| Asia Pacific   | 24%        |
+| Middle East    | 11%        |
+| Latin America  | 8%         |

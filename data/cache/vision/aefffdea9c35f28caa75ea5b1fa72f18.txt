@@ -1,0 +1,3 @@
+Type: photo
+
+Description: A photo showing three rectangular structures of varying heights on a green ground with a blue sky background, labeled as "Reference installation 8."

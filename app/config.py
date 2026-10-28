@@ -58,6 +58,11 @@ class Settings:
     azure_di_endpoint: str = os.getenv("AZURE_DI_ENDPOINT", "")
     azure_di_key: str = os.getenv("AZURE_DI_KEY", "")
 
+    # AWS Textract (optional). Credentials are resolved by boto3 from the normal
+    # AWS credential chain: environment variables, ~/.aws/credentials, or an IAM role.
+    aws_region: str = os.getenv("AWS_REGION", "")
+    aws_profile: str = os.getenv("AWS_PROFILE", "")
+
     # LlamaParse (cloud)
     llama_api_key: str = os.getenv("LLAMA_CLOUD_API_KEY", "")
 

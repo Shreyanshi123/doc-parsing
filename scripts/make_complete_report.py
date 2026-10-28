@@ -18,12 +18,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 EV = ROOT / "eval"
 TIE = 0.1
-SETS = {"enterprise": "Tough documents", "realistic": "Real-world style documents", "long": "Long documents"}
+SETS = {"enterprise": "Tough documents", "realistic": "Real-world style documents", "long": "Long documents", "mixed_long": "Long mixed documents",
+        "shared": "Research reports (shared by a colleague)"}
 KEYS = [("Text Accuracy", "Text"), ("Table Reconstruction", "Table"), ("Chart Understanding", "Chart"), ("Entity & Numeric Fidelity", "Numbers"),
         ("Structure", "Structure"), ("Completeness", "Complete"), ("Hallucination Penalty", "No extras")]
 PRETTY = {"pymupdf": "PyMuPDF", "pymupdf4llm": "PyMuPDF4LLM", "docling": "Docling", "opendataloader": "OpenDataLoader", "unstructured": "Unstructured", "markitdown": "MarkItDown",
           "pdfplumber": "pdfplumber", "ocr": "Tesseract OCR", "hybrid_pdf": "hybrid_pdf", "smart_pdf": "smart_pdf", "docx": "native Word reader", "pptx": "native PowerPoint reader",
-          "spreadsheet": "native Excel reader", "vision:azure_openai": "vision model", "text": "plain text reader"}
+          "spreadsheet": "native Excel reader", "vision:azure_openai": "vision model", "text": "plain text reader",
+          "azure_di": "Azure Document Intelligence (paid)", "pdfminer": "pdfminer", "easyocr": "EasyOCR", "haystack_converter": "Haystack loader",
+          "langchain_loader": "LangChain loader", "llamaindex_reader": "LlamaIndex reader", "adi_vision": "ADI + vision (paid)"}
 
 TYPE_OF = {  # document -> chapter
     "long_annual_report_20p.pdf": "digital", "contract_nested_clauses.pdf": "digital", "board_minutes.pdf": "digital", "contract_45p.pdf": "digital",
@@ -31,9 +34,11 @@ TYPE_OF = {  # document -> chapter
     "policy_schedule_nested.pdf": "tables", "clinical_trial_table.pdf": "tables", "bank_statement.pdf": "tables", "annual_report_income_statement.pdf": "tables", "bill_of_lading.pdf": "tables",
     "lab_report.pdf": "tables", "payslip.pdf": "tables", "purchase_order.pdf": "tables", "rfp_requirements_matrix.pdf": "tables", "transaction_ledger_100p.pdf": "tables",
     "annual_report_spread.pdf": "charts", "mixed_table_chart_photo.pdf": "charts", "research_two_column.pdf": "charts", "utility_bill.pdf": "charts", "annual_report_60p.pdf": "charts",
-    "scanned_financial_statement.pdf": "scan", "scanned_purchase_order_phone.pdf": "scan", "scanned_report_30p.pdf": "scan",
+    "group_report_100p.pdf": "charts", "scanned_financial_statement.pdf": "scan", "scanned_purchase_order_phone.pdf": "scan", "scanned_report_30p.pdf": "scan",
     "quality_manual.docx": "word", "sop_goods_receipt.docx": "word", "handbook_40p.docx": "word", "quarterly_review.pptx": "ppt",
     "budget_model.xlsx": "excel", "hr_headcount_report.xlsx": "excel", "big_workbook.xlsx": "excel",
+    "bernstein_novo_66p.pdf": "research", "tbrc_mash_market_61p.pdf": "research", "piper_madrigal_10p.pdf": "research", "nh_bio_sector_14p.pdf": "research",
+    "hcw_madrigal_10p.pdf": "research", "alphasense_mash_report_9p.pdf": "research",
 }
 
 
@@ -59,7 +64,8 @@ for s in SETS:
     for r in load(EV / s / "results.jsonl"):
         SUITE[s][r["file"]][r["cfg"]] = r
         SET_OF.setdefault(r["file"], s)
-ALL_DOCS = [d for s in SETS for d in sorted(set(H2H[s]) | set(SUITE[s]))]
+IGNORED: set = set()      # documents to leave out of the report (none at the moment)
+ALL_DOCS = [d for s in SETS for d in sorted(set(H2H[s]) | set(SUITE[s])) if d not in IGNORED]
 KNOWN_PAGES = {}
 
 
@@ -103,8 +109,11 @@ def best_txt(doc: str) -> str:
     if not rows:
         return "-"
     top = rows[0]
-    tied = [pn(r["parser"]) for r in rows[1:] if top["score"] - r["score"] <= TIE + 1e-9]
-    return f"{pn(top['parser'])} {top['score']:.2f}" + (f" (tied: {', '.join(tied[:3])})" if tied else "")
+    tied = [pn(r["parser"]) for r in rows if top["score"] - r["score"] <= TIE + 1e-9]
+    if len(tied) == 1:
+        return f"{tied[0]} {top['score']:.2f} (clear winner)"
+    extra = f" +{len(tied) - 4} more" if len(tied) > 4 else ""
+    return f"EQUAL (within 0.1): {', '.join(tied[:4])}{extra}. Top score {top['score']:.2f}"
 
 
 def score_of(doc: str, parser: str):
@@ -145,12 +154,72 @@ NOTE = {
     "utility_bill.pdf": "Bill with a bar chart. smart_pdf wins (4.49) because it reads the chart; the free route scores 3.58.",
     "hr_headcount_report.xlsx": "Excel with a real chart object. Native reader and Unstructured are tied (3.7).",
     "sop_goods_receipt.docx": "Unstructured (4.93) is ahead of Docling (4.57) and the native Word reader (4.33).",
+    # long documents
+    "annual_report_60p.pdf": "56 pages with 10 charts. PyMuPDF4LLM has perfect text and tables (4.8 to 5.0) but reads no chart values (Chart 0.0). smart_pdf reads the charts (4.4) but its text and tables are weaker (3.4 to 4.4). They tie at 4.18. Smart Extract paid picked smart_pdf, free picked PyMuPDF4LLM, both 4.18. No parser did both parts well. Docling did not finish in 10 minutes.",
+    "transaction_ledger_100p.pdf": "100 pages, 2,500 rows. OpenDataLoader 5.0 in 13 s, PyMuPDF4LLM 4.99, PyMuPDF and hybrid_pdf only 3.01. Docling and smart_pdf did not finish in 10 minutes (the laptop slept during this run, so these two timeouts may be partly caused by that). Smart Extract By document 5.0, By part 3.01: its 100 table pieces went to smart_pdf.",
+    "contract_45p.pdf": "46 pages of nested clauses. PyMuPDF4LLM 4.99, PyMuPDF family 4.9, Docling 4.88 (but 3 minutes). Smart Extract scored 4.9 in all three modes, using PyMuPDF only.",
+    "scanned_report_30p.pdf": "31 scanned pages. Docling 4.58 (about 6 minutes), PyMuPDF4LLM 3.67, Tesseract-only parsers 2.66; parsers without OCR return nothing. Smart Extract sent every page to Docling in all three modes: 4.58.",
+    "handbook_40p.docx": "40 sections. Every parser is at or near 5.0; the native Word reader is tied for first and the fastest.",
+    "big_workbook.xlsx": "5 sheets x 300 rows. Native Excel reader 4.99, MarkItDown 4.82. Smart Extract used the native reader: 4.99.",
+    "operations_report_36p.pdf": "36 pages of text, merged-header and side-by-side tables, a table inside a table, charts, photos and 6 scanned pages. Docling 4.66 and PyMuPDF4LLM 4.64 lead; OpenDataLoader 4.24, PyMuPDF 4.11. smart_pdf did not finish in 10 minutes and Smart Extract By part did not finish in 15. By document used PyMuPDF4LLM for all pages: 4.64. Note: each bar chart is followed by a table with the same values, so text parsers also got Chart points.",
+    "tender_pack_30p.pdf": "31 pages: two-column text, a spanning-cell requirement matrix, form grids, photos, bar charts. Docling 4.07 and PyMuPDF4LLM 3.90 lead. smart_pdf 3.65 reads some chart values (Chart 2.5; the others 0.0) but loses on text and adds photo descriptions (No extras 3.5). Smart Extract: By document paid (smart_pdf) 3.77, By part 3.86, free (PyMuPDF4LLM) 3.90.",
+    "group_report_100p.pdf": "99 pages: text, simple, merged-header, side-by-side and nested tables, about 27 bar and pie charts, photos and 14 scanned pages. Docling and Tesseract OCR were not run on it (too slow). PyMuPDF4LLM 3.93 is best (485 s), smart_pdf 3.66, PyMuPDF family 3.54, OpenDataLoader 3.53. Chart scores: smart_pdf 1.1, all others 0.0, because only 8 figures per document go to the vision model. Smart Extract: By document paid (smart_pdf) 3.66 in 48 s, By part 3.80 in 13 minutes (Docling read 34 scanned pieces, Tesseract 33), free (PyMuPDF4LLM) 3.93 in 3 minutes.",
     "quarterly_review.pptx": "Deck with a real chart. Docling reads the chart (4.50); the native reader does not (4.01).",
 }
 
 L: list[str] = []
 add = L.append
 PRE = (EV / "HEAD_TO_HEAD_REPORT.md").read_text(encoding="utf-8")
+
+
+def short_name(n: str) -> str:
+    return re.sub(r"\s*\(.*", "", n).strip()
+
+
+def mark_ties(md: str):
+    """Add a column to every parser table saying which parsers are within 0.1 of the best (equal to it). Returns (new_md, {type: [names]})."""
+    out, ties, table, title = [], {}, [], None
+
+    def flush():
+        nonlocal table
+        if not table:
+            return
+        scored = []
+        for ln in table[2:]:
+            c = [x.strip() for x in ln.strip().strip("|").split("|")]
+            try:
+                scored.append((c[0], float(c[1])))
+            except (ValueError, IndexError):
+                scored.append((c[0], None))
+        vals = [v for _, v in scored if v is not None]
+        top = max(vals) if vals else None
+        eq = [short_name(n) for n, v in scored if v is not None and top - v <= TIE + 1e-9]
+        if title:
+            ties[title] = eq
+        out.append(table[0] + " Within 0.1 of best? |")
+        out.append(table[1] + "---|")
+        for ln, (n, v) in zip(table[2:], scored):
+            mark = ""
+            if v is not None and top - v <= TIE + 1e-9:
+                mark = "**equal to best**" if len(eq) > 1 else "**clear winner**"
+            out.append(ln + f" {mark} |")
+        table = []
+
+    for ln in md.splitlines():
+        if ln.startswith("### "):
+            flush()
+            title = re.sub(r"\s*\(\d+ documents?\)\s*$", "", ln[4:]).strip()
+        if ln.startswith("| Parser | Overall"):
+            table = [ln]
+            continue
+        if table:
+            if ln.startswith("|"):
+                table.append(ln)
+                continue
+            flush()
+        out.append(ln)
+    flush()
+    return "\n".join(out), ties
 
 
 def section(md: str, title: str) -> str:
@@ -163,242 +232,201 @@ def avg(vals):
     return sum(vals) / len(vals) if vals else None
 
 
-# =========================================================================================================== report
-add("# Document parsing project: what we tested, what we found, and what it means")
-add("")
-add("*A plain-language report. It starts from the first question and covers every kind of document we tested: digital PDFs, PDFs with tables, charts and photos, scans, Word, PowerPoint, Excel, CSV, plain text and images, then tough, real-world style and very long documents.*")
-add("")
-n_pre = 62
+# =========================================================================================================== report (short version)
+_ap = section(PRE, "Parser against parser, per document type")
+_ap = re.sub(r"^## .*\n", "", _ap, count=1)
+APP_A, TIES = mark_ties(_ap)
 n_new = len(ALL_DOCS)
-add("## 1. The whole story in one page")
+add("# Document parsing: what we tested and what we found")
 add("")
-add("- **The question.** For a given document, which parser (the software that reads the file and turns it into text) gives the best result? And can the app pick that parser by itself, based on measured results, not on guesses?")
-add("- **What was wrong at the start.** The app chose parsers with fixed rules that nobody had measured. Some choices looked random, for example OpenDataLoader for almost every table document.")
-add(f"- **What we did.** (1) A fresh test: {n_pre} documents, every parser on every document, each result scored against an answer file written by hand. (2) The app now picks parsers from those scores. (3) Then we tried to break it with {n_new} harder documents: tough tables, real-world style business documents, and long documents of 30 to 100 pages.")
-add("- **The main finding.** There is no best parser for everything. Plain text and simple tables are fine with fast parsers. Charts need the vision model (smart_pdf). Scans need OCR or a layout model (Docling). Merged cells and tables inside tables need a layout-aware parser (PyMuPDF4LLM, OpenDataLoader or Docling).")
-add("- **What still goes wrong.** A few documents lose a lot in Smart Extract (about 3.0 instead of 4.5 to 5.0). The causes are known and listed in section 8. Nothing in the routing has been changed because of the new tests.")
+add(f"*Short report. First test: 62 documents. Then {n_new} harder documents (tough, real-world style, long). Scores are 0 to 5.*")
 add("")
-add("### Quick answer: which parser for which document")
+add("## 1. Summary")
 add("")
-add("| Document type | Best choice from the tests | Watch out for |")
+add("- **Question:** which parser is best for which document, based on measured scores, not guesses.")
+add(f"- **Test:** 62 documents first, then {n_new} harder ones (14 tough, 14 real-world style, 6 long: 30 to 100 pages, 3 long mixed: text, tables, charts, photos and scans in one file, 31 to 99 pages, 6 research reports from a colleague, 9 to 66 pages, answer files for key pages only). Every parser on every document, scored against a hand-written answer.")
+add("- **Finding:** no parser is best for everything. Plain text and simple tables: fast parsers are enough. Charts: smart_pdf. Scans: Docling. Merged cells and nested tables: PyMuPDF4LLM, OpenDataLoader or Docling.")
+add("- **New combo, ADI + vision:** Azure Document Intelligence reads text and tables, a vision model reads only charts and photos. Paid, not used by the routing. It matches the best parsers on merged-header tables and scans (4.96 vs smart_pdf 2.96 and 2.36), and adds little on the research reports (section 3).")
+add("- **Still wrong:** a few documents drop to about 3.0 in Smart Extract (section 4). Nothing was changed in the routing.")
+add("- **Note:** all documents are generated by us, not real company files. The 6 research reports (9 to 66 pages) come from a colleague; their answer files cover key pages only.")
+add("")
+add("### Which parser for which document")
+add("")
+add("| Document type | Best choice | Watch out for |")
 add("|---|---|---|")
 for row in [
-    ("Digital PDF, mostly text", "PyMuPDF (fast, scores 4.9)", "Nothing special."),
-    ("Digital PDF with tables", "OpenDataLoader, PyMuPDF4LLM or Docling (all about 4.5)", "Merged cells and nested tables: plain PyMuPDF, hybrid_pdf and smart_pdf are weaker."),
-    ("PDF with charts or photos", "smart_pdf when the chart values matter", "On documents with only photos or diagrams, the free parsers can score higher because the vision model adds descriptions."),
-    ("Scanned PDF or photo of a page", "Docling", "Parsers without OCR return nothing. Tesseract alone loses table structure."),
-    ("Image files (png, jpg)", "Docling (4.85)", "-"),
-    ("Word", "Unstructured or Docling; the native reader is slightly lower", "Native reader dropped the page header on one file."),
-    ("PowerPoint", "Native reader; Docling when the deck has real charts", "Native reader cannot read chart values."),
-    ("Excel / CSV", "Native reader (CSV 5.0)", "Merged cells and charts need checking."),
-    ("Plain text", "Plain text reader (5.0)", "Do not send it to other parsers."),
+    ("Digital PDF, mostly text", "PyMuPDF (fast)", "Nothing special"),
+    ("Digital PDF with tables", "OpenDataLoader, PyMuPDF4LLM or Docling (equal)", "Merged and nested tables: PyMuPDF, hybrid_pdf, smart_pdf are weaker"),
+    ("PDF with charts or photos", "smart_pdf (reads chart values)", "Photo-only pages: free parsers can score higher"),
+    ("Scans, phone photos", "Docling", "Parsers without OCR return nothing; Tesseract alone loses tables"),
+    ("Images (png, jpg)", "Docling", "-"),
+    ("Word", "Unstructured or Docling", "Native reader drops the page header"),
+    ("PowerPoint", "Native reader (Docling if it has real charts)", "Native reader cannot read charts"),
+    ("Excel, CSV", "Native reader", "Merged cells and charts need checking"),
+    ("Plain text", "Plain text reader", "Do not send it to other parsers"),
 ]:
     add("| " + " | ".join(row) + " |")
 add("")
-
-add("## 2. How we scored (in simple words)")
-add("")
-add("Every parser output was compared with an answer file written by hand. The score is from 0 to 5 and is the average of up to eight questions:")
-add("")
-add("| Question | In simple words |")
-add("|---|---|")
-for a, b in [("Text", "Are the words right?"), ("Table", "Are the rows and columns right?"), ("Chart", "Were the chart values read?"), ("Infographic", "Were the labels in a diagram read?"),
-             ("Numbers", "Are the numbers, dates and names exact?"), ("Structure", "Are headings, lists and order kept?"), ("Complete", "Is anything missing?"), ("No extras", "Did the parser add things that are not there?")]:
-    add(f"| {a} | {b} |")
-add("")
-add("A crash, a timeout or an empty result counts as 0. Parsers within 0.1 of the best are treated as equal, and then the fastest one wins. Questions that do not apply to a document (for example Chart on a text page) are left out of its average.")
+add("**Equal** means within 0.1 of the best score. Equal parsers are not ranked against each other; the app then prefers the fastest. Being listed first does not mean better.")
 add("")
 
-add("## 3. The parsers and what they are")
+add("## 2. How scores work")
 add("")
-add("| Parser | What it is | Good at | Weak at |")
-add("|---|---|---|---|")
+add("Each output is compared with a hand-written answer on up to 8 questions: Text, Table, Chart, Infographic, Numbers, Structure, Completeness, No extras. Score = average, 0 to 5. A crash, timeout or empty output counts as 0.")
+add("")
+add("| Parser | Good at | Weak at |")
+add("|---|---|---|")
 for row in [
-    ("PyMuPDF", "Very fast reader for PDFs that have a text layer", "Plain text, simple tables", "Merged cells, nested tables, scans (returns nothing)"),
-    ("PyMuPDF4LLM", "PyMuPDF plus layout rules that write Markdown", "Merged headers, long reports", "Slower on big files"),
-    ("OpenDataLoader", "Layout-aware PDF reader", "Tables, forms", "Scans (nothing), some side-by-side tables"),
-    ("Docling", "Layout model with OCR", "Scans, tables, slides, images", "Slow (minutes on long files)"),
-    ("Unstructured", "General document splitter", "Word, Excel", "PDF tables, plain text"),
-    ("MarkItDown", "Converts Office files to Markdown", "Excel, CSV", "PDF tables"),
-    ("pdfplumber", "PDF text and table finder", "Simple tables", "Structure"),
-    ("Tesseract OCR", "Reads text from pictures", "Scans", "Tables (becomes plain lines)"),
-    ("hybrid_pdf", "PyMuPDF + Tesseract OCR", "Mixed text and scanned pages", "Same table weaknesses as PyMuPDF"),
-    ("smart_pdf", "PyMuPDF + Tesseract OCR + a vision model that looks at charts, diagrams and photos (at most 8 per document)", "Reading chart values", "Merged-header tables; adds descriptions of photos"),
-    ("Native readers", "Word, PowerPoint, Excel and text readers built into the app", "Clean Office files", "Charts inside Office files"),
+    ("PyMuPDF", "Plain text, simple tables, very fast", "Merged cells, scans (nothing)"),
+    ("PyMuPDF4LLM", "Merged headers, long reports", "Charts, scans"),
+    ("OpenDataLoader", "Tables, forms", "Scans (nothing)"),
+    ("Docling", "Scans, tables, slides, images", "Very slow on long files"),
+    ("Unstructured / MarkItDown", "Word, Excel", "PDF tables"),
+    ("hybrid_pdf", "PyMuPDF + Tesseract OCR", "Same as PyMuPDF on tables"),
+    ("smart_pdf", "PyMuPDF + Tesseract OCR + vision model for charts and photos (max 8 per document)", "Merged-header tables; adds photo descriptions"),
 ]:
     add("| " + " | ".join(row) + " |")
 add("")
-add("Two parsers are kept out of the app on purpose: **vlm** (it sends every page to the Azure OpenAI model, too many API calls) and **Azure Document Intelligence** (paid; it can run next to the others as a comparison but was not part of these tests).")
+add("Smart Extract: **By document** sends the whole file to the best parser for its type. **By part** splits it: text with PyMuPDF, tables, scans and figures each to the parser that scored best on them. vlm (every page to the LLM) is off everywhere. Azure Document Intelligence was not tested (paid).")
 add("")
 
-add("## 4. How Smart Extract works")
+add("## 3. Results by test set")
 add("")
-add("Smart Extract looks at the document first, decides what kind it is, and picks parsers from the measured scores.")
+add("Smart Extract average score over the PDFs in each set:")
 add("")
-add("- **By document:** the whole file goes to the best parser for its type. If that parser fails, the next one is tried.")
-add("- **By part:** the file is split into pieces. Text and headings stay with PyMuPDF. Tables go to the parser that scored best on tables. Scanned pages go to the best scanned-page parser. Charts and photos go to the vision model (at most 8 per document).")
-add("- **Free or paid:** with *Include paid parsers* ticked, smart_pdf and the vision model can be used, and Azure Document Intelligence runs as an extra comparison tab. The result shown is always the best-ranked parser, never Azure by default.")
-add("- **Prefer quality:** turns off the tie rule, so the highest score wins even if it is slower.")
+add("| Set | Documents | By document, paid | By part, paid | By document, free |")
+add("|---|---|---|---|---|")
+for s, name in SETS.items():
+    docs = [d for d in sorted(SUITE[s]) if d.endswith(".pdf") and d not in IGNORED]
+    cells = []
+    for c in "ABC":
+        v = [sx(d, c) for d in docs if sx(d, c) is not None]
+        cells.append((f"{avg(v):.2f}" + (f" ({len(v)} of {len(docs)} finished)" if len(v) < len(docs) else "")) if v else "-")
+    n = len({d for d in ALL_DOCS if SET_OF[d] == s})
+    add(f"| {name} | {n} | " + " | ".join(cells) + " |")
+add("")
+add("- **Tough:** merged cells, nested tables, scan, charts. Parsers separate here; Smart Extract does well on 10 of 14.")
+add("- **Real-world style:** bank statement, payslip, lab report and more. Most parsers do well; By part is weaker than By document.")
+add("- **Long (30 to 100 pages):** length is not a problem for fast parsers. Docling takes minutes; scans need it anyway.")
+add("")
+add("### Long documents")
+add("")
+lens = [d for d in ALL_DOCS if SET_OF[d] in ("long", "mixed_long")]
+add("| Document | Pages | Best parser | Did not finish | Smart Extract: By document / By part / free |")
+add("|---|---|---|---|---|")
+for d in lens:
+    fl = ", ".join(f"{pn(r['parser'])} ({r['status']})" for r in failed(d)) or "none"
+    add(f"| `{d}` | {pages_of(d)} | {best_txt(d)} | {fl} | " + " / ".join(f(sx(d, c)) for c in "ABC") + " |")
+add("")
+add("The laptop slept during this run, so some timings and the Docling and smart_pdf timeouts on the 100-page ledger may be too long.")
+add("")
+add("### Research reports shared by a colleague (6 PDFs, 9 to 66 pages)")
+add("")
+add("Broker and market-research PDFs: dense text, many wide tables (some on rotated landscape pages), charts, and small text boxes. **All 16 parsers were run on all 6 documents, including Azure Document Intelligence (paid, about 160 pages).** vlm and LlamaParse were not run. The answer files cover the key pages only (summary tables, key numbers, valuation and catalyst tables), because a full hand-written answer for 66 pages was not possible. So the scores are low for every parser (1 to 2.6) and are only good for comparing parsers with each other.")
+add("")
+shared = [d for d in ALL_DOCS if SET_OF[d] == "shared"]
+add("| Document | Pages | Best parsers (equal = within 0.1) | Seconds of the best | Azure DI | Did not finish | Smart Extract: By document / By part / free |")
+add("|---|---|---|---|---|---|---|")
+for d in shared:
+    rows = ranked(d)
+    az = next((r for r in rows if r["parser"] == "azure_di"), None)
+    fl = ", ".join(f"{pn(r['parser'])} ({r['status']})" for r in failed(d)) or "none"
+    best_secs = f"{rows[0]['secs']:.0f}" if rows else "-"
+    add(f"| `{d}` | {pages_of(d)} | {best_txt(d)} | {best_secs} | {f(az['score']) + ' in ' + format(az['secs'], '.0f') + ' s' if az else '-'} | {fl} | " + " / ".join(f(sx(d, c)) for c in "ABC") + " |")
+add("")
+add("- **Mostly equal.** On 4 of 6 reports 2 to 5 parsers are within 0.1 of the best, so they are equal. Only two have a clear winner: Azure DI on AlphaSense (2.58) and OpenDataLoader on TBRC (1.86). The top score is held by OpenDataLoader (TBRC, NH), pdfplumber (Bernstein), Docling (Piper), MarkItDown (H.C. Wainwright) and Azure DI (AlphaSense).")
+add("- **Speed decides.** The fast parsers (PyMuPDF, PyMuPDF4LLM, OpenDataLoader, pdfplumber, MarkItDown) take 5 to 170 seconds. Docling takes 130 to 520 seconds on the 10 to 14 page files and did not finish the 61 and 66 page files in 25 minutes. EasyOCR did not finish 3 of 6 in 25 minutes. Unstructured did not finish the 66-page file in 15 minutes.")
+add("- **Azure DI (paid) is not better here.** It is first only on the AlphaSense report (2.58); on the others it is 0.02 to 0.17 below the best (equal to the best on 4 of them). It is fast (19 to 66 seconds per file) but costs money per page.")
+add("- **smart_pdf and the vision model do not help on these reports.** smart_pdf is equal to or below the plain PyMuPDF family on 5 of 6. In Smart Extract the free route (By document, free) scored higher than the paid route on 5 of 6 (for example Piper 1.42 vs 1.16, TBRC 1.70 vs 1.34); By part took up to 308 seconds on the 66-page file.")
+add("- **Limit:** the answer files are partial (key pages only), so use these scores only to compare parsers.")
+add("")
+add("### New combo: ADI + vision (Azure Document Intelligence for text and tables, a vision model only for charts and photos)")
+add("")
+add("Built after the first tests. Azure DI reads the whole PDF; the vision model reads only the cut-out charts and photos (at most 8 per document); a page is never sent as a whole to the model. It is paid (Azure per page, vision per figure) and is never picked by the automatic routing. Tested on the 12 tough PDFs and the 6 research reports.")
+add("")
+add("`-` in the Azure DI column = Azure DI alone was only run on the research reports.")
+add("")
+add("| Document | ADI + vision | smart_pdf | Azure DI alone | Best parser (score) |")
+add("|---|---|---|---|---|")
+_cmp = [d for d in ALL_DOCS if d.endswith(".pdf") and score_of(d, "adi_vision") is not None]
+_gap = []
+for d in _cmp:
+    rows = ranked(d)
+    top = rows[0]
+    a, sp, az = score_of(d, "adi_vision"), score_of(d, "smart_pdf"), score_of(d, "azure_di")
+    _gap.append((a, sp))
+    add(f"| `{d}` | {f(a)} | {f(sp)} | {f(az)} | {pn(top['parser'])} {top['score']:.2f}{' (equal)' if top['score'] - a <= TIE + 1e-9 else ''} |")
+add("")
+_ok = [(a, sp) for a, sp in _gap if a is not None and sp is not None]
+_wins = sum(1 for a, sp in _ok if a - sp > TIE + 1e-9)
+_loss = sum(1 for a, sp in _ok if sp - a > TIE + 1e-9)
+_best = sum(1 for d in _cmp if ranked(d) and ranked(d)[0]["score"] - score_of(d, "adi_vision") <= TIE + 1e-9)
+add(f"- **Against smart_pdf (PyMuPDF + OCR + vision):** ADI + vision scored more than 0.1 higher on {_wins} of {len(_ok)} PDFs and more than 0.1 lower on {_loss}. Average on the 12 tough PDFs {sum(a for a, _ in _ok[:12]) / 12:.2f} vs {sum(sp for _, sp in _ok[:12]) / 12:.2f}; on the 6 research reports {sum(a for a, _ in _ok[12:]) / 6:.2f} vs {sum(sp for _, sp in _ok[12:]) / 6:.2f}. The big gains are on merged-header tables and the scan (financial statement 4.96 vs 2.96, scanned statement 4.96 vs 2.36), where Azure reads the table properly.")
+add(f"- **Against the best parser:** equal to the best (within 0.1) on {_best} of {len(_cmp)} PDFs. It is clearly weaker on the nested table (policy schedule 3.89 vs 4.77) and not better than the free parsers on the research reports.")
+add("- **Charts:** on the two chart documents it scores 4.45 (annual report spread) and 4.0 (mixed page), with a Chart score of 5.0, the same as smart_pdf.")
+add("- **Azure alone vs ADI + vision on the research reports:** the two are within 0.04 of each other, so the vision model adds almost nothing there (few charts have values that the answer file checks).")
+add("- **Cost and speed:** 10 to 45 seconds on the tough documents and 30 to 85 seconds on the research reports, much faster than Docling. Two runs first failed with a network error and were run again; the table shows the re-run scores.")
 add("")
 
-add("## 5. First test: 62 documents")
+add("## 4. Problems found (none fixed yet)")
 add("")
-add("Every parser was run on every document it can open (786 runs). The table shows what Smart Extract uses first for each kind of document.")
+add("1. **Table lines counted as a figure.** clinical_trial_table 3.01 and financial_statement_multiheader 2.96 in paid By document; free route 5.0 and 4.86. PyMuPDF splits a merged-cell table into small tables, the detector sees the lines as a picture, and smart_pdf then writes the numbers twice. Confirmed by running the detector directly.")
+add("2. **By part repeats merged cells.** purchase_order 3.54 vs 4.96, lab_report 3.26 vs 4.55, bill_of_lading 3.93 vs 4.56, policy_schedule_nested 3.06 vs 4.77, 100-page ledger 3.01 vs 5.0 (By part vs By document). Seen directly in the lab_report output; probable on the others.")
+add("3. **A network error looks like a bad score.** annual_report_spread first scored 3.98 because the chart call failed; rerun gave 4.53.")
+add("4. **The rule is per document type, not per file.** On payslip the choice (OpenDataLoader) scored 3.94, Docling 4.69.")
+add("5. **hybrid_pdf and smart_pdf are weak on scans** (2.3 to 2.7 vs Docling 4.4 to 4.7). Smart Extract avoids this by using Docling for scans.")
+add("6. **Native Word and Excel readers lose a little** (page header dropped, list numbers flattened).")
+add("7. **Long report with charts:** PyMuPDF4LLM is best at text and tables but reads no charts; smart_pdf reads charts but is weaker on text and tables. Both end at 4.18.")
+add("8. **Long mixed documents are slow with smart_pdf and By part.** On the 36-page report with 6 scanned pages, smart_pdf did not finish in 10 minutes and By part did not finish in 15 (cause not investigated; an orphaned Python process was also running on the laptop). By document with PyMuPDF4LLM took about 3 to 4 minutes and scored 4.64, close to the best (Docling 4.66, 7 minutes). On the 31-page tender pack the paid route (smart_pdf, 3.77) scored below the free one (PyMuPDF4LLM, 3.90) and Docling (4.07). On the 99-page file the paid By document run (smart_pdf, 3.66) was also below the free one (PyMuPDF4LLM, 3.93), and By part took 13 minutes.")
+add("9. **Only 8 figures per document are read by the vision model.** The 99-page report has about 27 charts, so smart_pdf scored only 1.1 on charts (others 0.0), and the 56-page report with 10 charts is also capped. For long documents with many charts most charts stay unread.")
 add("")
-tbl = re.search(r"\| Document type \| Documents tested.*?(?=\n\n)", PRE, flags=re.S)
-add(tbl.group(0) if tbl else "(table not found)")
+
+add("## 5. Done and not done")
 add("")
-add("Full parser-against-parser tables for all 13 document types are in Appendix A.")
+add("- **Done:** 62-document test, routing built from it, three harder test sets, causes of problems 1 and 3 found.")
+add("- **Not done:** fixes for the problems above (they change routing, need your yes), Azure Document Intelligence on the new sets (paid), real client documents.")
+add("- **Limits:** generated documents, one run each, differences under 0.1 are noise, timings are rough.")
 add("")
-add("**What the first test showed**")
+
+add("## Appendix A. First test: parser against parser (62 documents)")
 add("")
-add("- Digital text PDFs: PyMuPDF, hybrid_pdf and smart_pdf tie at 4.94, and PyMuPDF is the fastest.")
-add("- PDFs with tables: Docling 4.50, OpenDataLoader 4.45 and PyMuPDF4LLM 4.44 are tied within 0.1; plain PyMuPDF is lower (4.31).")
-add("- PDFs with charts or photos: smart_pdf is first (3.88) because it reads chart values; the next best is 3.32.")
-add("- Scans: Docling 3.47 is first; PyMuPDF and pdfminer return nothing.")
-add("- Images: Docling 4.85. Word 4.1 to 4.2 (all close). PowerPoint: native 4.86. Excel and CSV: native is at or near the top. Plain text: native 5.0.")
+add(APP_A.strip().replace("### ", "#### "))
 add("")
-add("### Documents that mix text, tables, charts and photos")
-add("")
-add("These were run through the real app, three ways.")
+
+add("## Appendix B. Documents that mix text, tables, charts and photos")
 add("")
 mix = section(PRE, "Smart Extract on documents that mix text, tables, charts, photos and diagrams")
 mix = re.sub(r"^## .*\n\n", "", mix, count=1)
 add(mix.strip())
 add("")
 
-add("## 6. The three new test sets")
+add("## Appendix C. Harder documents by type")
 add("")
-tot = {s: len({d for d in ALL_DOCS if SET_OF[d] == s}) for s in SETS}
-add(f"All three sets were generated by scripts in this project (`make_enterprise_docs.py`, `make_realistic_docs.py`, `make_long_docs.py`), each with a hand-written answer file. **None of them are real company files**; real files cannot be shared here. The layouts copy common real formats.")
-add("")
-add("| Set | Documents | What it contains |")
-add("|---|---|---|")
-add(f"| Tough documents | {tot['enterprise']} | merged-cell tables, a table inside a table, a table over many pages, wide tables, forms, a scan, charts with photos, Excel and Word |")
-add(f"| Real-world style | {tot['realistic']} | bank statement, income statement, purchase order, payslip, lab report, electricity bill with chart, bill of lading, RFP matrix, board minutes, two-column paper, a tilted phone photo of a purchase order, Excel with chart, Word SOP, PowerPoint with chart |")
-add(f"| Long documents | {tot['long']} | 56-page annual report with 10 charts, 100-page ledger (2,500 rows), 46-page contract, 31 scanned pages, 40-section Word handbook, 5-sheet Excel workbook |")
-add("")
-add("### How the three sets did, in numbers")
-add("")
-add("Smart Extract average score (0 to 5) over the PDFs in each set:")
-add("")
-add("| Set | PDFs | By document, paid | By part, paid | By document, free |")
-add("|---|---|---|---|---|")
-for s, name in SETS.items():
-    docs = [d for d in sorted(SUITE[s]) if d.endswith(".pdf")]
-    cells = []
-    for c in "ABC":
-        v = [sx(d, c) for d in docs if sx(d, c) is not None]
-        cells.append(f"{avg(v):.2f} ({len(v)})" if v else "-")
-    add(f"| {name} | {len(docs)} | " + " | ".join(cells) + " |")
-add("")
-add("The number in brackets is how many documents finished. A smaller number means some runs are still going or did not finish.")
-add("")
-
-add("## 7. Chapter by document type")
-add("")
-CH = [("digital", "Digital PDFs (mostly text)"), ("tables", "Digital PDFs with tables, forms and statements"), ("charts", "PDFs with charts, figures and photos"), ("scan", "Scanned PDFs and photos of pages"),
-      ("word", "Word documents"), ("ppt", "PowerPoint"), ("excel", "Excel")]
-INTRO = {
-    "digital": "The easy case. Every parser with a text layer scores well, so speed decides. On the long contract and long report, PyMuPDF4LLM and Docling lead; the PyMuPDF family is a little lower.",
-    "tables": "The biggest group. Simple tables are easy for every layout-aware parser. Merged cells, side-by-side tables, nested tables and header rows that span columns are where parsers separate. The same few parsers (PyMuPDF4LLM, OpenDataLoader, Docling) keep leading, and plain PyMuPDF, hybrid_pdf and smart_pdf trail on the hard ones.",
-    "charts": "Only a vision model can read the numbers inside a chart. smart_pdf is first on each of the four chart documents of the tough and real-world sets (annual report spread, mixed page, research paper, electricity bill). The cost is a few seconds per figure and one API call per figure.",
-    "scan": "A scan has no text layer. Parsers that only read text return nothing (counted as 0). Docling reads scans best. hybrid_pdf and smart_pdf use only Tesseract OCR on scanned pages, so tables become plain lines.",
-    "word": "Native Word reader is close to the others. On the two smaller Word files it lost the page header and flattened the list numbers, and Unstructured scored highest. On the 40-section handbook the native reader was tied for first.",
-    "ppt": "Native reader is best for normal slides. For a deck that has real chart objects, Docling reads the chart and the native reader cannot.",
-    "excel": "Native reader is close to the top. MarkItDown and Unstructured are equal or slightly better on some files, but not by the 0.5 margin the rule needs to replace the native reader.",
-}
+CH = [("digital", "Digital PDFs (mostly text)"), ("tables", "Digital PDFs with tables, forms and statements"), ("charts", "PDFs with charts, figures and photos"), ("scan", "Scanned PDFs and photos"),
+      ("word", "Word"), ("ppt", "PowerPoint"), ("excel", "Excel"), ("research", "Research reports (shared by a colleague)")]
 for key, title in CH:
+    docs = [d for d in ALL_DOCS if TYPE_OF.get(d) == key]
+    if not docs:
+        continue
     add(f"### {title}")
     add("")
-    add(INTRO[key])
-    add("")
-    docs = [d for d in ALL_DOCS if TYPE_OF.get(d) == key]
-    if docs:
-        add("| Document | Set | Pages | Best parser | Smart Extract: By document, By part, free | What happened |")
-        add("|---|---|---|---|---|---|")
-        for d in docs:
-            note = NOTE.get(d, "Result is in the ranking table in Appendix B; see the note below the table.")
-            sxs = " / ".join(f(sx(d, c)) for c in "ABC") if d.endswith(".pdf") else f"{f(sx(d, 'A'))} / - / -"
-            add(f"| `{d}` | {SETS[SET_OF[d]]} | {pages_of(d)} | {best_txt(d)} | {sxs} | {note} |")
-        add("")
+    add("| Document | Set | Pages | Best parser | Smart Extract: By document, By part, free | What happened |")
+    add("|---|---|---|---|---|---|")
+    for d in docs:
+        sxs = " / ".join(f(sx(d, c)) for c in "ABC") if d.endswith(".pdf") else f"{f(sx(d, 'A'))} / - / -"
+        add(f"| `{d}` | {SETS[SET_OF[d]]} | {pages_of(d)} | {best_txt(d)} | {sxs} | {NOTE.get(d, '')} |")
     add("")
 
-add("## 8. The problems we found")
+add("## Appendix D. Ranking per document (harder sets)")
 add("")
-add("These are the real weak points. None of them is fixed yet, because you asked for testing, not changes.")
-add("")
-add("1. **Table lines mistaken for a figure (clinical_trial_table 3.01, financial_statement_multiheader 2.96 in paid By document; free route 5.0 and 4.86).** PyMuPDF splits a table with merged cells into several small tables. The picture detector then sees one big group of lines that is not inside any single table and calls it a figure. We confirmed this by running the detector directly. The file is then sent to smart_pdf, which reads the table as a picture and also adds the PyMuPDF text, so the numbers appear twice. Fix idea: also check figures against the combined area of all detected tables.")
-add("2. **By part repeats merged cells (purchase_order 3.54 vs 4.96 By document; lab_report 3.26 vs 4.55; bill_of_lading 3.93 vs 4.56; policy_schedule_nested 3.06 vs 4.77).** In By part, a table piece can be read by PyMuPDF, which writes the same text into every column a merged cell covers. We saw this directly in the lab_report output; the same pattern is probable on the others. Fix idea: keep tables with merged cells or nested tables as one piece and give them to PyMuPDF4LLM or OpenDataLoader.")
-add("3. **A network error looks like a bad score.** annual_report_spread first scored 3.98 in Smart Extract. The vision call for the bar chart had failed with a connection error, so the chart was missing. Run again, it scored 4.53, the same as smart_pdf alone. Lesson: when a figure cannot be read, the result shows a warning line, and such a run should be repeated.")
-add("4. **The rule is per document type, not per file.** For digital PDFs with tables the first choice is OpenDataLoader. On board_minutes (mostly text) it scored 4.61 while PyMuPDF4LLM and Docling scored 5.0, and on payslip it scored 3.94 while Docling scored 4.69. A per-file check would do better but costs a test run per file.")
-add("5. **hybrid_pdf and smart_pdf are weak on scans.** Both use only Tesseract OCR on scanned pages: 2.3 to 2.4 on the two scanned documents of the tough and real-world sets, against 4.4 to 4.7 for Docling. Smart Extract avoids this by sending scans to Docling.")
-add("6. **Native Word and Excel readers lose a little.** The native Word reader drops the page header and flattens numbered lists. The difference is under the 0.5 margin on most files.")
-add("")
-
-add("## 9. Long documents")
-add("")
-lens = [d for d in ALL_DOCS if SET_OF[d] == "long"]
-if not lens:
-    add("Results are not available yet.")
-else:
-    add("Long documents were run with a limit of 10 minutes per parser per document (parsers vs parsers) and 15 minutes per Smart Extract run. A parser that does not finish is counted as 0 and shown as *timeout*.")
-    add("")
-    add("| Document | Pages | Best parser | Parsers that timed out or returned nothing | Smart Extract: By document, By part, free |")
-    add("|---|---|---|---|---|")
-    for d in lens:
-        fl = ", ".join(f"{pn(r['parser'])} ({r['status']})" for r in failed(d)) or "none"
-        add(f"| `{d}` | {pages_of(d)} | {best_txt(d)} | {fl} | " + " / ".join(f(sx(d, c)) for c in "ABC") + " |")
-    done_s = sum(len(v) for v in SUITE["long"].values())
-    add("")
-    add(f"Smart Extract runs finished for long documents so far: {done_s}. If this number is lower than 14, the run is still going and this section will be updated when the report is generated again.")
-    add("")
-    add("Timings for long documents are measured but not exact, because the laptop was doing other things at the same time. What they show clearly: Docling and Tesseract OCR take minutes on 30 to 100 pages, while PyMuPDF takes seconds.")
-add("")
-
-add("## 10. What is done and what is not")
-add("")
-add("**Done and tested**")
-add("")
-add("- Fresh 62-document head-to-head, with the routing built from it.")
-add("- Smart Extract By document, By part and free mode, in the app, on all three new sets.")
-add("- vlm is off everywhere; smart_pdf and By part read figures only (at most 8 per document).")
-add("- Detector problem and network error problem traced to their causes.")
-add("")
-add("**Not done**")
-add("")
-add("- Azure Document Intelligence on the new sets (it is paid; ask first).")
-add("- Fixes for the six problems in section 8. They change routing, so they need your yes.")
-add("- Real client documents: everything here is generated.")
-add("- The new sets are not part of the routing table. They only measure.")
-add("")
-
-add("## 11. Limits")
-add("")
-add("- All documents are generated; real files are messier.")
-add("- One run per parser and document. Differences under 0.1 are noise.")
-add("- Answer files are written by hand; a different but correct layout can lose points.")
-add("- Timings are only good for telling fast parsers from slow ones.")
-add("- LlamaParse (no key), MinerU, Marker and Azure Document Intelligence were not run.")
-add("")
-
-add("## Appendix A. Parser against parser, the 62-document test")
-add("")
-ap = section(PRE, "Parser against parser, per document type")
-ap = re.sub(r"^## .*\n", "", ap, count=1)
-add(ap.strip().replace("### ", "#### "))
-add("")
-
-add("## Appendix B. Ranking per document: tough, real-world and long sets")
-add("")
-add("Sorted by score. *tied* means within 0.1 of the best. `-` means the question does not apply.")
+add("Sorted by score. **EQUAL to best** = within 0.1 of the best; not ranked against each other.")
 for d in ALL_DOCS:
     rows = ranked(d)
     add("")
-    add(f"### {d}  ({SETS[SET_OF[d]]}, {pages_of(d)} pages)" if d.endswith(".pdf") else f"### {d}  ({SETS[SET_OF[d]]})")
+    add(f"### {d}  ({SETS[SET_OF[d]]})")
     add("")
     if not rows:
-        add("No results yet.")
+        add("No results.")
         continue
     has_chart = any(r["card"].get("Chart Understanding") is not None for r in rows)
     cols = [(k, lab) for k, lab in KEYS if lab != "Chart" or has_chart]
@@ -406,13 +434,20 @@ for d in ALL_DOCS:
     add("|---|---|---|" + "---|" * len(cols) + "---|")
     for i, r in enumerate(rows, 1):
         tied = rows[0]["score"] - r["score"] <= TIE + 1e-9
-        add(f"| {i} | {pn(r['parser'])}{' (tied)' if tied and i > 1 else ''} | **{r['score']:.2f}** | " + " | ".join(f(r["card"].get(k)) for k, _ in cols) + f" | {r['secs']:.0f} |")
+        n_eq = sum(1 for x in rows if rows[0]["score"] - x["score"] <= TIE + 1e-9)
+        add(f"| {i} | {pn(r['parser'])}{' (EQUAL to best)' if tied and n_eq > 1 else ''} | **{r['score']:.2f}** | " + " | ".join(f(r["card"].get(k)) for k, _ in cols) + f" | {r['secs']:.0f} |")
     for r in failed(d):
         add(f"| - | {pn(r['parser'])} | 0.00 ({r['status']}) | " + " | ".join("-" for _ in cols) + f" | {r.get('secs', 0):.0f} |")
     if d in NOTE:
         add("")
         add(f"**Note:** {NOTE[d]}")
 add("")
+import subprocess as _sp
+_sp.run([sys.executable, str(ROOT / "scripts" / "report_factors.py")], check=False, capture_output=True)
+_fx = EV / "_appendix_factors.md"
+if _fx.exists():
+    L.append("")
+    L.extend(_fx.read_text(encoding="utf-8").splitlines())
 out = EV / "COMPLETE_REPORT.md"
 out.write_text("\n".join(L) + "\n", encoding="utf-8")
 print("wrote", out, len(L), "lines;", len(ALL_DOCS), "documents")

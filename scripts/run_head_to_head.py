@@ -22,9 +22,9 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "eval" / "head_to_head"
 RESULTS = OUT / "results.jsonl"
 TIMEOUT = int(os.environ.get("H2H_TIMEOUT", 400))
-SKIP = {"azure_di", "llamaparse"}
+SKIP = {"azure_di", "adi_vision", "llamaparse"} - set(filter(None, os.environ.get("H2H_ALLOW", "").split(",")))   # H2H_ALLOW=azure_di runs the paid parser
 ORDER = ["text", "spreadsheet", "docx", "pptx", "pdfminer", "pdfplumber", "pymupdf", "markitdown", "haystack_converter", "langchain_loader",
-         "llamaindex_reader", "opendataloader", "pymupdf4llm", "hybrid_pdf", "ocr", "unstructured", "docling", "easyocr", "vlm", "smart_pdf"]
+         "llamaindex_reader", "opendataloader", "pymupdf4llm", "hybrid_pdf", "ocr", "unstructured", "docling", "easyocr", "vlm", "smart_pdf", "adi_vision"]
 
 EV, IN = ROOT / "eval", ROOT / "eval" / "industrial"
 # document -> content type (used for the summary)
@@ -64,13 +64,18 @@ DOCS = {
 }
 
 
-if os.environ.get("H2H_SET") in ("enterprise", "realistic", "long"):     # extra document sets: separate results, the routing table is not changed
+if os.environ.get("H2H_SET") in ("enterprise", "realistic", "long", "mixed_long", "shared"):     # extra document sets: separate results, the routing table is not changed
     _SET = os.environ["H2H_SET"]
     OUT = ROOT / "eval" / f"{_SET}_results"
     RESULTS = OUT / "results.jsonl"
     _ENT = ROOT / "eval" / _SET
     DOCS = {p.name: (f"{_SET}: " + p.stem.replace("_", " "), _ENT) for p in sorted(_ENT.iterdir())
             if p.is_file() and not p.name.endswith(".truth.md") and (_ENT / (p.name + ".truth.md")).exists()}
+
+
+if os.environ.get("H2H_DOCS"):      # run only these documents (comma separated names)
+    _keep = set(os.environ["H2H_DOCS"].split(","))
+    DOCS = {k: v for k, v in DOCS.items() if k in _keep}
 
 
 def doc_path(name: str) -> Path:

@@ -1,0 +1,14 @@
+Type: flowchart
+
+Boxes/entities:
+- MASH Treatment
+- Hospitals
+- Specialty Clinics
+- Homecare
+- Other End-User
+
+Connections:
+- MASH Treatment -> Hospitals
+- MASH Treatment -> Specialty Clinics
+- MASH Treatment -> Homecare
+- MASH Treatment -> Other End-User

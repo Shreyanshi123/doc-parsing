@@ -1,0 +1,16 @@
+Type: flowchart
+
+Boxes/entities:
+- MASH Treatment
+- Simple Fatty Liver / MASLD (No Or Mild Fibrosis)
+- Early MASH (Significant/Advanced Fibrosis)
+- Fibrotic MASH
+- MASH Cirrhosis
+- Liver Failure / Liver Cancer Mortality
+
+Connections:
+- MASH Treatment -> Simple Fatty Liver / MASLD (No Or Mild Fibrosis)
+- MASH Treatment -> Early MASH (Significant/Advanced Fibrosis)
+- MASH Treatment -> Fibrotic MASH
+- MASH Treatment -> MASH Cirrhosis
+- MASH Treatment -> Liver Failure / Liver Cancer Mortality

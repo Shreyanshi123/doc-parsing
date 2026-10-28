@@ -1,0 +1,24 @@
+Type: line chart
+
+Chart:
+Title: [Not shown]
+Axis labels: 
+- Y-axis: (US$)
+- X-axis: Years ('23.1, '23.7, '24.1, '24.7, '25.1, '25.7, '26.1)
+
+| Year   | Value (US$) |
+|--------|-------------|
+| '23.1  | ~5          |
+| '23.7  | ~5          |
+| '24.1  | ~5          |
+| '24.7  | ~15         |
+| '25.1  | ~13         |
+| '25.7  | ~8          |
+| '26.1  | ~20         |
+| '26.1* | ~10         |
+
+Annotations:
+- '24.10 WVE-006 phase Ib/IIa encouraging initial data
+- '25.09 WVE-006 phase Ib/IIa sluggish interim data
+- '25.12 WVE-007 phase I encouraging interim data
+- '26.03 WVE-007 phase I sluggish data

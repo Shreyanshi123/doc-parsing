@@ -1,0 +1,9 @@
+Type: flowchart
+
+Boxes/entities:
+- Secondary Research
+- In-house Research
+- Primary Research
+
+Connections:
+- No explicit arrows or labels are shown; the diagram visually groups the three research types as components of the methodology.

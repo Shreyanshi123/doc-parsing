@@ -1,0 +1,15 @@
+Type: bar chart
+
+Chart: MASH Treatment Market, Historic, 2019 – 2024, $ Million
+Axis labels: 
+- X-axis: Year
+- Y-axis: Market Value ($ Million)
+
+| Year | Market Value ($ Million) |
+|------|-------------------------|
+| 2019 | 978.91                  |
+| 2020 | 1,127.90                |
+| 2021 | 1,391.18                |
+| 2022 | 1,716.03                |
+| 2023 | 2,111.74                |
+| 2024 | 2,597.53                |

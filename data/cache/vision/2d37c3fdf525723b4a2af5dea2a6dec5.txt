@@ -1,0 +1,16 @@
+Type: line chart
+
+Chart:
+Title: Rating and Price Target History for: Madrigal Pharmaceuticals, Inc. (MDGL) as of 05-05-2026
+Axis labels: 
+- X-axis: Time (quarters, years)
+- Y-axis: Price (USD)
+
+Markdown table with all data values (from boxes):
+
+| Date       | Rating | Price Target (USD) |
+|------------|--------|-------------------|
+| 01/23/24   | OW     | $336              |
+| 02/13/25   | OW     | $400              |
+| 10/14/25   | OW     | $540              |
+| 12/18/25   | OW     | $900              |

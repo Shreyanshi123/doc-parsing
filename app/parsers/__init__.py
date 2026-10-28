@@ -1,6 +1,8 @@
 """Importing this package registers every parser (each module uses @register)."""
 from app.parsers import (  # noqa: F401
+    adi_vision_parser,
     azure_di_parser,
+    textract_parser,
     docling_parser,
     docx_parser,
     easyocr_parser,

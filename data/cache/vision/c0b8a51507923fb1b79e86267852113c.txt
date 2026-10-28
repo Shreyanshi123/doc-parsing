@@ -1,0 +1,3 @@
+Type: screenshot
+
+Description: A screenshot showing a search result for the query "MASH or MASLD Industry Report" with three icons at the top (magnifying glass, sparkles, and flask).

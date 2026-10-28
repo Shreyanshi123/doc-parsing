@@ -655,8 +655,8 @@ const PARAMS = [
   { k: "Completeness", label: "Completeness", ic: "◔", what: "How much of the correct text was captured? Nothing dropped.", na: "always tested" },
   { k: "Hallucination Penalty", label: "No invented text", ic: "✓", what: "Is everything in the output really in the document? 5 means nothing was made up.", na: "always tested" }
 ];
-const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision model for charts and figures" };
-const COMBO_SHORT = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision" };
+const COMBO = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision model for charts and figures", adi_vision: "Azure Document Intelligence (text, tables) + vision model (charts, photos only)" };
+const COMBO_SHORT = { hybrid_pdf: "PyMuPDF + Tesseract OCR", smart_pdf: "PyMuPDF + Tesseract OCR + vision", adi_vision: "Azure DI + vision (charts, photos)" };
 /* a parser name; for our two combinations also what they are made of, wherever the name is shown */
 const pn = name => esc(name) + (COMBO_SHORT[name] ? `<span class="combo" title="Our own combination: ${escA(COMBO[name])}">${esc(COMBO_SHORT[name])}</span>` : "");
 const heat = v => v == null ? "" : `background:var(--h${v >= 4.5 ? 4 : v >= 3.5 ? 3 : v >= 2.5 ? 2 : v >= 1.2 ? 1 : 0})`;

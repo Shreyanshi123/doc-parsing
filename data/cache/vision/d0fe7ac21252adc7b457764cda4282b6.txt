@@ -1,0 +1,8 @@
+Type: table image
+
+| Key Drivers                                              |
+|----------------------------------------------------------|
+| Rising Research And Development (R&D) Spending In Life Sciences |
+| Rising Demand For Personalized Medicine                  |
+| Supportive Government Initiatives                        |
+| Growing Awareness And Screening Programs                 |

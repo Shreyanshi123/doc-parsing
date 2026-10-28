@@ -1,0 +1,14 @@
+Type: bar chart
+
+Chart: 
+Title: Revenue and operating cost trend
+Axis labels: 
+- X-axis: Quarter (Q1, Q2, Q3, Q4)
+- Y-axis: USD million
+
+| Quarter | Revenue (USD million) | Operating cost (USD million) |
+|---------|----------------------|------------------------------|
+| Q1      | ~185                 | ~140                         |
+| Q2      | ~205                 | ~150                         |
+| Q3      | ~225                 | ~160                         |
+| Q4      | ~240                 | ~170                         |

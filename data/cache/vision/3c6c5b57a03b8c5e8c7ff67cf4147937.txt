@@ -1,0 +1,8 @@
+Type: table image
+
+Chart: Rating Definitions
+| Rating        | Definition                                                                                                      |
+|---------------|-----------------------------------------------------------------------------------------------------------------|
+| Overweight (OW) | Anticipated to outperform relative to the median of the group of stocks covered by the analyst.                |
+| Neutral (N)     | Anticipated to perform in line relative to the median of the group of stocks covered by the analyst.           |
+| Underweight (UW)| Anticipated to underperform relative to the median of the group of stocks covered by the analyst.              |

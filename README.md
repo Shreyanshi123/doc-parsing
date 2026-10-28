@@ -22,6 +22,7 @@ The repo includes multiple parser families and evaluation modes:
 - OpenDataLoader
 - Unstructured / Docling style integration options
 - optional local vision LLM parsing through Ollama
+- optional Amazon Textract or Azure Document Intelligence comparison
 - comparison and benchmarking workflows across engines
 
 ## Architecture
@@ -182,6 +183,23 @@ The core requirements include a large set of parsing libraries, including:
 - optional local vision LLM parser via Ollama
 
 Heavy/cloud/paid integrations are kept in `requirements-extra.txt`.
+
+### Optional: Amazon Textract
+
+Amazon Textract is AWS's managed OCR and document-analysis service. It reads
+scanned pages and returns text, tables, and form fields. This POC exposes it as
+the `textract` parser, alongside `azure_di`.
+
+```bash
+pip install -r requirements-extra.txt
+aws configure                 # or use your organisation's approved IAM role/profile
+```
+
+Set `AWS_REGION` in `.env` (and optionally `AWS_PROFILE`). Choose `textract`
+as the parser in the UI/API, or include it in a parser comparison. PDFs are
+rendered locally one page at a time and each page is sent to Textract, so an S3
+bucket is not required. Textract is a paid AWS service; do not use production
+documents until their data-handling policy and cost approval are in place.
 
 ## Docker
 

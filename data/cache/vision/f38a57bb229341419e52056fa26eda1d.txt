@@ -1,0 +1,47 @@
+Type: bar chart and line chart
+
+Chart 1 (left): Operating Profit Growth (CER) Guidance
+- Title: Operating Profit Growth (CER) Guidance
+- X-axis: Period (FY22, 1Q23, 2Q23, 3Q23, 23 Actual, FY23, 1Q24, 2Q24, 3Q24, 24 Actual, FY24, 1Q25, 2Q25, 3Q25, 25 Actual, FY26e)
+- Y-axis: Operating Profit Growth (%) (0% to 50%)
+- Data:
+
+| Period     | Top End (%) | Bottom End (%) | Actual (%) |
+|------------|-------------|----------------|------------|
+| FY22       | ~20         | ~15            |            |
+| 1Q23       | ~30         | ~25            |            |
+| 2Q23       | ~40         | ~35            |            |
+| 3Q23       | ~45         | ~40            |            |
+| 23 Actual  |             |                | ~40        |
+| FY23       | ~35         | ~30            |            |
+| 1Q24       | ~30         | ~25            |            |
+| 2Q24       | ~30         | ~25            |            |
+| 3Q24       | ~30         | ~25            |            |
+| 24 Actual  |             |                | ~25        |
+| FY24       | ~20         | ~15            |            |
+| 1Q25       | ~15         | ~10            |            |
+| 2Q25       | ~10         | ~5             |            |
+| 3Q25       | ~5          | ~0             |            |
+| 25 Actual  |             |                | ~0         |
+| FY26e      | ~0          | ~-5            |            |
+
+Chart 2 (right): Bernstein sits well below consensus on both group sales and EPS
+- Title: Bernstein sits well below consensus on both group sales and EPS
+- X-axis: Year (2025, 2026E, 2027E, 2028E, 2029E, 2030E, 2031E, 2032E, 2033E, 2034E, 2035E, 2036E)
+- Y-axis: % deviation from consensus (0% to -35%)
+- Data:
+
+| Year   | Group Sales (%) | Diluted EPS (%) |
+|--------|-----------------|-----------------|
+| 2025   | 0               | 0               |
+| 2026E  | ~-20            | ~-15            |
+| 2027E  | ~-10            | ~-20            |
+| 2028E  | ~-15            | ~-25            |
+| 2029E  | ~-20            | ~-25            |
+| 2030E  | ~-15            | ~-30            |
+| 2031E  | ~-20            | ~-30            |
+| 2032E  | ~-15            | ~-25            |
+| 2033E  | ~-20            | ~-25            |
+| 2034E  | ~-15            | ~-30            |
+| 2035E  | ~-20            | ~-25            |
+| 2036E  | ~-10            | ~-20            |

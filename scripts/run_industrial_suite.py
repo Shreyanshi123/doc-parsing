@@ -24,14 +24,14 @@ ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "eval" / os.environ.get("SUITE_DIR", "industrial")
 RESULTS = CORPUS / "results.jsonl"
 OUTDIR = CORPUS / "_out"
-TIMEOUT = 900
+TIMEOUT = int(os.environ.get("SUITE_TIMEOUT", 900))
 
 HTTP_ONLY = {"config.json", "report.html", "data.xml", "message.eml", "legacy_report.doc", "legacy_sheet.xls", "protected.pdf", "corrupted.pdf", "blank.pdf"}
 WITH_C = {"chart_report.pdf", "slides.pdf", "annual_report_page.pdf", "scanned_report_page.pdf", "product_brochure.pdf", "flowchart_doc.pdf",
           "infographic.pdf", "datasheet_with_photo.pdf", "01_corporate_annual_report.pdf", "04_scientific_research_paper.pdf", "10_mixed_parser_killer.pdf"}
 
 
-if os.environ.get("SUITE_DIR") in ("enterprise", "realistic", "long"):     # every PDF three ways; nothing is sent to the web API
+if os.environ.get("SUITE_DIR") in ("enterprise", "realistic", "long", "mixed_long", "shared"):     # every PDF three ways; nothing is sent to the web API
     HTTP_ONLY = set()
     WITH_C = {p.name for p in CORPUS.glob("*.pdf")}
 
@@ -39,7 +39,7 @@ if os.environ.get("SUITE_DIR") in ("enterprise", "realistic", "long"):     # eve
 def jobs() -> list[tuple[str, str]]:
     out = []
     for p in sorted(CORPUS.iterdir()):
-        if not p.is_file() or p.name.endswith(".truth.md") or p.name in ("results.jsonl",):
+        if not p.is_file() or p.name.startswith("_") or p.name.endswith(".truth.md") or p.name in ("results.jsonl",):
             continue
         if p.name in HTTP_ONLY:
             out.append((p.name, "http"))

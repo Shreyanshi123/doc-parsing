@@ -1,0 +1,11 @@
+Type: bar chart
+
+Chart:
+Title: Clinical Significance of CSPH as an Indicator of Outcomes in F4c
+Axis labels: No axis labels or units are shown.
+
+| Category           | Baseline | Year 1 | Year 2 |
+|--------------------|----------|--------|--------|
+| CSPH               | 100%     | 41%    | 35%    |
+| Probable CSPH      |          | 24%    | 23%    |
+| No/Low CSPH        |          | 34%    | 42%    |
